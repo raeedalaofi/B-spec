@@ -24,7 +24,7 @@ export const BAL = {
   /** straights for overtaking zones need radius above this */
   straightRadiusM: 420,
   /** minimum straight length feeding a braking zone (m) */
-  overtakeMinStraightM: 180,
+  overtakeMinStraightM: 140,
   /** curvature smoothing window (samples) */
   curvatureSmoothWindow: 9,
   /** merge corner runs separated by less than this many meters */
@@ -49,7 +49,7 @@ export const BAL = {
   noiseSigmaConsistency: 0.01,
 
   // -- mistakes (rolled per corner entry)
-  mistakeBase: 0.0015,
+  mistakeBase: 0.0025,
   mistakeConsistency: 2.5,
   mistakeWear: 2.0,
   mistakeFatigue: 1.5,
@@ -94,7 +94,7 @@ export const BAL = {
   slipstreamMinGapS: 0.2,
   slipstreamMaxGapS: 1.0,
   slipstreamBoost: 1.03,
-  passBase: 0.22,
+  passBase: 0.25,
   passPaceDelta: 9.0,
   passBattleDiff: 0.25,
   passOvertakeMode: 0.1,
@@ -103,12 +103,21 @@ export const BAL = {
   passBlocking: 0.1,
   passMin: 0.03,
   passMax: 0.85,
-  /** attempt failure costs the attacker this many seconds of gap */
-  passFailGapS: 0.8,
-  passingDurS: 2.5,
-  passingForceResolveS: 3.0,
-  passingAttackerBoost: 1.01,
+  /** failed attempt: attacker slowdown factor and duration */
+  passFailFactor: 0.985,
+  passFailDurS: 1.5,
+  /** forced resolution deadline for a pass in progress (s) */
+  passingForceResolveS: 3.5,
+  /** attacker target speed relative to defender speed while passing */
+  passingAttackerBoost: 1.1,
   passingDefenderLoss: 0.985,
+  /** attacker must be this many meters clear to complete the pass */
+  passingClearM: 4,
+  /** a leader slower than this fraction of the follower's target is
+   *  driven around freely (spun/crawling cars don't form trains) */
+  slowLeaderFrac: 0.5,
+  /** absolute minimum physical gap between cars (m) */
+  minGapM: 3,
   /** pace advantage (fraction) beyond which anywhere-passes unlock */
   fallbackPassAdvantage: 0.03,
   fallbackPassP: 0.1,

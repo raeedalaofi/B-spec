@@ -116,7 +116,7 @@ export interface BattleState {
   phase: BattlePhase;
   /** carId of the car ahead */
   targetId: string;
-  /** ticks remaining in PASSING before forced resolution */
+  /** seconds remaining in PASSING before forced resolution */
   passingTimer: number;
   /** overtake zones to skip after a failed attempt */
   attemptCooldown: number;
@@ -124,6 +124,10 @@ export interface BattleState {
   lastZoneTried: number;
   /** ticks of continuous slipstream on the current straight */
   slipstreamTicks: number;
+  /** seconds of post-failed-attempt slowdown remaining */
+  penaltyTimer: number;
+  /** overtaking zone name where the current pass attempt started */
+  zoneName: string;
 }
 
 export interface PitState {
@@ -176,9 +180,13 @@ export interface CarRaceState {
   morale: number;
 
   battle: BattleState | null;
+  /** true while another car is following/passing this one (set per tick) */
+  underAttack: boolean;
   mistake: MistakeState | null;
   pit: PitState | null;
   pitCount: number;
+  /** AI decision thresholds (null for the player's car) */
+  ai: { wearThreshold: number; fuelLapsMin: number } | null;
 
   /** index into track.corners of the next corner entry ahead */
   nextCornerIdx: number;

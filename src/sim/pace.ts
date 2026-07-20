@@ -43,6 +43,29 @@ export function effectivePace(car: CarRaceState): number {
   return level;
 }
 
+/**
+ * Location-independent sustained pace (m/s average lap speed with all
+ * live modifiers except corner noise). Used to compare two cars' genuine
+ * pace when resolving overtakes — instantaneous noisy targets would make
+ * pass probabilities swing wildly corner to corner.
+ */
+export function paceIndex(state: RaceState, car: CarRaceState): number {
+  const avgV = state.track.lengthM / car.idealLapS;
+  const pace = effectivePace(car);
+  const fPace = BAL.paceSpeed[pace];
+  const fDriver = BAL.driverSkillBase + BAL.driverSkillPer * car.stats.pace;
+  const fMorale = 1 + (car.morale - 1) * BAL.moraleEffect;
+  return (
+    avgV *
+    fPace *
+    fDriver *
+    fMorale *
+    tireFactor(car.tireWear) *
+    fuelFactor(car.fuelL) *
+    fatigueFactor(car.fatigue, car.stats.stamina)
+  );
+}
+
 /** target speed at the car's current position, before battle clamps */
 export function computeVTarget(state: RaceState, car: CarRaceState): number {
   const idealV = profileSpeedAt(state.track, car.profile, car.s);

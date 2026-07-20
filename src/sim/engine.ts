@@ -3,7 +3,9 @@
 // RNG carried in RaceState, commands applied at tick boundaries.
 
 import { BAL } from '../data/balance';
-import { updateBattles } from './battle';
+import { updateAI } from './ai';
+import { enforceGaps, updateBattles } from './battle';
+import { rngNext } from './rng';
 import { rollCornerNoise, rollMistake } from './mistakes';
 import { computeVTarget } from './pace';
 import { buildSpeedProfile } from './speedProfile';
@@ -27,6 +29,7 @@ export const TICK_S = BAL.tickS;
 
 export function createRace(cfg: RaceConfig): RaceState {
   const track = cfg.track;
+  const rng = { rngState: cfg.seed | 0 };
   const cars: CarRaceState[] = cfg.entries.map((entry, i) => {
     const { profile, profileMax, idealLapS } = buildSpeedProfile(track, entry.spec);
     const behind = BAL.gridSpacingM * (i + 1);
@@ -52,9 +55,16 @@ export function createRace(cfg: RaceConfig): RaceState {
       fatigue: 0,
       morale: 1,
       battle: null,
+      underAttack: false,
       mistake: null,
       pit: null,
       pitCount: 0,
+      ai: entry.isPlayer
+        ? null
+        : {
+            wearThreshold: BAL.aiPitWearAt + (rngNext(rng) - 0.5) * 2 * BAL.aiPitJitter,
+            fuelLapsMin: BAL.aiPitFuelLaps + (rngNext(rng) - 0.5) * 0.6,
+          },
       nextCornerIdx: firstCornerAhead(track, s),
       noise: 1,
       noiseUntilS: -1,
@@ -76,7 +86,7 @@ export function createRace(cfg: RaceConfig): RaceState {
 
   return {
     tickCount: 0,
-    rngState: cfg.seed | 0,
+    rngState: rng.rngState,
     track,
     lapsTotal: cfg.lapsTotal,
     phase: 'countdown',
@@ -134,6 +144,8 @@ export function tick(state: RaceState, commands: Command[]): RaceEvent[] {
 
   state.raceTime += dt;
 
+  updateAI(state);
+
   // 1. per-car target speeds (fixed entry order for RNG determinism)
   const vTargets = new Float64Array(state.cars.length);
   for (let i = 0; i < state.cars.length; i++) {
@@ -155,6 +167,9 @@ export function tick(state: RaceState, commands: Command[]): RaceEvent[] {
     if (car.finished) continue;
     moveCar(state, car, vTargets[i], dt, events);
   }
+
+  // 4. hard no-overlap invariant
+  enforceGaps(state);
 
   state.tickCount++;
   return events;
@@ -343,15 +358,26 @@ function completeLapCrossing(
   }
 }
 
-/** when the race ends, classify cars still on track by distance */
+/**
+ * When the race ends, classify cars still on track by distance and project
+ * a finish time from their remaining distance (so results show sensible
+ * gaps instead of blanks). Cars more than a lap down stay marked as lapped.
+ */
 function classifyRemaining(state: RaceState, events: RaceEvent[]): void {
+  const L = state.track.lengthM;
   const running = state.cars
     .filter((c) => !c.finished)
     .sort((a, b) => b.totalDist - a.totalDist);
   for (const car of running) {
     car.finished = true;
     car.finishPosition = ++state.finishedCount;
-    car.finishTime = null;
+    const lapsToGo = state.lapsTotal - car.lap;
+    if (lapsToGo <= 0) {
+      const remaining = L - car.s;
+      car.finishTime = state.raceTime + remaining / Math.max(car.speed, 15);
+    } else {
+      car.finishTime = null; // genuinely lapped
+    }
     events.push({ type: 'FINISH', carId: car.carId, position: car.finishPosition });
   }
 }
