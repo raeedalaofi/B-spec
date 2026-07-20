@@ -2,6 +2,7 @@ import { CARS } from '../../data/cars';
 import { CHAMPIONSHIPS } from '../../data/championships';
 import { championshipProgress } from '../../state/gameState';
 import { highestLicense } from '../../state/trials';
+import { imgTag } from '../assets';
 import { menuShell } from '../menuCommon';
 import type { AppContext } from '../screenManager';
 
@@ -69,12 +70,22 @@ export function homeScreen(ctx: AppContext): void {
     </div>
     <div class="hub-cards">
       ${cards
-        .map(
-          (c) => `
+        .map((c) => {
+          const icon: Record<string, string> = {
+            events: 'ui/icon-events.png',
+            dealership: 'ui/icon-dealership.png',
+            garage: 'ui/icon-garage.png',
+            driver: 'ui/icon-driver.png',
+            licenses: 'ui/license-b.png',
+            'free-race': 'ui/icon-freerace.png',
+            achievements: 'ui/icon-trophy.png',
+          };
+          return `
         <button class="hub-card${c.accent ? ' accent' : ''}" data-screen="${c.screen}">
+          ${icon[c.id] ? imgTag(icon[c.id], 'hub-icon') : ''}
           <b>${c.title}</b><span>${c.sub}</span>
-        </button>`,
-        )
+        </button>`;
+        })
         .join('')}
     </div>
     <div class="hub-foot">

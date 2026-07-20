@@ -62,7 +62,7 @@ export interface GameState {
   /** standalone catalog event id → best outcome */
   standaloneResults: Record<string, { position: number; bestLapS: number | null }>;
   totals: { races: number; wins: number; podiums: number; overtakes: number };
-  settings: { defaultSpeed: 1 | 2 | 4; audio: boolean };
+  settings: { defaultSpeed: 1 | 2 | 4; audio: boolean; avatar?: number };
 }
 
 export const STARTING_CREDITS = 15000;

@@ -77,6 +77,30 @@ export function mountRaceScreen(root: HTMLElement, opts: RaceScreenOptions): () 
     }
   };
 
+  const effectFor = (e: RaceEvent): void => {
+    const carOf = (id: string): { s: number } | undefined =>
+      state.cars.find((c) => c.carId === id);
+    switch (e.type) {
+      case 'MISTAKE': {
+        const c = carOf(e.carId);
+        if (c) renderer.burst(c, e.severity === 'spin' ? 'smoke' : 'dust');
+        break;
+      }
+      case 'OVERTAKE': {
+        const c = carOf(e.carId);
+        if (c) renderer.burst(c, 'spark');
+        break;
+      }
+      case 'FINISH': {
+        if (e.carId === playerId && e.position <= 3) {
+          const c = carOf(e.carId);
+          if (c) renderer.burst(c, 'confetti');
+        }
+        break;
+      }
+    }
+  };
+
   const onKey = (e: KeyboardEvent): void => {
     if (e.target instanceof HTMLInputElement) return;
     hud.handleKey(e.key);
@@ -119,6 +143,7 @@ export function mountRaceScreen(root: HTMLElement, opts: RaceScreenOptions): () 
         for (const e of events) {
           hud.pushEvent(state, e);
           playSoundFor(e);
+          effectFor(e);
         }
         acc -= TICK_S;
         ticks++;
@@ -136,7 +161,7 @@ export function mountRaceScreen(root: HTMLElement, opts: RaceScreenOptions): () 
       if (hud.updateCountdown(state)) SOUND.countdownTick();
     }
 
-    renderer.draw(state, interp, Math.max(0, Math.min(1, acc / TICK_S)));
+    renderer.draw(state, interp, Math.max(0, Math.min(1, acc / TICK_S)), dt);
 
     if (state.phase === 'finished' && !finishedShown) {
       finishedShown = true;

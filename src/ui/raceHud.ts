@@ -4,6 +4,7 @@
 
 import { raceOrder } from '../sim/engine';
 import type { PaceLevel, RaceEvent, RaceResult, RaceState } from '../sim/types';
+import { imgTag } from './assets';
 import { messageFor } from './messages';
 
 export interface HudCallbacks {
@@ -250,12 +251,20 @@ export class RaceHud {
       const n = Math.ceil(state.countdown);
       if (n !== this.lastCountdownShown) {
         this.lastCountdownShown = n;
-        this.showOverlay(`<div class="countdown-num">${n}</div>`);
+        this.showOverlay(`
+          <div class="countdown-stack">
+            ${imgTag('fx/start-lights.png', `lights-img lit-${n}`)}
+            <div class="countdown-num">${n}</div>
+          </div>`);
         return true;
       }
     } else if (this.lastCountdownShown !== -2 && this.overlay) {
       this.lastCountdownShown = -2;
-      this.showOverlay(`<div class="countdown-num green">GO!</div>`);
+      this.showOverlay(`
+        <div class="countdown-stack">
+          ${imgTag('fx/flag-green.png', 'flag-img')}
+          <div class="countdown-num green">GO!</div>
+        </div>`);
       const el = this.overlay;
       setTimeout(() => {
         if (this.overlay === el) this.hideOverlay();
@@ -291,7 +300,7 @@ export class RaceHud {
       .join('');
     this.showOverlay(`
       <div class="results-card">
-        <h2>Race Result</h2>
+        <h2>${imgTag('fx/flag-checkered.png', 'flag-img inline')}Race Result</h2>
         <table class="results-table">
           <thead><tr><th>P</th><th>Driver</th><th>Car</th><th>Gap</th><th>Best</th></tr></thead>
           <tbody>${rows}</tbody>

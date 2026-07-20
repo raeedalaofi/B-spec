@@ -32,6 +32,12 @@ export function imgTag(rel: string, className: string, alt = ''): string {
   return `<img src="${assetUrl(rel)}" class="${className}" alt="${alt}" onerror="this.style.display='none'" draggable="false" />`;
 }
 
+/** medal image with emoji fallback when the asset is missing */
+export function medalIcon(medal: 'gold' | 'silver' | 'bronze'): string {
+  const emoji = { gold: '🥇', silver: '🥈', bronze: '🥉' }[medal];
+  return `<span class="medal-wrap"><img src="${assetUrl(`ui/medal-${medal}.png`)}" class="medal-img" alt="${medal}" draggable="false" onerror="this.style.display='none';this.nextElementSibling.style.display='inline'" /><span style="display:none">${emoji}</span></span>`;
+}
+
 /** kick off background loading for a list of assets */
 export function preload(rels: string[]): void {
   for (const rel of rels) getImage(rel);

@@ -10,10 +10,9 @@ import { tunedSpec } from '../../data/parts';
 import { getTrackDef } from '../../data/tracks';
 import { ppOf } from '../../state/pp';
 import { hasLicense } from '../../state/trials';
+import { medalIcon } from '../assets';
 import { fmtCr, menuShell } from '../menuCommon';
 import type { AppContext } from '../screenManager';
-
-const MEDAL_ICON: Record<Medal, string> = { gold: '🥇', silver: '🥈', bronze: '🥉' };
 
 interface CatalogParams {
   category: CatalogCategory | 'missions';
@@ -43,7 +42,7 @@ function missionsView(ctx: AppContext, content: HTMLElement, params: CatalogPara
     ${
       params.flash
         ? `<div class="${params.flash.medal ? 'title-banner' : 'entry-warning'} big">
-            ${params.flash.medal ? `${MEDAL_ICON[params.flash.medal]} ${params.flash.medal.toUpperCase()} — ${params.flash.detail}` : `Mission failed — ${params.flash.detail}`}
+            ${params.flash.medal ? `${medalIcon(params.flash.medal)} ${params.flash.medal.toUpperCase()} — ${params.flash.detail}` : `Mission failed — ${params.flash.detail}`}
           </div>`
         : ''
     }
@@ -54,7 +53,7 @@ function missionsView(ctx: AppContext, content: HTMLElement, params: CatalogPara
         const medal = gs.trialMedals[m.id];
         return `
           <div class="trial-row">
-            <span class="trial-medal">${medal ? MEDAL_ICON[medal] : '·'}</span>
+            <span class="trial-medal">${medal ? medalIcon(medal) : '·'}</span>
             <div class="trial-info">
               <b>${m.name}</b>
               <span>${m.desc}</span>

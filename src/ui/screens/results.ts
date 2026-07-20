@@ -4,6 +4,7 @@
 import { CHAMPIONSHIP_BY_ID } from '../../data/championships';
 import type { RaceRewards } from '../../state/progression';
 import type { RaceResult } from '../../sim/types';
+import { imgTag } from '../assets';
 import { fmtCr, menuShell } from '../menuCommon';
 import type { AppContext } from '../screenManager';
 
@@ -28,15 +29,18 @@ export function resultsScreen(ctx: AppContext, params?: unknown): void {
     <div class="rewards-layout">
       <div class="rewards-main">
         <div class="finish-banner ${posClass}">
-          <span class="label">${seriesName}</span>
-          <b>${ORDINALS[rewards.position - 1] ?? `P${rewards.position}`}</b>
-          <span>${rewards.position === 1 ? 'Victory!' : rewards.position <= 3 ? 'Podium finish' : 'Classified'}</span>
+          ${rewards.position <= 3 ? imgTag('cinematic/podium-back.png', 'podium-art') : ''}
+          <div class="finish-banner-text">
+            <span class="label">${seriesName}</span>
+            <b>${ORDINALS[rewards.position - 1] ?? `P${rewards.position}`}</b>
+            <span>${rewards.position === 1 ? 'Victory!' : rewards.position <= 3 ? 'Podium finish' : 'Classified'}</span>
+          </div>
         </div>
         ${
           rewards.championshipDecided && champ
             ? `<div class="title-banner big">${
                 rewards.wonTitle
-                  ? `🏆 ${champ.name} CHAMPION! Title bonus ${fmtCr(rewards.titleBonus)}`
+                  ? `${imgTag('cinematic/title-laurel.png', 'laurel-art')} ${champ.name} CHAMPION! Title bonus ${fmtCr(rewards.titleBonus)}`
                   : 'Championship concluded — the title goes elsewhere this season.'
               }</div>`
             : ''

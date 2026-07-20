@@ -38,6 +38,7 @@ export function tuningScreen(ctx: AppContext, params?: unknown): void {
     </div>`;
 
   content.innerHTML = `
+    <div class="tuning-hero">${imgTag(`cars/${carId}-side.png`, 'car-side', car.name)}</div>
     <div class="tuning-layout">
       <div>
         <h2 class="section-title">Parts</h2>

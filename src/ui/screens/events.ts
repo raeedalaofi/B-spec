@@ -4,7 +4,7 @@ import { CHAMPIONSHIPS, CHAMPIONSHIP_BY_ID, type ChampionshipDef } from '../../d
 import { CATALOG, CATEGORY_INFO } from '../../data/eventCatalog';
 import { generateInvitational } from '../../data/invitationals';
 import { MISSIONS } from '../../data/missions';
-import { TRACK_DEFS } from '../../data/tracks';
+import { biomeOf, TRACK_DEFS } from '../../data/tracks';
 import { tunedSpec } from '../../data/parts';
 import { championshipProgress } from '../../state/gameState';
 import { ppOf } from '../../state/pp';
@@ -42,6 +42,7 @@ function invitationalSection(ctx: AppContext): string {
   return `
     <h2 class="section-title">Invitational Series — Endless</h2>
     <div class="event-card invitational">
+      ${imgTag('ui/cat-invitational.png', 'cat-art side')}
       <div class="event-info">
         <b>${inv.name}</b>
         <span class="label">${track.name} · ${inv.laps} laps · elite field</span>
@@ -54,6 +55,15 @@ function invitationalSection(ctx: AppContext): string {
     </div>
     ${carOk ? '' : '<div class="entry-warning">Invitationals require a Class A car.</div>'}`;
 }
+
+const CAT_ART: Record<string, string> = {
+  trophy: 'cat-trophy',
+  'trophy-reverse': 'cat-reverse',
+  endurance: 'cat-endurance',
+  rally: 'cat-rally',
+  super: 'cat-super',
+  missions: 'cat-missions',
+};
 
 function categoryCards(ctx: AppContext): string {
   const gs = ctx.gs!;
@@ -76,7 +86,8 @@ function categoryCards(ctx: AppContext): string {
     <div class="hub-cards category-cards">
       ${cards
         .map(
-          (c) => `<button class="hub-card" data-category="${c.id}">
+          (c) => `<button class="hub-card with-art" data-category="${c.id}">
+            ${imgTag(`ui/${CAT_ART[c.id]}.png`, 'cat-art')}
             <b>${c.title}</b><span>${c.sub}</span><span class="champ-progress">${c.count}</span>
           </button>`,
         )
@@ -109,9 +120,9 @@ function championshipList(ctx: AppContext): void {
   <h2 class="section-title">Career Championships</h2>
   <div class="champ-list">${byCategory('core').map((c) => champCard(ctx, c)).join('')}</div>
   ${categoryCards(ctx)}
-  <h2 class="section-title">Grand Tour Series</h2>
+  <h2 class="section-title">${imgTag('ui/cat-grandtour.png', 'section-icon')}Grand Tour Series</h2>
   <div class="champ-list">${byCategory('grandtour').map((c) => champCard(ctx, c)).join('')}</div>
-  <h2 class="section-title">One-Make Cups</h2>
+  <h2 class="section-title">${imgTag('ui/cat-onemake.png', 'section-icon')}One-Make Cups</h2>
   <div class="champ-list">${byCategory('onemake').map((c) => champCard(ctx, c)).join('')}</div>
   ${invitationalSection(ctx)}`;
 
@@ -148,7 +159,9 @@ function championshipDetail(ctx: AppContext, champ: ChampionshipDef): void {
   const aiNames = Object.fromEntries(champ.aiDriverIds.map((id) => [id, AI_BY_ID[id].name]));
   const standings = standingsOf(gs, champ, aiNames);
 
+  const firstTrack = champ.events[0] ? TRACK_DEFS[champ.events[0].trackId] : null;
   content.innerHTML = `
+    ${firstTrack ? `<div class="detail-backdrop-wrap">${imgTag(`tracks/backdrops/${biomeOf(firstTrack.id)}.png`, 'detail-backdrop', '')}</div>` : ''}
     <button class="btn" id="back-events">‹ All Championships</button>
     ${carOk ? '' : `<div class="entry-warning">${entryProblem}</div>`}
     <div class="events-layout">
@@ -193,7 +206,7 @@ function championshipDetail(ctx: AppContext, champ: ChampionshipDef): void {
               .join('')}
           </tbody>
         </table>
-        ${progress.champion ? '<div class="title-banner">🏆 Series Champion</div>' : ''}
+        ${progress.champion ? `<div class="title-banner">${imgTag('cinematic/title-cup.png', 'cup-art')} Series Champion</div>` : ''}
       </div>
     </div>`;
 

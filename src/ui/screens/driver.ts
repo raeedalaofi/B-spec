@@ -1,16 +1,24 @@
 import { TRACK_DEFS } from '../../data/tracks';
 import { pointsToNextLevel } from '../../state/progression';
+import { imgTag } from '../assets';
 import { fmtLapTime, menuShell, statBars } from '../menuCommon';
 import type { AppContext } from '../screenManager';
+
+const AVATAR_COUNT = 6;
 
 export function driverScreen(ctx: AppContext): void {
   const gs = ctx.gs!;
   const content = menuShell(ctx, 'Driver', { backTo: 'home' });
   const need = pointsToNextLevel(gs.driver.level);
   const pct = Math.min(100, Math.round((gs.driver.bspecPoints / need) * 100));
+  const avatar = gs.settings.avatar ?? 1;
   content.innerHTML = `
     <div class="driver-card">
       <div class="driver-head">
+        <div class="driver-avatar">
+          ${imgTag(`portraits/player-${avatar}.png`, 'avatar-face', gs.driver.name)}
+          <button class="btn avatar-cycle" id="avatar-cycle" title="Change portrait">↻</button>
+        </div>
         <div>
           <h2>${gs.driver.name}</h2>
           <span class="label">B-Spec Driver — Level ${gs.driver.level}</span>
@@ -55,4 +63,10 @@ export function driverScreen(ctx: AppContext): void {
           </table>`
         : ''
     }`;
+
+  content.querySelector('#avatar-cycle')?.addEventListener('click', () => {
+    gs.settings.avatar = (avatar % AVATAR_COUNT) + 1;
+    ctx.save();
+    ctx.go('driver');
+  });
 }

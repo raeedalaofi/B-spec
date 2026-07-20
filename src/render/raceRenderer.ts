@@ -18,6 +18,19 @@ export interface InterpState {
   cur: Map<string, number>;
 }
 
+interface Particle {
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+  life: number;
+  maxLife: number;
+  size: number;
+  rot: number;
+  vrot: number;
+  img: string;
+}
+
 export class RaceRenderer {
   private canvas: HTMLCanvasElement;
   private ctx: CanvasRenderingContext2D;
@@ -25,6 +38,7 @@ export class RaceRenderer {
   private cam: Camera = { scale: 1, offsetX: 0, offsetY: 0 };
   private ribbon: HTMLCanvasElement | null = null;
   private dpr = 1;
+  private particles: Particle[] = [];
 
   private biome: string;
   private tilesApplied = false;
@@ -38,6 +52,14 @@ export class RaceRenderer {
       `tracks/tiles/${this.biome}-ground.png`,
       `tracks/tiles/${this.biome}-asphalt.png`,
       ...this.propRels(),
+      'fx/dust-1.png',
+      'fx/dust-2.png',
+      'fx/smoke-1.png',
+      'fx/smoke-2.png',
+      'fx/spark-1.png',
+      'fx/confetti-1.png',
+      'fx/confetti-2.png',
+      'fx/skid.png',
     ]);
     this.ctx = canvas.getContext('2d')!;
     this.resize();
@@ -49,6 +71,61 @@ export class RaceRenderer {
       'tracks/props/shared-4.png', // tire wall
       'tracks/props/shared-8.png', // paddock tent
     ];
+  }
+
+  /** spawn a particle burst at a car's position (world space) */
+  burst(car: { s: number }, kind: 'dust' | 'smoke' | 'spark' | 'confetti'): void {
+    const pos = posAt(this.track, car.s);
+    const imgs: Record<string, string[]> = {
+      dust: ['fx/dust-1.png', 'fx/dust-2.png'],
+      smoke: ['fx/smoke-1.png', 'fx/smoke-2.png'],
+      spark: ['fx/spark-1.png'],
+      confetti: ['fx/confetti-1.png', 'fx/confetti-2.png'],
+    };
+    const n = kind === 'confetti' ? 14 : kind === 'spark' ? 5 : 7;
+    for (let i = 0; i < n; i++) {
+      const a = Math.random() * Math.PI * 2;
+      const sp = kind === 'confetti' ? 22 : 12;
+      this.particles.push({
+        x: pos.x,
+        y: pos.y,
+        vx: Math.cos(a) * sp * (0.4 + Math.random()),
+        vy: Math.sin(a) * sp * (0.4 + Math.random()),
+        life: 0,
+        maxLife: kind === 'confetti' ? 1.6 : 0.9,
+        size: (kind === 'confetti' ? 10 : 14) * (0.7 + Math.random() * 0.7),
+        rot: Math.random() * Math.PI * 2,
+        vrot: (Math.random() - 0.5) * 6,
+        img: imgs[kind][i % imgs[kind].length],
+      });
+    }
+    if (this.particles.length > 260) this.particles.splice(0, this.particles.length - 260);
+  }
+
+  private drawParticles(dt: number): void {
+    const ctx = this.ctx;
+    for (let i = this.particles.length - 1; i >= 0; i--) {
+      const p = this.particles[i];
+      p.life += dt;
+      if (p.life >= p.maxLife) {
+        this.particles.splice(i, 1);
+        continue;
+      }
+      p.x += p.vx * dt;
+      p.y += p.vy * dt;
+      p.rot += p.vrot * dt;
+      const img = getImage(p.img);
+      if (!ready(img)) continue;
+      const t = p.life / p.maxLife;
+      const [x, y] = toScreen(this.cam, p.x, p.y);
+      const s = p.size * this.dpr * (0.6 + t * 0.9);
+      ctx.save();
+      ctx.globalAlpha = (1 - t) * 0.85;
+      ctx.translate(x, y);
+      ctx.rotate(p.rot);
+      ctx.drawImage(img, -s / 2, -s / 2, s, s);
+      ctx.restore();
+    }
   }
 
   resize(): void {
@@ -228,7 +305,7 @@ export class RaceRenderer {
    * Draw one frame. `interp` holds per-car totalDist at the previous and
    * current tick; `alpha` in [0,1] blends between them for smooth motion.
    */
-  draw(state: RaceState, interp: InterpState, alpha: number): void {
+  draw(state: RaceState, interp: InterpState, alpha: number, dt = 0.016): void {
     this.refreshRibbonIfTilesReady();
     const ctx = this.ctx;
     ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
@@ -253,13 +330,29 @@ export class RaceRenderer {
       const wy = pos.y + ny * lateral;
       const [x, y] = toScreen(this.cam, wx, wy);
 
+      if (car.mistake?.severity === 'spin') {
+        // skid mark laid under the spinning car
+        const skid = getImage('fx/skid.png');
+        if (ready(skid)) {
+          const sw = 26 * this.dpr;
+          const sh = sw * (skid.naturalHeight / skid.naturalWidth);
+          ctx.save();
+          ctx.translate(x, y);
+          ctx.rotate(-pos.heading);
+          ctx.globalAlpha = 0.55;
+          ctx.drawImage(skid, -sw / 2, -sh / 2, sw, sh);
+          ctx.restore();
+        }
+      }
       ctx.save();
       ctx.translate(x, y);
       ctx.rotate(-pos.heading);
       if (car.mistake?.severity === 'spin') {
         ctx.rotate((state.tickCount % 20) * 0.31); // spinning wildly
       }
-      const sprite = getImage(`cars/${car.spec.id}-topdown.png`);
+      // heavily worn tires swap in the battle-scarred render
+      const damaged = car.tireWear > 0.65 ? getImage(`cars/${car.spec.id}-damaged.png`) : null;
+      const sprite = ready(damaged) ? damaged : getImage(`cars/${car.spec.id}-topdown.png`);
       if (ready(sprite)) {
         // generated sprite is nose-up; +90° aligns it with +x heading
         ctx.rotate(Math.PI / 2);
@@ -300,5 +393,7 @@ export class RaceRenderer {
         ctx.textAlign = 'left';
       }
     }
+
+    this.drawParticles(dt);
   }
 }

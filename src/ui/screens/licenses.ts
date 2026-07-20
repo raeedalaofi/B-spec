@@ -6,11 +6,9 @@ import { CARS } from '../../data/cars';
 import { LICENSES, trialsOf, type Medal } from '../../data/licenses';
 import { getTrackDef } from '../../data/tracks';
 import { hasLicense, licenseAttemptable } from '../../state/trials';
-import { assetUrl } from '../assets';
+import { assetUrl, medalIcon } from '../assets';
 import { menuShell } from '../menuCommon';
 import type { AppContext } from '../screenManager';
-
-const MEDAL_ICON: Record<Medal, string> = { gold: '🥇', silver: '🥈', bronze: '🥉' };
 
 export function licensesScreen(ctx: AppContext, params?: unknown): void {
   const gs = ctx.gs!;
@@ -21,8 +19,13 @@ export function licensesScreen(ctx: AppContext, params?: unknown): void {
   content.innerHTML = `
     ${
       flash
-        ? `<div class="${flash.medal ? 'title-banner' : 'entry-warning'} big">
-            ${flash.medal ? `${MEDAL_ICON[flash.medal]} ${flash.medal.toUpperCase()} — ${flash.detail}` : `Test failed — ${flash.detail}. Try again.`}
+        ? `<div class="${flash.medal ? 'title-banner' : 'entry-warning'} big flash-banner">
+            ${
+              flash.medal
+                ? `<img src="${assetUrl('cinematic/license-pass.png')}" class="flash-art" alt="" draggable="false" onerror="this.style.display='none'" />
+                   ${medalIcon(flash.medal)} ${flash.medal.toUpperCase()} — ${flash.detail}`
+                : `Test failed — ${flash.detail}. Try again.`
+            }
           </div>`
         : ''
     }
@@ -54,7 +57,7 @@ export function licensesScreen(ctx: AppContext, params?: unknown): void {
                 const track = getTrackDef(t.trackId);
                 return `
                 <div class="trial-row">
-                  <span class="trial-medal">${medal ? MEDAL_ICON[medal] : '·'}</span>
+                  <span class="trial-medal">${medal ? medalIcon(medal) : '·'}</span>
                   <div class="trial-info">
                     <b>${t.name}</b>
                     <span>${t.desc}</span>

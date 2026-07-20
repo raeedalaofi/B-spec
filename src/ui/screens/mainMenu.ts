@@ -8,6 +8,8 @@ export function mainMenuScreen(ctx: AppContext): void {
   wrap.className = 'main-menu';
   const canContinue = hasSave();
   wrap.innerHTML = `
+    <img src="${assetUrl('cinematic/intro-pitwall.png')}" class="menu-backdrop" alt="" draggable="false"
+      onerror="this.style.display='none'" />
     <div class="menu-logo">
       <img src="${assetUrl('ui/logo-main.png')}" class="logo-img" alt="B-SPEC" draggable="false"
         onerror="this.style.display='none'"
