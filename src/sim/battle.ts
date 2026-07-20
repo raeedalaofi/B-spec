@@ -168,6 +168,7 @@ export function updateBattles(
       battle.penaltyTimer -= dt;
       vTargets[i] *= BAL.passFailFactor;
     }
+    if (battle.attemptCooldown > 0) battle.attemptCooldown -= dt;
 
     if (battle.phase === 'PASSING') {
       leader.underAttack = true;
@@ -221,9 +222,7 @@ export function updateBattles(
       const z = zoneAt(state, car.s);
       if (z && battle.lastZoneTried !== z.idx) {
         battle.lastZoneTried = z.idx;
-        if (battle.attemptCooldown > 0) {
-          battle.attemptCooldown--;
-        } else {
+        if (battle.attemptCooldown <= 0) {
           const p = passProbability(state, car, leader, z.zone);
           if (rngNext(state) < p) {
             battle.phase = 'PASSING';
@@ -232,7 +231,7 @@ export function updateBattles(
             car.lane = 1;
           } else {
             battle.penaltyTimer = BAL.passFailDurS;
-            battle.attemptCooldown = 1;
+            battle.attemptCooldown = BAL.passRetryCooldownS;
             events.push({
               type: 'OVERTAKE_ATTEMPT_FAILED',
               carId: car.carId,
@@ -288,7 +287,7 @@ function completePass(
     phase: 'FOLLOWING',
     targetId: attacker.carId,
     passingTimer: 0,
-    attemptCooldown: 1,
+    attemptCooldown: BAL.passCounterCooldownS,
     lastZoneTried: -1,
     slipstreamTicks: 0,
     penaltyTimer: 0,

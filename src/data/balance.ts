@@ -111,6 +111,10 @@ export const BAL = {
   /** failed attempt: attacker slowdown factor and duration */
   passFailFactor: 0.985,
   passFailDurS: 1.5,
+  /** seconds before the attacker may attempt again after a failure */
+  passRetryCooldownS: 12,
+  /** seconds before a just-passed defender may counter-attack */
+  passCounterCooldownS: 8,
   /** forced resolution deadline for a pass in progress (s) */
   passingForceResolveS: 3.5,
   /** attacker target speed relative to defender speed while passing */

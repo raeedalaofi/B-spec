@@ -14,7 +14,9 @@ export type ScreenId =
   | 'race'
   | 'results'
   | 'achievements'
-  | 'free-race';
+  | 'free-race'
+  | 'licenses'
+  | 'catalog';
 
 export interface AppContext {
   root: HTMLElement;

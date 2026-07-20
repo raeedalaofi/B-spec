@@ -3,6 +3,7 @@
 // prize money per race plus a title bonus.
 
 import type { CarClass } from '../sim/types';
+import type { LicenseId } from './licenses';
 
 export interface EventDef {
   id: string;
@@ -27,6 +28,10 @@ export interface ChampionshipDef {
   titleBonus: number;
   /** championship that must be completed first */
   unlockAfter: string | null;
+  /** Director License required to enter */
+  licenseReq?: LicenseId;
+  /** entries limited to this Performance Points ceiling */
+  ppMax?: number;
 }
 
 /** championship points per finishing position */
@@ -105,6 +110,7 @@ export const CHAMPIONSHIPS: ChampionshipDef[] = [
     prize: [7000, 4900, 3600, 2700, 2000, 1500, 1100, 800],
     titleBonus: 15000,
     unlockAfter: 'sunday-cup',
+    licenseReq: 'b',
   },
   {
     id: 'national',
@@ -152,6 +158,7 @@ export const CHAMPIONSHIPS: ChampionshipDef[] = [
     prize: [16000, 11000, 8000, 6000, 4500, 3400, 2500, 1800],
     titleBonus: 45000,
     unlockAfter: 'clubman',
+    licenseReq: 'ia',
   },
 ];
 

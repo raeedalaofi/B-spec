@@ -18,6 +18,12 @@ export const MIGRATIONS: Migration[] = [
     invitationals: old.invitationals ?? 0,
     settings: { defaultSpeed: 1, audio: true, ...(old.settings as object | undefined) },
   }),
+  // v2 → v3: director licenses (trial medals) + standalone event results
+  (old) => ({
+    ...old,
+    trialMedals: old.trialMedals ?? {},
+    standaloneResults: old.standaloneResults ?? {},
+  }),
 ];
 
 export function migrate(raw: Record<string, unknown>, targetVersion: number): GameState {

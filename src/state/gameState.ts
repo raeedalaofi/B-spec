@@ -2,7 +2,7 @@
 
 import type { DriverStats } from '../sim/types';
 
-export const SCHEMA_VERSION = 2;
+export const SCHEMA_VERSION = 3;
 
 export interface EventOutcome {
   position: number;
@@ -57,6 +57,10 @@ export interface GameState {
   history: RaceHistoryEntry[];
   /** completed Invitational Series events (endless endgame) */
   invitationals: number;
+  /** trial id (license test / mission) → best medal */
+  trialMedals: Record<string, 'gold' | 'silver' | 'bronze'>;
+  /** standalone catalog event id → best outcome */
+  standaloneResults: Record<string, { position: number; bestLapS: number | null }>;
   totals: { races: number; wins: number; podiums: number; overtakes: number };
   settings: { defaultSpeed: 1 | 2 | 4; audio: boolean };
 }
@@ -82,6 +86,8 @@ export function createNewGame(driverName: string): GameState {
     achievements: {},
     history: [],
     invitationals: 0,
+    trialMedals: {},
+    standaloneResults: {},
     totals: { races: 0, wins: 0, podiums: 0, overtakes: 0 },
     settings: { defaultSpeed: 1, audio: true },
   };

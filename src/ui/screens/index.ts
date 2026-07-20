@@ -7,6 +7,7 @@ import { eventsScreen } from './events';
 import { freeRaceScreen } from './freeRace';
 import { garageScreen } from './garage';
 import { homeScreen } from './home';
+import { licensesScreen } from './licenses';
 import { mainMenuScreen } from './mainMenu';
 import { resultsScreen } from './results';
 import { tuningScreen } from './tuning';
@@ -23,4 +24,5 @@ export function registerAllScreens(): void {
   registerScreen('results', resultsScreen);
   registerScreen('achievements', achievementsScreen);
   registerScreen('free-race', freeRaceScreen);
+  registerScreen('licenses', licensesScreen);
 }

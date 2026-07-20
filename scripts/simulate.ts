@@ -11,6 +11,8 @@ import { CARS } from '../src/data/cars';
 import { TRACK_DEFS } from '../src/data/tracks';
 import { AI_DRIVERS, AI_BY_ID } from '../src/data/aidrivers';
 import { CHAMPIONSHIPS } from '../src/data/championships';
+import { LICENSE_TRIALS } from '../src/data/licenses';
+import { evaluateTrial, trialTrackDef } from '../src/state/trials';
 import type { Command, DriverStats, RaceEntry, RaceEvent, RaceState, Track } from '../src/sim/types';
 
 const args = process.argv.slice(2);
@@ -287,5 +289,60 @@ if (mode === 'single') {
         `${event.id.padEnd(6)} ${event.name.padEnd(26)} [${playerCarId.padEnd(7)}] win ${String(winPct).padStart(3)}%  podium ${String(podPct).padStart(3)}%  avg P${(posSum / n).toFixed(2)}${flag}`,
       );
     }
+  }
+}
+
+// eslint-disable-next-line no-constant-condition
+if (mode === 'trials') {
+  // License-trial achievability check: run every trial with the standard
+  // actively-managed policy and tier-appropriate driver stats. A healthy
+  // trial is gold-able with strong play and at least bronze with this bot.
+  const tierStats: Record<string, DriverStats> = {
+    b: { pace: 42, consistency: 38, battle: 35, smoothness: 40, stamina: 45 },
+    a: { pace: 52, consistency: 48, battle: 44, smoothness: 46, stamina: 48 },
+    ic: { pace: 60, consistency: 56, battle: 50, smoothness: 52, stamina: 52 },
+    ia: { pace: 70, consistency: 64, battle: 58, smoothness: 58, stamina: 55 },
+    s: { pace: 80, consistency: 74, battle: 68, smoothness: 64, stamina: 60 },
+  };
+  for (const trial of LICENSE_TRIALS) {
+    const track = compileTrack(trialTrackDef(trial));
+    const entries: RaceEntry[] = trial.ai.map(({ driverId, carId }, i) => ({
+      carId: `ai-${driverId}-${i}`,
+      spec: CARS[carId],
+      driverName: AI_BY_ID[driverId].name,
+      stats: AI_BY_ID[driverId].stats,
+      isPlayer: false,
+    }));
+    entries.push({
+      carId: 'player',
+      spec: CARS[trial.carId],
+      driverName: 'BOT',
+      stats: tierStats[trial.licenseId ?? 'b'],
+      isPlayer: true,
+      paceCmd: 4,
+    });
+    const state = createRace({ track, lapsTotal: trial.laps, seed: trial.seed, entries });
+    let pitCalled = false;
+    let guard = 0;
+    while (state.phase !== 'finished' && guard++ < 400000) {
+      const cmds: Command[] = [];
+      if (state.tickCount % 10 === 0) {
+        const me = state.cars.find((c) => c.isPlayer)!;
+        const lapsRemaining = state.lapsTotal - me.lap + 1;
+        if (!pitCalled && !me.pit && me.tireWear > 0.8 && lapsRemaining > 2) {
+          cmds.push({ type: 'PIT', carId: 'player', tires: true, refuel: true });
+          pitCalled = true;
+        }
+        const wantPace = me.tireWear > 0.92 ? 2 : 4;
+        if (me.paceCmd !== wantPace) cmds.push({ type: 'SET_PACE', carId: 'player', level: wantPace as 2 | 4 });
+        const wantOt = me.battle !== null;
+        if (me.overtakeMode !== wantOt) cmds.push({ type: 'OVERTAKE_MODE', carId: 'player', on: wantOt });
+      }
+      tick(state, cmds);
+    }
+    const grade = evaluateTrial(trial, buildResult(state), state);
+    console.log(
+      `${trial.id.padEnd(5)} ${trial.name.padEnd(22)} ${String(grade.medal ?? 'FAIL').padEnd(6)} ${grade.detail}`,
+    );
   }
 }

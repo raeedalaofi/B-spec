@@ -5,12 +5,26 @@ import { generateInvitational } from '../../data/invitationals';
 import { TRACK_DEFS } from '../../data/tracks';
 import { championshipProgress } from '../../state/gameState';
 import { standingsOf } from '../../state/progression';
+import { hasLicense } from '../../state/trials';
 import { fmtCr, fmtLapTime, menuShell } from '../menuCommon';
 import type { AppContext } from '../screenManager';
 
 function isUnlocked(ctx: AppContext, champ: ChampionshipDef): boolean {
-  if (!champ.unlockAfter) return true;
-  return championshipProgress(ctx.gs!, champ.unlockAfter).finished;
+  if (champ.unlockAfter && !championshipProgress(ctx.gs!, champ.unlockAfter).finished) {
+    return false;
+  }
+  if (champ.licenseReq && !hasLicense(ctx.gs!, champ.licenseReq)) return false;
+  return true;
+}
+
+function lockReason(ctx: AppContext, champ: ChampionshipDef): string {
+  if (champ.unlockAfter && !championshipProgress(ctx.gs!, champ.unlockAfter).finished) {
+    return `Complete ${CHAMPIONSHIP_BY_ID[champ.unlockAfter].name} to unlock`;
+  }
+  if (champ.licenseReq && !hasLicense(ctx.gs!, champ.licenseReq)) {
+    return `Requires the ${champ.licenseReq.toUpperCase()} Director License`;
+  }
+  return '';
 }
 
 function invitationalSection(ctx: AppContext): string {
@@ -47,10 +61,10 @@ function championshipList(ctx: AppContext): void {
       <button class="champ-card ${unlocked ? '' : 'locked'}" data-champ="${champ.id}" ${unlocked ? '' : 'disabled'}>
         <div class="champ-title">
           <b>${champ.name} ${progress.champion ? '🏆' : ''}</b>
-          <span class="label">Class ${champ.allowedClasses.join('/')} · ${champ.events.length} races</span>
+          <span class="label">Class ${champ.allowedClasses.join('/')}${champ.licenseReq ? ` · ${champ.licenseReq.toUpperCase()} license` : ''} · ${champ.events.length} races</span>
         </div>
         <span class="champ-tagline">${champ.tagline}</span>
-        <span class="champ-progress">${unlocked ? `${done}/${champ.events.length} raced` : `Complete ${CHAMPIONSHIP_BY_ID[champ.unlockAfter!].name} to unlock`}</span>
+        <span class="champ-progress">${unlocked ? `${done}/${champ.events.length} raced` : lockReason(ctx, champ)}</span>
       </button>`;
   }).join('')}</div>
   ${invitationalSection(ctx)}`;

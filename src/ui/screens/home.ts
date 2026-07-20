@@ -1,6 +1,7 @@
 import { CARS } from '../../data/cars';
 import { CHAMPIONSHIPS } from '../../data/championships';
 import { championshipProgress } from '../../state/gameState';
+import { highestLicense } from '../../state/trials';
 import { menuShell } from '../menuCommon';
 import type { AppContext } from '../screenManager';
 
@@ -36,6 +37,14 @@ export function homeScreen(ctx: AppContext): void {
       title: 'Driver',
       sub: `${gs.driver.name} — Level ${gs.driver.level}`,
       screen: 'driver',
+    },
+    {
+      id: 'licenses',
+      title: 'License Center',
+      sub: highestLicense(gs)
+        ? `Held: ${highestLicense(gs)!.name}`
+        : 'Earn Director Licenses to unlock the upper categories',
+      screen: 'licenses',
     },
     {
       id: 'free-race',

@@ -8,10 +8,12 @@ import { AI_BY_ID } from '../../data/aidrivers';
 import { CARS } from '../../data/cars';
 import { CHAMPIONSHIP_BY_ID } from '../../data/championships';
 import { generateInvitational } from '../../data/invitationals';
+import { LICENSE_BY_ID, TRIAL_BY_ID } from '../../data/licenses';
 import { tunedSpec } from '../../data/parts';
 import { TRACK_DEFS } from '../../data/tracks';
 import { evaluateAchievements } from '../../state/achievements';
 import { applyInvitationalResult, applyRaceResult } from '../../state/progression';
+import { applyTrialMedal, evaluateTrial, trialTrackDef } from '../../state/trials';
 import { hashSeed } from '../../sim/rng';
 import { compileTrack } from '../../sim/trackCompiler';
 import type { RaceEntry } from '../../sim/types';
@@ -30,7 +32,8 @@ export interface FreeRaceConfig {
 export type CareerRaceParams =
   | { championshipId: string; eventId: string }
   | { invitational: number }
-  | { free: FreeRaceConfig };
+  | { free: FreeRaceConfig }
+  | { trial: string };
 
 function aiEntries(driverIds: string[], carIds: string[]): RaceEntry[] {
   return driverIds.map((driverId, i) => ({
@@ -121,6 +124,50 @@ export function careerRaceScreen(ctx: AppContext, params?: unknown): (() => void
         ctx.go('results', { invitational: true, result, rewards });
       },
       onRetire: () => ctx.go('events'),
+    });
+  }
+
+  if ('trial' in p) {
+    const trial = TRIAL_BY_ID[p.trial];
+    const track = compileTrack(trialTrackDef(trial));
+    const entries: RaceEntry[] = trial.ai.map(({ driverId, carId }, i) => ({
+      carId: `ai-${driverId}-${i}`,
+      spec: CARS[carId],
+      driverName: AI_BY_ID[driverId].name,
+      stats: AI_BY_ID[driverId].stats,
+      isPlayer: false,
+    }));
+    // loaner car, stock spec — only the driver and the commands are yours
+    entries.push({
+      carId: 'player',
+      spec: CARS[trial.carId],
+      driverName: gs.driver.name,
+      stats: { ...gs.driver.stats },
+      isPlayer: true,
+      paceCmd: 3,
+    });
+    const license = trial.licenseId ? LICENSE_BY_ID[trial.licenseId] : null;
+    const backTo = license ? 'licenses' : 'events';
+    return mountRaceScreen(ctx.root, {
+      ...common,
+      config: { track, lapsTotal: trial.laps, seed: trial.seed, entries },
+      title: license ? `${license.short} License — ${trial.name}` : `Mission — ${trial.name}`,
+      subtitle: `${track.def.name} · ${trial.laps} laps`,
+      onFinished: (result, state) => {
+        const grade = evaluateTrial(trial, result, state);
+        const earned = applyTrialMedal(gs, trial, grade.medal);
+        const unlocked = evaluateAchievements(gs, { type: 'generic' });
+        ctx.save();
+        showAchievementToasts(unlocked);
+        ctx.go(backTo, {
+          flash: {
+            trialId: trial.id,
+            medal: grade.medal,
+            detail: grade.detail + (earned > 0 ? ` (+${earned.toLocaleString('en-US')} Cr.)` : ''),
+          },
+        });
+      },
+      onRetire: () => ctx.go(backTo),
     });
   }
 
