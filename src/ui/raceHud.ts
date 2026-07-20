@@ -11,6 +11,7 @@ export interface HudCallbacks {
   onOvertake(on: boolean): void;
   onPit(): void;
   onSpeed(mult: number): void;
+  onRetire(): void;
 }
 
 const MAX_MESSAGES = 7;
@@ -64,6 +65,15 @@ export class RaceHud {
       this.speedBtns.push(b);
       speeds.appendChild(b);
     }
+    const retire = document.createElement('button');
+    retire.textContent = '✕';
+    retire.title = 'Retire from the race';
+    retire.addEventListener('click', () => {
+      if (confirm('Retire from this race? No prizes or points will be awarded.')) {
+        this.cb.onRetire();
+      }
+    });
+    speeds.appendChild(retire);
 
     this.tower = document.createElement('div');
     this.tower.className = 'timing-tower';
@@ -77,7 +87,7 @@ export class RaceHud {
     bar.className = 'command-bar';
     const paceGroup = document.createElement('div');
     paceGroup.className = 'pace-group';
-    paceGroup.innerHTML = `<span class="label">Pace — cruise to attack</span>`;
+    paceGroup.innerHTML = `<span class="label">Pace 1-5 · O overtake · P pit · S speed</span>`;
     const paceRow = document.createElement('div');
     paceRow.className = 'pace-buttons';
     for (let lvl = 1; lvl <= 5; lvl++) {
@@ -123,6 +133,20 @@ export class RaceHud {
 
   setPaceActive(level: PaceLevel): void {
     this.paceBtns.forEach((b, i) => b.classList.toggle('active', i + 1 === level));
+  }
+
+  /** keyboard shortcuts: 1-5 pace, O overtake, P pit, S cycle speed */
+  handleKey(key: string): void {
+    if (key >= '1' && key <= '5') {
+      this.paceBtns[Number(key) - 1].click();
+    } else if (key === 'o' || key === 'O') {
+      this.overtakeBtn.click();
+    } else if (key === 'p' || key === 'P') {
+      if (!this.pitBtn.disabled) this.pitBtn.click();
+    } else if (key === 's' || key === 'S') {
+      const active = this.speedBtns.findIndex((b) => b.classList.contains('active'));
+      this.speedBtns[(active + 1) % this.speedBtns.length].click();
+    }
   }
 
   /** periodic refresh (~4 Hz) */

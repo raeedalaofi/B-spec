@@ -12,6 +12,8 @@ export interface RaceScreenOptions {
   title: string;
   subtitle: string;
   onFinished(result: RaceResult, state: RaceState): void;
+  /** retire without rewards (defaults to reloading into onFinished flow) */
+  onRetire?(): void;
 }
 
 const MAX_TICKS_PER_FRAME = 40;
@@ -36,7 +38,14 @@ export function mountRaceScreen(root: HTMLElement, opts: RaceScreenOptions): () 
     onOvertake: (on) => pending.push({ type: 'OVERTAKE_MODE', carId: playerId, on }),
     onPit: () => pending.push({ type: 'PIT', carId: playerId, tires: true, refuel: true }),
     onSpeed: (mult) => (speedMult = mult),
+    onRetire: () => opts.onRetire?.(),
   });
+
+  const onKey = (e: KeyboardEvent): void => {
+    if (e.target instanceof HTMLInputElement) return;
+    hud.handleKey(e.key);
+  };
+  window.addEventListener('keydown', onKey);
 
   const interp: InterpState = { prev: new Map(), cur: new Map() };
   const capture = (into: Map<string, number>): void => {
@@ -104,6 +113,7 @@ export function mountRaceScreen(root: HTMLElement, opts: RaceScreenOptions): () 
     cancelAnimationFrame(raf);
     document.removeEventListener('visibilitychange', onVisibility);
     window.removeEventListener('resize', onResize);
+    window.removeEventListener('keydown', onKey);
     root.innerHTML = '';
   };
 }

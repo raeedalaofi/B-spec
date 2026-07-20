@@ -57,5 +57,6 @@ export function careerRaceScreen(ctx: AppContext, params?: unknown): (() => void
       ctx.save();
       ctx.go('results', { championshipId, eventId, result, rewards });
     },
+    onRetire: () => ctx.go('events', { championshipId }),
   });
 }
