@@ -1,4 +1,5 @@
 import { ACHIEVEMENTS } from '../../state/achievements';
+import { assetUrl } from '../assets';
 import { menuShell } from '../menuCommon';
 import type { AppContext } from '../screenManager';
 
@@ -17,7 +18,11 @@ export function achievementsScreen(ctx: AppContext): void {
         const at = gs.achievements[def.id];
         return `
           <div class="ach-card ${at ? 'unlocked' : ''}">
-            <span class="ach-icon">${at ? '🏆' : '🔒'}</span>
+            <span class="ach-icon">
+              <img src="${assetUrl(`ui/icon-ach-${def.id}.png`)}" alt="" draggable="false"
+                onerror="this.style.display='none';this.nextElementSibling.style.display='inline'" />
+              <span style="display:none">${at ? '🏆' : '🔒'}</span>
+            </span>
             <div>
               <b>${def.name}</b>
               <span>${def.desc}</span>

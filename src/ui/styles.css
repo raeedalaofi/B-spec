@@ -1502,3 +1502,13 @@ select.text-input {
   object-fit: contain;
   flex: none;
 }
+
+.ach-icon img {
+  width: 34px;
+  height: 34px;
+  object-fit: contain;
+}
+
+.ach-card:not(.unlocked) .ach-icon img {
+  filter: grayscale(1) brightness(0.55);
+}
