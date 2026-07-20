@@ -54,7 +54,7 @@ export const CHAMPIONSHIPS: ChampionshipDef[] = [
         name: 'Green Park Sprint',
         trackId: 'greenpark',
         laps: 5,
-        aiCarIds: ['kestrel', 'kestrel', 'kestrel', 'kestrel', 'vulpe', 'kestrel', 'kestrel'],
+        aiCarIds: ['vulpe', 'kestrel', 'vulpe', 'kestrel', 'kestrel', 'kestrel', 'vulpe'],
       },
       {
         id: 'sc-2',
