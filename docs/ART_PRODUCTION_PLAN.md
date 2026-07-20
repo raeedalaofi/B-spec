@@ -1,6 +1,19 @@
 # B-Spec — Visual Asset Production Plan (Scenario Pipeline)
 
-**Version 1.0 · July 2026 · Status: ready for production**
+**Version 1.1 · July 2026 · Status: ready for production — READY-MADE MODELS ONLY**
+
+> **Revision v1.1 (client decision):** production uses Scenario's ready-made
+> platform models exclusively — no custom LoRA training. Consistency is
+> achieved instead through: (1) a locked shared prompt prefix per lane,
+> (2) the Flux **Kontext** platform model for the studio-render → top-down
+> transformation (instruction-based img2img, no training needed),
+> (3) fixed seed families logged per car in `docs/art-manifest.csv`, and
+> (4) native-alpha lanes (Ideogram V3 Generate Transparent / Recraft v3).
+> §2.1 below is retained for reference but is OUT OF SCOPE.
+> Pipeline runner: `scripts/art/scenario.mjs` (credentials via env vars,
+> never committed). A 6-asset pilot batch
+> (`scripts/art/manifest-pilot.json`) gates mass production on style
+> approval.
 
 This document is the single source of truth for producing 100% of B-Spec's
 visual assets through [Scenario](https://www.scenario.com). It is written so
