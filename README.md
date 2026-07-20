@@ -36,6 +36,25 @@ Tires degrade gradually, then fall off a cliff past ~85% wear — box before it
 or gamble. Slipstream, blocking, fatigue and driver morale are all simulated.
 Progress autosaves to your browser after every race and purchase.
 
+**Content** — 19 original circuits (club tracks, city streets, a 6 km
+mountain monster with 108 m of climb, an ultra-fast endurance layout, a
+loose-surface rally park — several with full elevation profiles that change
+braking and acceleration), plus reverse layouts. Over **230 races across
+17 championships and 5 event categories**:
+
+- **Career championships** — Sunday Cup → Clubman → National.
+- **Director Licenses (B → A → IC → IA → S)** — the B-Spec answer to GT
+  license schools: 20 graded tests of *race direction* (traffic charges,
+  duels, tire windows, a final Perfect Race exam) on loaner cars, with
+  gold/silver/bronze medals. Licenses gate the upper categories.
+- **Track Trophies** (57) and **Reverse GP** (18) — every circuit, every
+  class, with Performance Point (PP) ceilings. PP is derived from the
+  physics itself: your car's ideal lap time with tuning applied.
+- **Endurance Series** (12) — 60–120 km races decided in the pit window.
+- **Rally Sprints** (10) — low grip, brutal wear.
+- **Super League** (8) + **Grand Tour** (6 series) + **One-Make Cups** (8).
+- **Driving Missions** (12) — skill trials that pay credits per medal.
+
 **Beyond the championships:**
 
 - **Tuning** — every owned car has a parts shop (Engine ×3 stages, Weight ×2,

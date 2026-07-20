@@ -226,6 +226,7 @@ if (mode === 'single') {
 
   for (const champ of CHAMPIONSHIPS) {
     const tier = tiers[champ.id];
+    if (!tier) continue; // generated championships aren't part of the core path
     console.log(`\n=== ${champ.name} (player: ${CARS[tier.carId].name}) ===`);
     for (const event of champ.events) {
       const playerCarId = tier.perEvent?.[event.id] ?? tier.carId;
