@@ -187,7 +187,7 @@
       "width": 512,
       "height": 1024,
       "alpha": "remove-bg",
-      "prompt": "orthographic top-down view of a wide-body 2000s Japanese GT500-style super coupe, low and aggressive, gloss black #20242c paint covered in dust and light scuffs, completely debadged, nose pointing up, centered, even overhead lighting, video game sprite, plain white background",
+      "prompt": "orthographic top-down view of a wide-body 2000s Japanese flagship super coupe race car, very low and aggressive stance, gloss black #20242c paint covered in dust and light scuffs, completely debadged, nose pointing up, centered, even overhead lighting, video game sprite, plain white background",
       "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand, extra wheels"
     },
     {
@@ -197,7 +197,7 @@
       "width": 512,
       "height": 1024,
       "alpha": "remove-bg",
-      "prompt": "orthographic top-down view of a open-cockpit Le Mans style racing prototype with large rear wing, pearl white and silver #e2e6ee paint covered in dust and light scuffs, completely debadged, nose pointing up, centered, even overhead lighting, video game sprite, plain white background",
+      "prompt": "orthographic top-down view of a open-cockpit endurance racing prototype car with large rear wing and covered wheels, pearl white and silver #e2e6ee paint covered in dust and light scuffs, completely debadged, nose pointing up, centered, even overhead lighting, video game sprite, plain white background",
       "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand, extra wheels"
     },
     {

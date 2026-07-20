@@ -37,8 +37,8 @@ const CAR_DESC: Record<string, string> = {
   falcon: '2000s Japanese turbocharged sports sedan with subtle rear wing',
   serval: 'lightweight 2000s Japanese two-seater roadster, soft top down',
   kite: '2000s Japanese AWD rally homologation turbo coupe with hood scoop',
-  phantom: 'wide-body 2000s Japanese GT500-style super coupe, low and aggressive',
-  arrow: 'open-cockpit Le Mans style racing prototype with large rear wing',
+  phantom: 'wide-body 2000s Japanese flagship super coupe race car, very low and aggressive stance',
+  arrow: 'open-cockpit endurance racing prototype car with large rear wing and covered wheels',
 };
 
 const COLOR_NAME: Record<string, string> = {

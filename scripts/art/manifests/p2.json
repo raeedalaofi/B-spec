@@ -567,7 +567,7 @@
       "width": 1408,
       "height": 640,
       "alpha": "remove-bg",
-      "prompt": "professional game asset, Gran Turismo era broadcast aesthetic, deep navy and gold palette, perfect side profile view of a wide-body 2000s Japanese GT500-style super coupe, low and aggressive, gloss black #20242c paint, completely debadged, no license plate, studio lighting, plain light gray background",
+      "prompt": "professional game asset, Gran Turismo era broadcast aesthetic, deep navy and gold palette, perfect side profile view of a wide-body 2000s Japanese flagship super coupe race car, very low and aggressive stance, gloss black #20242c paint, completely debadged, no license plate, studio lighting, plain light gray background",
       "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand, extra wheels"
     },
     {
@@ -577,7 +577,7 @@
       "width": 1408,
       "height": 640,
       "alpha": "remove-bg",
-      "prompt": "professional game asset, Gran Turismo era broadcast aesthetic, deep navy and gold palette, perfect side profile view of a open-cockpit Le Mans style racing prototype with large rear wing, pearl white and silver #e2e6ee paint, completely debadged, no license plate, studio lighting, plain light gray background",
+      "prompt": "professional game asset, Gran Turismo era broadcast aesthetic, deep navy and gold palette, perfect side profile view of a open-cockpit endurance racing prototype car with large rear wing and covered wheels, pearl white and silver #e2e6ee paint, completely debadged, no license plate, studio lighting, plain light gray background",
       "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand, extra wheels"
     }
   ]

@@ -127,7 +127,7 @@
       "width": 1408,
       "height": 896,
       "alpha": "remove-bg",
-      "prompt": "professional game asset, Gran Turismo era broadcast aesthetic, deep navy and gold palette, wide-body 2000s Japanese GT500-style super coupe, low and aggressive, gloss black #20242c paint, completely debadged with no manufacturer emblem and no license plate, three-quarter front studio shot, soft key light with subtle gold rim light, plain light gray studio background, clean showroom quality",
+      "prompt": "professional game asset, Gran Turismo era broadcast aesthetic, deep navy and gold palette, wide-body 2000s Japanese flagship super coupe race car, very low and aggressive stance, gloss black #20242c paint, completely debadged with no manufacturer emblem and no license plate, three-quarter front studio shot, soft key light with subtle gold rim light, plain light gray studio background, clean showroom quality",
       "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand, extra wheels"
     },
     {
@@ -137,7 +137,7 @@
       "width": 512,
       "height": 1024,
       "alpha": "remove-bg",
-      "prompt": "orthographic top-down view of a wide-body 2000s Japanese GT500-style super coupe, low and aggressive, gloss black #20242c paint, completely debadged with no manufacturer emblem and no license plate, nose pointing up, full car visible and centered, even neutral overhead lighting, crisp silhouette, video game sprite, plain white background",
+      "prompt": "orthographic top-down view of a wide-body 2000s Japanese flagship super coupe race car, very low and aggressive stance, gloss black #20242c paint, completely debadged with no manufacturer emblem and no license plate, nose pointing up, full car visible and centered, even neutral overhead lighting, crisp silhouette, video game sprite, plain white background",
       "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand, extra wheels"
     },
     {
@@ -147,7 +147,7 @@
       "width": 1408,
       "height": 896,
       "alpha": "remove-bg",
-      "prompt": "professional game asset, Gran Turismo era broadcast aesthetic, deep navy and gold palette, open-cockpit Le Mans style racing prototype with large rear wing, pearl white and silver #e2e6ee paint, completely debadged with no manufacturer emblem and no license plate, three-quarter front studio shot, soft key light with subtle gold rim light, plain light gray studio background, clean showroom quality",
+      "prompt": "professional game asset, Gran Turismo era broadcast aesthetic, deep navy and gold palette, open-cockpit endurance racing prototype car with large rear wing and covered wheels, pearl white and silver #e2e6ee paint, completely debadged with no manufacturer emblem and no license plate, three-quarter front studio shot, soft key light with subtle gold rim light, plain light gray studio background, clean showroom quality",
       "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand, extra wheels"
     },
     {
@@ -157,7 +157,7 @@
       "width": 512,
       "height": 1024,
       "alpha": "remove-bg",
-      "prompt": "orthographic top-down view of a open-cockpit Le Mans style racing prototype with large rear wing, pearl white and silver #e2e6ee paint, completely debadged with no manufacturer emblem and no license plate, nose pointing up, full car visible and centered, even neutral overhead lighting, crisp silhouette, video game sprite, plain white background",
+      "prompt": "orthographic top-down view of a open-cockpit endurance racing prototype car with large rear wing and covered wheels, pearl white and silver #e2e6ee paint, completely debadged with no manufacturer emblem and no license plate, nose pointing up, full car visible and centered, even neutral overhead lighting, crisp silhouette, video game sprite, plain white background",
       "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand, extra wheels"
     },
     {
