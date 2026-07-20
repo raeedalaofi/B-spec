@@ -1,0 +1,549 @@
+/* B-Spec — GT4-inspired broadcast look: deep navy, thin gold rules,
+   condensed uppercase labels, monospace timing figures. */
+
+:root {
+  --bg-0: #060a12;
+  --bg-1: #0b1322;
+  --bg-2: #101c30;
+  --panel: rgba(8, 14, 26, 0.88);
+  --panel-line: rgba(201, 165, 74, 0.55);
+  --gold: #c9a54a;
+  --gold-bright: #ffd75e;
+  --text: #e8ecf4;
+  --text-dim: #93a0b4;
+  --good: #58d68a;
+  --bad: #e06c5c;
+  --accent: #4f8edc;
+  --font-ui: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+  --font-timing: 'Consolas', 'Menlo', 'DejaVu Sans Mono', monospace;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  background: radial-gradient(120% 90% at 50% 0%, var(--bg-2) 0%, var(--bg-1) 45%, var(--bg-0) 100%);
+  color: var(--text);
+  font-family: var(--font-ui);
+  overflow: hidden;
+}
+
+#app {
+  height: 100%;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+}
+
+/* ---------------------------------------------------------------- labels */
+
+.label {
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+/* ------------------------------------------------------------ race screen */
+
+.race-screen {
+  position: relative;
+  height: 100%;
+  overflow: hidden;
+}
+
+.race-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.hud-top {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  background: linear-gradient(to bottom, rgba(4, 8, 16, 0.92), rgba(4, 8, 16, 0));
+  pointer-events: none;
+}
+
+.hud-top > * {
+  pointer-events: auto;
+}
+
+.race-title {
+  font-size: 13px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--gold-bright);
+}
+
+.race-title small {
+  display: block;
+  color: var(--text-dim);
+  font-size: 10px;
+  letter-spacing: 0.18em;
+}
+
+.lap-counter {
+  font-family: var(--font-timing);
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.lap-counter span {
+  color: var(--text-dim);
+  font-size: 14px;
+}
+
+.speed-controls {
+  display: flex;
+  gap: 4px;
+}
+
+.speed-controls button {
+  background: var(--panel);
+  color: var(--text-dim);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 3px;
+  font-family: var(--font-timing);
+  font-size: 13px;
+  padding: 4px 10px;
+}
+
+.speed-controls button.active {
+  color: #10131a;
+  background: var(--gold-bright);
+  border-color: var(--gold-bright);
+  font-weight: 700;
+}
+
+/* ------------------------------------------------------------ timing tower */
+
+.timing-tower {
+  position: absolute;
+  top: 64px;
+  left: 14px;
+  width: 240px;
+  background: var(--panel);
+  border-top: 2px solid var(--panel-line);
+  border-radius: 0 0 6px 6px;
+  overflow: hidden;
+  backdrop-filter: blur(3px);
+}
+
+.tower-row {
+  display: grid;
+  grid-template-columns: 24px 10px 1fr 66px;
+  gap: 6px;
+  align-items: center;
+  padding: 4px 8px;
+  font-size: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  transition: background 0.3s;
+}
+
+.tower-row.player {
+  background: rgba(201, 165, 74, 0.16);
+}
+
+.tower-row.flash {
+  background: rgba(88, 214, 138, 0.25);
+}
+
+.tower-pos {
+  font-family: var(--font-timing);
+  font-weight: 700;
+  color: var(--text-dim);
+  text-align: right;
+}
+
+.tower-row.player .tower-pos {
+  color: var(--gold-bright);
+}
+
+.tower-chip {
+  width: 8px;
+  height: 12px;
+  border-radius: 2px;
+}
+
+.tower-name {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  letter-spacing: 0.04em;
+}
+
+.tower-name small {
+  display: block;
+  color: var(--text-dim);
+  font-size: 9px;
+  letter-spacing: 0.08em;
+}
+
+.tower-gap {
+  font-family: var(--font-timing);
+  font-size: 11px;
+  text-align: right;
+  color: var(--text-dim);
+}
+
+.tower-row .st {
+  font-size: 9px;
+  color: var(--accent);
+}
+
+/* --------------------------------------------------------- condition panel */
+
+.condition-panel {
+  position: absolute;
+  top: 64px;
+  right: 14px;
+  width: 210px;
+  background: var(--panel);
+  border-top: 2px solid var(--panel-line);
+  border-radius: 0 0 6px 6px;
+  padding: 10px 12px 12px;
+  backdrop-filter: blur(3px);
+}
+
+.cond-pos {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 2px;
+}
+
+.cond-pos b {
+  font-family: var(--font-timing);
+  font-size: 34px;
+  color: var(--gold-bright);
+}
+
+.cond-driver {
+  font-size: 13px;
+  letter-spacing: 0.06em;
+}
+
+.cond-car {
+  font-size: 10px;
+  color: var(--text-dim);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.bar {
+  height: 7px;
+  background: rgba(255, 255, 255, 0.09);
+  border-radius: 3px;
+  overflow: hidden;
+  margin: 3px 0 8px;
+}
+
+.bar i {
+  display: block;
+  height: 100%;
+  border-radius: 3px;
+  background: var(--good);
+  transition: width 0.4s, background 0.4s;
+}
+
+.bar i.warn {
+  background: var(--gold-bright);
+}
+
+.bar i.crit {
+  background: var(--bad);
+}
+
+.cond-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.cond-row .val {
+  font-family: var(--font-timing);
+  font-size: 11px;
+  color: var(--text);
+}
+
+.cond-lastlap {
+  margin-top: 4px;
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-timing);
+  font-size: 12px;
+}
+
+.cond-lastlap .label {
+  font-family: var(--font-ui);
+}
+
+/* ------------------------------------------------------------- command bar */
+
+.command-bar {
+  position: absolute;
+  bottom: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: var(--panel);
+  border-top: 2px solid var(--panel-line);
+  border-radius: 6px;
+  padding: 10px 16px;
+  backdrop-filter: blur(3px);
+}
+
+.pace-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.pace-buttons {
+  display: flex;
+  gap: 3px;
+}
+
+.pace-buttons button {
+  width: 34px;
+  height: 30px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-dim);
+  border-radius: 3px;
+  font-family: var(--font-timing);
+  font-size: 13px;
+}
+
+.pace-buttons button.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+  font-weight: 700;
+}
+
+.pace-buttons button:nth-child(4).active,
+.pace-buttons button:nth-child(5).active {
+  background: var(--bad);
+  border-color: var(--bad);
+}
+
+.cmd-toggle {
+  height: 40px;
+  padding: 0 16px;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.cmd-toggle.active {
+  background: var(--bad);
+  border-color: var(--bad);
+  color: #fff;
+  font-weight: 700;
+  animation: pulse 1s infinite alternate;
+}
+
+.cmd-toggle.armed {
+  background: var(--gold);
+  border-color: var(--gold);
+  color: #10131a;
+  font-weight: 700;
+}
+
+.cmd-toggle:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+@keyframes pulse {
+  from {
+    filter: brightness(1);
+  }
+  to {
+    filter: brightness(1.35);
+  }
+}
+
+/* ------------------------------------------------------------- message log */
+
+.message-log {
+  position: absolute;
+  bottom: 14px;
+  left: 14px;
+  width: 300px;
+  max-height: 180px;
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 3px;
+  overflow: hidden;
+  pointer-events: none;
+  mask-image: linear-gradient(to top, black 70%, transparent);
+}
+
+.message-log .msg {
+  background: rgba(6, 10, 20, 0.82);
+  border-left: 3px solid var(--text-dim);
+  border-radius: 0 3px 3px 0;
+  padding: 5px 9px;
+  font-size: 12px;
+  animation: slide-in 0.25s ease-out;
+}
+
+.message-log .msg.good {
+  border-left-color: var(--good);
+}
+
+.message-log .msg.bad {
+  border-left-color: var(--bad);
+}
+
+.message-log .msg.highlight {
+  border-left-color: var(--gold-bright);
+}
+
+@keyframes slide-in {
+  from {
+    opacity: 0;
+    transform: translateX(-12px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ----------------------------------------------------------------- overlay */
+
+.race-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(4, 7, 14, 0.55);
+  z-index: 10;
+}
+
+.countdown-num {
+  font-family: var(--font-timing);
+  font-size: 120px;
+  font-weight: 700;
+  color: var(--gold-bright);
+  text-shadow: 0 0 40px rgba(201, 165, 74, 0.5);
+}
+
+.countdown-num.green {
+  color: var(--good);
+  font-size: 72px;
+  letter-spacing: 0.08em;
+}
+
+/* results card (also reused by career results screen) */
+
+.results-card {
+  width: min(560px, 92vw);
+  background: var(--bg-1);
+  border-top: 3px solid var(--gold);
+  border-radius: 8px;
+  padding: 22px 26px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6);
+}
+
+.results-card h2 {
+  font-size: 15px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--gold-bright);
+  margin-bottom: 14px;
+}
+
+.results-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.results-table th {
+  text-align: left;
+  font-size: 9px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  padding: 3px 6px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.results-table td {
+  padding: 5px 6px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.results-table td.mono {
+  font-family: var(--font-timing);
+  font-size: 12px;
+}
+
+.results-table tr.player td {
+  background: rgba(201, 165, 74, 0.14);
+  color: var(--gold-bright);
+}
+
+.results-actions {
+  margin-top: 16px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.btn {
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text);
+  border-radius: 4px;
+  padding: 9px 20px;
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.btn.primary {
+  background: var(--gold);
+  border-color: var(--gold);
+  color: #10131a;
+  font-weight: 700;
+}
+
+.btn.primary:hover {
+  background: var(--gold-bright);
+}
+
+.btn:hover {
+  border-color: var(--gold);
+}
