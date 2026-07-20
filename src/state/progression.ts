@@ -5,8 +5,13 @@
 import { BAL } from '../data/balance';
 import { CHAMP_POINTS, type ChampionshipDef } from '../data/championships';
 import { hashSeed, rngNext } from '../sim/rng';
-import type { DriverStats, RaceResult } from '../sim/types';
-import { championshipProgress, type EventOutcome, type GameState } from './gameState';
+import type { DriverStats, RaceResult, RaceResultRow } from '../sim/types';
+import {
+  championshipProgress,
+  pushHistory,
+  type EventOutcome,
+  type GameState,
+} from './gameState';
 
 export interface StatGain {
   stat: keyof DriverStats;
@@ -81,6 +86,37 @@ function awardBspecPoints(gs: GameState, points: number): LevelUp[] {
   return ups;
 }
 
+/** B-Spec points for the player's race performance, with a breakdown */
+function racePoints(
+  playerRow: RaceResultRow,
+  gridSlot: number,
+): { points: number; breakdown: string[] } {
+  const breakdown: string[] = [];
+  let points = BAL.bspecPosPoints[playerRow.position - 1] ?? 0;
+  breakdown.push(`P${playerRow.position} finish: +${points}`);
+  const overtakePts = playerRow.overtakes * BAL.bspecOvertakePts;
+  if (overtakePts > 0) {
+    points += overtakePts;
+    breakdown.push(`${playerRow.overtakes} overtakes: +${overtakePts}`);
+  }
+  if (playerRow.fastestLap) {
+    points += BAL.bspecFastestLapPts;
+    breakdown.push(`Fastest lap: +${BAL.bspecFastestLapPts}`);
+  }
+  if (gridSlot - playerRow.position >= 3) {
+    points += BAL.bspecComebackPts;
+    breakdown.push(`Charged from P${gridSlot}: +${BAL.bspecComebackPts}`);
+  }
+  return { points, breakdown };
+}
+
+function recordTotals(gs: GameState, playerRow: RaceResultRow): void {
+  gs.totals.races++;
+  if (playerRow.position === 1) gs.totals.wins++;
+  if (playerRow.position <= 3) gs.totals.podiums++;
+  gs.totals.overtakes += playerRow.overtakes;
+}
+
 /**
  * Applies a finished race to the career: prize money, championship
  * standings, B-Spec points, level-ups, title resolution.
@@ -108,22 +144,8 @@ export function applyRaceResult(
   gs.credits += creditsEarned;
 
   // B-Spec points
-  const breakdown: string[] = [];
-  let points = BAL.bspecPosPoints[position - 1] ?? 0;
-  breakdown.push(`P${position} finish: +${points}`);
-  const overtakePts = playerRow.overtakes * BAL.bspecOvertakePts;
-  if (overtakePts > 0) {
-    points += overtakePts;
-    breakdown.push(`${playerRow.overtakes} overtakes: +${overtakePts}`);
-  }
-  if (playerRow.fastestLap) {
-    points += BAL.bspecFastestLapPts;
-    breakdown.push(`Fastest lap: +${BAL.bspecFastestLapPts}`);
-  }
-  if (gridSlot - position >= 3) {
-    points += BAL.bspecComebackPts;
-    breakdown.push(`Charged from P${gridSlot}: +${BAL.bspecComebackPts}`);
-  }
+  const { points: basePoints, breakdown } = racePoints(playerRow, gridSlot);
+  let points = basePoints;
 
   // record outcome (keep the best)
   const prev = progress.completedEvents[eventId];
@@ -136,10 +158,7 @@ export function applyRaceResult(
   };
   if (!prev || position < prev.position) progress.completedEvents[eventId] = outcome;
 
-  gs.totals.races++;
-  if (position === 1) gs.totals.wins++;
-  if (position <= 3) gs.totals.podiums++;
-  gs.totals.overtakes += playerRow.overtakes;
+  recordTotals(gs, playerRow);
 
   // title decided once every event has been completed
   let wonTitle = false;
@@ -161,6 +180,18 @@ export function applyRaceResult(
 
   const levelUps = awardBspecPoints(gs, points);
 
+  const event = champ.events.find((e) => e.id === eventId);
+  pushHistory(gs, {
+    at: Date.now(),
+    series: champ.name,
+    event: event?.name ?? eventId,
+    trackId: event?.trackId ?? '',
+    position,
+    bestLapS: playerRow.bestLapS,
+    creditsEarned,
+    pointsEarned: points,
+  });
+
   return {
     position,
     creditsEarned,
@@ -170,6 +201,46 @@ export function applyRaceResult(
     championshipDecided: decided,
     wonTitle,
     titleBonus,
+  };
+}
+
+/**
+ * Applies a finished Invitational Series event (the endless endgame):
+ * credits + B-Spec points + history, no championship standings.
+ */
+export function applyInvitationalResult(
+  gs: GameState,
+  inv: { name: string; trackId: string; prize: number[] },
+  result: RaceResult,
+  gridSlot: number,
+): RaceRewards {
+  const playerRow = result.rows.find((r) => r.isPlayer)!;
+  const position = playerRow.position;
+  const creditsEarned = inv.prize[position - 1] ?? 0;
+  gs.credits += creditsEarned;
+  const { points, breakdown } = racePoints(playerRow, gridSlot);
+  recordTotals(gs, playerRow);
+  if (position === 1) gs.invitationals++;
+  const levelUps = awardBspecPoints(gs, points);
+  pushHistory(gs, {
+    at: Date.now(),
+    series: 'Invitational Series',
+    event: inv.name,
+    trackId: inv.trackId,
+    position,
+    bestLapS: playerRow.bestLapS,
+    creditsEarned,
+    pointsEarned: points,
+  });
+  return {
+    position,
+    creditsEarned,
+    pointsEarned: points,
+    pointsBreakdown: breakdown,
+    levelUps,
+    championshipDecided: false,
+    wonTitle: false,
+    titleBonus: 0,
   };
 }
 

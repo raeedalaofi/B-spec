@@ -8,10 +8,13 @@ export type ScreenId =
   | 'home'
   | 'dealership'
   | 'garage'
+  | 'tuning'
   | 'driver'
   | 'events'
   | 'race'
-  | 'results';
+  | 'results'
+  | 'achievements'
+  | 'free-race';
 
 export interface AppContext {
   root: HTMLElement;

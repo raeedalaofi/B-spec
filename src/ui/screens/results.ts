@@ -8,8 +8,8 @@ import { fmtCr, menuShell } from '../menuCommon';
 import type { AppContext } from '../screenManager';
 
 interface ResultsParams {
-  championshipId: string;
-  eventId: string;
+  championshipId?: string;
+  invitational?: boolean;
   result: RaceResult;
   rewards: RaceRewards;
 }
@@ -18,7 +18,8 @@ const ORDINALS = ['1st', '2nd', '3rd', '4th', '5th', '6th', '7th', '8th'];
 
 export function resultsScreen(ctx: AppContext, params?: unknown): void {
   const { championshipId, result, rewards } = params as ResultsParams;
-  const champ = CHAMPIONSHIP_BY_ID[championshipId];
+  const champ = championshipId ? CHAMPIONSHIP_BY_ID[championshipId] : null;
+  const seriesName = champ?.name ?? 'Invitational Series';
   const content = menuShell(ctx, 'Race Rewards');
 
   const posClass = rewards.position === 1 ? 'gold' : rewards.position <= 3 ? 'silver' : '';
@@ -26,12 +27,12 @@ export function resultsScreen(ctx: AppContext, params?: unknown): void {
     <div class="rewards-layout">
       <div class="rewards-main">
         <div class="finish-banner ${posClass}">
-          <span class="label">${champ.name}</span>
+          <span class="label">${seriesName}</span>
           <b>${ORDINALS[rewards.position - 1] ?? `P${rewards.position}`}</b>
           <span>${rewards.position === 1 ? 'Victory!' : rewards.position <= 3 ? 'Podium finish' : 'Classified'}</span>
         </div>
         ${
-          rewards.championshipDecided
+          rewards.championshipDecided && champ
             ? `<div class="title-banner big">${
                 rewards.wonTitle
                   ? `🏆 ${champ.name} CHAMPION! Title bonus ${fmtCr(rewards.titleBonus)}`
@@ -57,7 +58,7 @@ export function resultsScreen(ctx: AppContext, params?: unknown): void {
         }
         <div class="results-actions">
           <button class="btn" id="res-home">Home</button>
-          <button class="btn primary" id="res-back">Back to ${champ.name}</button>
+          <button class="btn primary" id="res-back">Back to ${champ ? champ.name : 'Events'}</button>
         </div>
       </div>
       <div>
@@ -81,5 +82,7 @@ export function resultsScreen(ctx: AppContext, params?: unknown): void {
   content.querySelector('#res-home')!.addEventListener('click', () => ctx.go('home'));
   content
     .querySelector('#res-back')!
-    .addEventListener('click', () => ctx.go('events', { championshipId }));
+    .addEventListener('click', () =>
+      ctx.go('events', championshipId ? { championshipId } : undefined),
+    );
 }

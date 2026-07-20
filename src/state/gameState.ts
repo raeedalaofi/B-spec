@@ -2,7 +2,7 @@
 
 import type { DriverStats } from '../sim/types';
 
-export const SCHEMA_VERSION = 1;
+export const SCHEMA_VERSION = 2;
 
 export interface EventOutcome {
   position: number;
@@ -23,6 +23,17 @@ export interface ChampionshipProgress {
   champion: boolean;
 }
 
+export interface RaceHistoryEntry {
+  at: number;
+  series: string;
+  event: string;
+  trackId: string;
+  position: number;
+  bestLapS: number | null;
+  creditsEarned: number;
+  pointsEarned: number;
+}
+
 export interface GameState {
   schemaVersion: number;
   createdAt: number;
@@ -37,9 +48,17 @@ export interface GameState {
   };
   ownedCarIds: string[];
   activeCarId: string;
+  /** carId → installed part ids */
+  tuning: Record<string, string[]>;
   career: Record<string, ChampionshipProgress>;
+  /** achievement id → unlockedAt timestamp */
+  achievements: Record<string, number>;
+  /** most recent races, newest first (capped) */
+  history: RaceHistoryEntry[];
+  /** completed Invitational Series events (endless endgame) */
+  invitationals: number;
   totals: { races: number; wins: number; podiums: number; overtakes: number };
-  settings: { defaultSpeed: 1 | 2 | 4 };
+  settings: { defaultSpeed: 1 | 2 | 4; audio: boolean };
 }
 
 export const STARTING_CREDITS = 15000;
@@ -58,10 +77,21 @@ export function createNewGame(driverName: string): GameState {
     },
     ownedCarIds: [],
     activeCarId: '',
+    tuning: {},
     career: {},
+    achievements: {},
+    history: [],
+    invitationals: 0,
     totals: { races: 0, wins: 0, podiums: 0, overtakes: 0 },
-    settings: { defaultSpeed: 1 },
+    settings: { defaultSpeed: 1, audio: true },
   };
+}
+
+export const HISTORY_CAP = 30;
+
+export function pushHistory(gs: GameState, entry: RaceHistoryEntry): void {
+  gs.history.unshift(entry);
+  if (gs.history.length > HISTORY_CAP) gs.history.length = HISTORY_CAP;
 }
 
 export function championshipProgress(gs: GameState, championshipId: string): ChampionshipProgress {

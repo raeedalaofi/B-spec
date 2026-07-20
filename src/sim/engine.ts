@@ -403,6 +403,7 @@ export function buildResult(state: RaceState): RaceResult {
       bestLapS: car.bestLapS,
       overtakes: car.raceStats.overtakes,
       mistakes: car.raceStats.mistakes,
+      pitStops: car.pitCount,
       fastestLap: state.fastestLap?.carId === car.carId,
     })),
   };

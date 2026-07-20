@@ -1,6 +1,7 @@
 import { AI_BY_ID } from '../../data/aidrivers';
 import { CARS } from '../../data/cars';
 import { CHAMPIONSHIPS, CHAMPIONSHIP_BY_ID, type ChampionshipDef } from '../../data/championships';
+import { generateInvitational } from '../../data/invitationals';
 import { TRACK_DEFS } from '../../data/tracks';
 import { championshipProgress } from '../../state/gameState';
 import { standingsOf } from '../../state/progression';
@@ -10,6 +11,29 @@ import type { AppContext } from '../screenManager';
 function isUnlocked(ctx: AppContext, champ: ChampionshipDef): boolean {
   if (!champ.unlockAfter) return true;
   return championshipProgress(ctx.gs!, champ.unlockAfter).finished;
+}
+
+function invitationalSection(ctx: AppContext): string {
+  const gs = ctx.gs!;
+  if (!championshipProgress(gs, 'national').champion) return '';
+  const inv = generateInvitational(gs.invitationals);
+  const track = TRACK_DEFS[inv.trackId];
+  const activeCar = gs.activeCarId ? CARS[gs.activeCarId] : null;
+  const carOk = activeCar !== null && activeCar.class === 'A';
+  return `
+    <h2 class="section-title">Invitational Series — Endless</h2>
+    <div class="event-card invitational">
+      <div class="event-info">
+        <b>${inv.name}</b>
+        <span class="label">${track.name} · ${inv.laps} laps · elite field</span>
+        <span class="champ-progress">Invitationals won: ${gs.invitationals} — prize money grows with your streak</span>
+      </div>
+      <div class="event-enter">
+        <span class="car-price">1st: ${fmtCr(inv.prize[0])}</span>
+        <button class="btn primary" id="enter-inv" ${carOk ? '' : 'disabled'}>Enter Race</button>
+      </div>
+    </div>
+    ${carOk ? '' : '<div class="entry-warning">Invitationals require a Class A car.</div>'}`;
 }
 
 function championshipList(ctx: AppContext): void {
@@ -28,11 +52,15 @@ function championshipList(ctx: AppContext): void {
         <span class="champ-tagline">${champ.tagline}</span>
         <span class="champ-progress">${unlocked ? `${done}/${champ.events.length} raced` : `Complete ${CHAMPIONSHIP_BY_ID[champ.unlockAfter!].name} to unlock`}</span>
       </button>`;
-  }).join('')}</div>`;
+  }).join('')}</div>
+  ${invitationalSection(ctx)}`;
 
   content.querySelectorAll<HTMLButtonElement>('[data-champ]').forEach((btn) =>
     btn.addEventListener('click', () => ctx.go('events', { championshipId: btn.dataset.champ })),
   );
+  content
+    .querySelector('#enter-inv')
+    ?.addEventListener('click', () => ctx.go('race', { invitational: gs.invitationals }));
 }
 
 function championshipDetail(ctx: AppContext, champ: ChampionshipDef): void {

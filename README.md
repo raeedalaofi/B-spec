@@ -36,6 +36,21 @@ Tires degrade gradually, then fall off a cliff past ~85% wear — box before it
 or gamble. Slipstream, blocking, fatigue and driver morale are all simulated.
 Progress autosaves to your browser after every race and purchase.
 
+**Beyond the championships:**
+
+- **Tuning** — every owned car has a parts shop (Engine ×3 stages, Weight ×2,
+  Tires ×2, Aero, Transmission). Parts change the exact physics the sim races
+  with; a fully-built entry car can embarrass much more expensive machinery.
+- **Achievements** — 24 unlockables, from *First Set of Keys* to *Clean Sweep*.
+- **Free Race** — exhibition sandbox: any owned car, any track, any rival tier.
+- **Invitational Series** — win the National Championship to unlock an
+  *endless* endgame: procedurally generated elite events with prize money that
+  scales with your win streak.
+- **Race history** — your last 30 results live on the Driver screen.
+- **Sound** — fully synthesized WebAudio (no assets): engine hum tracks your
+  driver's speed, countdown beeps, overtake stings, podium fanfare. Toggle it
+  from the race HUD.
+
 ## Tech
 
 - Vite + TypeScript, zero runtime dependencies. Canvas 2D for the race view,

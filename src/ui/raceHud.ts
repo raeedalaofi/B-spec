@@ -12,6 +12,8 @@ export interface HudCallbacks {
   onPit(): void;
   onSpeed(mult: number): void;
   onRetire(): void;
+  audioOn: boolean;
+  onAudioToggle(on: boolean): void;
 }
 
 const MAX_MESSAGES = 7;
@@ -65,6 +67,17 @@ export class RaceHud {
       this.speedBtns.push(b);
       speeds.appendChild(b);
     }
+    let audioOn = this.cb.audioOn;
+    const audio = document.createElement('button');
+    audio.textContent = audioOn ? '🔊' : '🔇';
+    audio.title = 'Toggle sound';
+    audio.addEventListener('click', () => {
+      audioOn = !audioOn;
+      audio.textContent = audioOn ? '🔊' : '🔇';
+      this.cb.onAudioToggle(audioOn);
+    });
+    speeds.appendChild(audio);
+
     const retire = document.createElement('button');
     retire.textContent = '✕';
     retire.title = 'Retire from the race';
@@ -231,13 +244,14 @@ export class RaceHud {
     }
   }
 
-  /** countdown / green-flag overlay driven from the race loop */
-  updateCountdown(state: RaceState): void {
+  /** countdown / green-flag overlay; returns true when a new digit shows */
+  updateCountdown(state: RaceState): boolean {
     if (state.phase === 'countdown') {
       const n = Math.ceil(state.countdown);
       if (n !== this.lastCountdownShown) {
         this.lastCountdownShown = n;
         this.showOverlay(`<div class="countdown-num">${n}</div>`);
+        return true;
       }
     } else if (this.lastCountdownShown !== -2 && this.overlay) {
       this.lastCountdownShown = -2;
@@ -247,6 +261,7 @@ export class RaceHud {
         if (this.overlay === el) this.hideOverlay();
       }, 900);
     }
+    return false;
   }
 
   showOverlay(html: string): void {

@@ -1,6 +1,8 @@
 import { CAR_LIST } from '../../data/cars';
+import { evaluateAchievements } from '../../state/achievements';
 import { fmtCr, menuShell } from '../menuCommon';
 import type { AppContext } from '../screenManager';
+import { showAchievementToasts } from '../toasts';
 import type { CarSpec } from '../../sim/types';
 
 function carCard(ctx: AppContext, car: CarSpec): string {
@@ -54,7 +56,9 @@ export function dealershipScreen(ctx: AppContext): void {
       gs.credits -= car.priceCr;
       gs.ownedCarIds.push(car.id);
       if (!gs.activeCarId) gs.activeCarId = car.id;
+      const unlocked = evaluateAchievements(gs, { type: 'purchase' });
       ctx.save();
+      showAchievementToasts(unlocked);
       ctx.go('dealership');
     });
   });

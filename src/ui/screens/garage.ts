@@ -1,4 +1,5 @@
 import { CARS } from '../../data/cars';
+import { activeParts, tunedSpec } from '../../data/parts';
 import { fmtCr, menuShell } from '../menuCommon';
 import type { AppContext } from '../screenManager';
 
@@ -17,18 +18,23 @@ export function garageScreen(ctx: AppContext): void {
   content.innerHTML = `<div class="car-list">${gs.ownedCarIds
     .map((id) => {
       const car = CARS[id];
+      const parts = gs.tuning[id] ?? [];
+      const eff = tunedSpec(car, parts);
+      const tunedCount = activeParts(parts).length;
       const active = gs.activeCarId === id;
       const sellPrice = Math.round(car.priceCr * 0.6);
-      const kmh = Math.round(car.topSpeedMs * 3.6);
+      const kmh = Math.round(eff.topSpeedMs * 3.6);
       return `
         <div class="car-card ${active ? 'active-car' : ''}">
           <div class="car-chip" style="background:${car.color}"></div>
           <div class="car-info">
-            <b>${car.name} ${active ? '<span class="active-tag">ACTIVE</span>' : ''}</b>
+            <b>${car.name} ${active ? '<span class="active-tag">ACTIVE</span>' : ''}
+              ${tunedCount > 0 ? `<span class="tuned-tag">TUNED ×${tunedCount}</span>` : ''}</b>
             <span class="label">Class ${car.class}</span>
-            <span class="car-specs">${car.powerKw} kW · ${car.massKg} kg · ${kmh} km/h · grip ${car.grip.toFixed(2)}</span>
+            <span class="car-specs">${eff.powerKw} kW · ${eff.massKg} kg · ${kmh} km/h · grip ${eff.grip.toFixed(2)}</span>
           </div>
           <div class="car-buy">
+            <button class="btn" data-tune="${id}">Tune</button>
             ${active ? '' : `<button class="btn primary" data-select="${id}">Select</button>`}
             ${
               gs.ownedCarIds.length > 1 && !active
@@ -47,12 +53,18 @@ export function garageScreen(ctx: AppContext): void {
       ctx.go('garage');
     }),
   );
+  content.querySelectorAll<HTMLButtonElement>('[data-tune]').forEach((btn) =>
+    btn.addEventListener('click', () => ctx.go('tuning', { carId: btn.dataset.tune })),
+  );
   content.querySelectorAll<HTMLButtonElement>('[data-sell]').forEach((btn) =>
     btn.addEventListener('click', () => {
       const id = btn.dataset.sell!;
       const car = CARS[id];
-      if (!confirm(`Sell the ${car.name} for ${fmtCr(Math.round(car.priceCr * 0.6))}?`)) return;
+      const hasParts = (gs.tuning[id] ?? []).length > 0;
+      const warn = hasParts ? ' Installed tuning parts will be lost.' : '';
+      if (!confirm(`Sell the ${car.name} for ${fmtCr(Math.round(car.priceCr * 0.6))}?${warn}`)) return;
       gs.ownedCarIds = gs.ownedCarIds.filter((c) => c !== id);
+      delete gs.tuning[id];
       gs.credits += Math.round(car.priceCr * 0.6);
       ctx.save();
       ctx.go('garage');

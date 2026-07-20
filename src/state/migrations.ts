@@ -8,7 +8,17 @@ import type { GameState } from './gameState';
 type Migration = (old: Record<string, unknown>) => Record<string, unknown>;
 
 /** index 0 upgrades v1 → v2, and so on */
-export const MIGRATIONS: Migration[] = [];
+export const MIGRATIONS: Migration[] = [
+  // v1 → v2: tuning, achievements, race history, invitationals, audio setting
+  (old) => ({
+    ...old,
+    tuning: old.tuning ?? {},
+    achievements: old.achievements ?? {},
+    history: old.history ?? [],
+    invitationals: old.invitationals ?? 0,
+    settings: { defaultSpeed: 1, audio: true, ...(old.settings as object | undefined) },
+  }),
+];
 
 export function migrate(raw: Record<string, unknown>, targetVersion: number): GameState {
   let data = raw;

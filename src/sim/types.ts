@@ -273,6 +273,7 @@ export interface RaceResultRow {
   bestLapS: number | null;
   overtakes: number;
   mistakes: number;
+  pitStops: number;
   fastestLap: boolean;
 }
 

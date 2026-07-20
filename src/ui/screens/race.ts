@@ -4,8 +4,9 @@
 
 import { RaceRenderer, type InterpState } from '../../render/raceRenderer';
 import { buildResult, createRace, tick, TICK_S } from '../../sim/engine';
-import type { Command, RaceConfig, RaceResult, RaceState } from '../../sim/types';
+import type { Command, RaceConfig, RaceEvent, RaceResult, RaceState } from '../../sim/types';
 import { RaceHud } from '../raceHud';
+import { SOUND } from '../sound';
 
 export interface RaceScreenOptions {
   config: RaceConfig;
@@ -14,6 +15,9 @@ export interface RaceScreenOptions {
   onFinished(result: RaceResult, state: RaceState): void;
   /** retire without rewards (defaults to reloading into onFinished flow) */
   onRetire?(): void;
+  /** initial audio setting; toggle persisted via onAudioToggle */
+  audio?: boolean;
+  onAudioToggle?(on: boolean): void;
 }
 
 const MAX_TICKS_PER_FRAME = 40;
@@ -31,6 +35,8 @@ export function mountRaceScreen(root: HTMLElement, opts: RaceScreenOptions): () 
   const playerId = opts.config.entries.find((e) => e.isPlayer)?.carId ?? '';
   const renderer = new RaceRenderer(canvas, opts.config.track);
 
+  SOUND.setEnabled(opts.audio ?? true);
+
   let speedMult = 1;
   const pending: Command[] = [];
   const hud = new RaceHud(screen, opts.title, opts.subtitle, {
@@ -39,7 +45,37 @@ export function mountRaceScreen(root: HTMLElement, opts: RaceScreenOptions): () 
     onPit: () => pending.push({ type: 'PIT', carId: playerId, tires: true, refuel: true }),
     onSpeed: (mult) => (speedMult = mult),
     onRetire: () => opts.onRetire?.(),
+    audioOn: opts.audio ?? true,
+    onAudioToggle: (on) => {
+      SOUND.setEnabled(on);
+      opts.onAudioToggle?.(on);
+    },
   });
+
+  const playSoundFor = (e: RaceEvent): void => {
+    switch (e.type) {
+      case 'GREEN_FLAG':
+        SOUND.greenFlag();
+        SOUND.startEngine();
+        break;
+      case 'OVERTAKE':
+        if (e.carId === playerId) SOUND.goodSting();
+        else if (e.passedId === playerId) SOUND.badSting();
+        break;
+      case 'MISTAKE':
+        if (e.carId === playerId) SOUND.badSting();
+        break;
+      case 'PIT_IN':
+        if (e.carId === playerId) SOUND.pitChime();
+        break;
+      case 'FINISH':
+        if (e.carId === playerId) {
+          if (e.position <= 3) SOUND.fanfare();
+          SOUND.stopEngine();
+        }
+        break;
+    }
+  };
 
   const onKey = (e: KeyboardEvent): void => {
     if (e.target instanceof HTMLInputElement) return;
@@ -80,7 +116,10 @@ export function mountRaceScreen(root: HTMLElement, opts: RaceScreenOptions): () 
         capture(interp.prev);
         const events = tick(state, pending.splice(0, pending.length));
         capture(interp.cur);
-        for (const e of events) hud.pushEvent(state, e);
+        for (const e of events) {
+          hud.pushEvent(state, e);
+          playSoundFor(e);
+        }
         acc -= TICK_S;
         ticks++;
       }
@@ -89,8 +128,12 @@ export function mountRaceScreen(root: HTMLElement, opts: RaceScreenOptions): () 
       if (hudClock >= 0.25) {
         hudClock = 0;
         hud.update(state);
+        const me = state.cars.find((c) => c.carId === playerId);
+        if (me && state.phase === 'racing') {
+          SOUND.setEngineSpeed(me.speed / me.spec.topSpeedMs);
+        }
       }
-      hud.updateCountdown(state);
+      if (hud.updateCountdown(state)) SOUND.countdownTick();
     }
 
     renderer.draw(state, interp, Math.max(0, Math.min(1, acc / TICK_S)));
@@ -110,6 +153,7 @@ export function mountRaceScreen(root: HTMLElement, opts: RaceScreenOptions): () 
 
   return () => {
     stopped = true;
+    SOUND.stopEngine();
     cancelAnimationFrame(raf);
     document.removeEventListener('visibilitychange', onVisibility);
     window.removeEventListener('resize', onResize);

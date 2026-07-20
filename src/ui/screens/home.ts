@@ -37,6 +37,18 @@ export function homeScreen(ctx: AppContext): void {
       sub: `${gs.driver.name} — Level ${gs.driver.level}`,
       screen: 'driver',
     },
+    {
+      id: 'free-race',
+      title: 'Free Race',
+      sub: 'Exhibition — any car, any track, no stakes',
+      screen: 'free-race',
+    },
+    {
+      id: 'achievements',
+      title: 'Achievements',
+      sub: `${Object.keys(gs.achievements).length} unlocked`,
+      screen: 'achievements',
+    },
   ];
 
   content.innerHTML = `

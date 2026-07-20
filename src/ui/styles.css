@@ -1100,3 +1100,247 @@ button {
 .levelup-line {
   color: var(--good);
 }
+
+/* ================================================================ v2 UI */
+
+/* toasts (achievement unlocks) */
+
+#toasts {
+  position: fixed;
+  top: 18px;
+  right: 18px;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  pointer-events: none;
+}
+
+.toast {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: linear-gradient(90deg, rgba(201, 165, 74, 0.28), var(--panel) 55%);
+  border: 1px solid var(--gold);
+  border-radius: 6px;
+  padding: 10px 16px;
+  min-width: 240px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  animation: toast-in 0.3s ease-out;
+}
+
+.toast.leaving {
+  transition: opacity 0.5s, transform 0.5s;
+  opacity: 0;
+  transform: translateX(30px);
+}
+
+.toast-trophy {
+  font-size: 22px;
+}
+
+.toast-body {
+  display: flex;
+  flex-direction: column;
+}
+
+.toast-body b {
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--gold-bright);
+}
+
+.toast-body span {
+  font-size: 13px;
+}
+
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateX(40px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* tuning shop */
+
+.tuning-layout {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 28px;
+}
+
+@media (max-width: 760px) {
+  .tuning-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+.parts-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.part-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  background: var(--panel);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 6px;
+  padding: 13px 16px;
+}
+
+.part-info {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.part-info b {
+  font-size: 14px;
+  letter-spacing: 0.06em;
+}
+
+.part-desc {
+  font-size: 11px;
+  color: var(--text-dim);
+}
+
+.part-desc.maxed {
+  color: var(--good);
+}
+
+.spec-sheet {
+  background: var(--panel);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 6px;
+  padding: 14px 16px;
+}
+
+.spec-row {
+  display: grid;
+  grid-template-columns: 90px 1fr 18px 1fr;
+  gap: 8px;
+  align-items: baseline;
+  padding: 5px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.spec-row .mono {
+  font-family: var(--font-timing);
+  font-size: 12px;
+}
+
+.spec-row .arrow {
+  color: var(--text-dim);
+  text-align: center;
+}
+
+.spec-row .now {
+  color: var(--good);
+}
+
+.tuned-tag {
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  color: var(--accent);
+  border: 1px solid var(--accent);
+  border-radius: 3px;
+  padding: 2px 6px;
+  vertical-align: middle;
+}
+
+/* achievements */
+
+.ach-grid {
+  margin-top: 18px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 10px;
+}
+
+.ach-card {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  background: var(--panel);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+  padding: 12px 14px;
+  opacity: 0.55;
+}
+
+.ach-card.unlocked {
+  opacity: 1;
+  border-color: rgba(201, 165, 74, 0.5);
+}
+
+.ach-icon {
+  font-size: 20px;
+}
+
+.ach-card div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.ach-card b {
+  font-size: 13px;
+}
+
+.ach-card span {
+  font-size: 11px;
+  color: var(--text-dim);
+  line-height: 1.45;
+}
+
+.ach-card small {
+  font-size: 10px;
+  color: var(--gold);
+  font-family: var(--font-timing);
+}
+
+/* free race form */
+
+.free-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  align-items: flex-end;
+  max-width: 720px;
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+select.text-input {
+  min-width: 160px;
+}
+
+/* history + invitational */
+
+.history-table td,
+.history-table th {
+  font-size: 12px;
+}
+
+.history-table .win {
+  color: var(--gold-bright);
+  font-weight: 700;
+}
+
+.event-card.invitational {
+  border-color: var(--gold);
+  background: linear-gradient(90deg, rgba(201, 165, 74, 0.12), var(--panel) 60%);
+}

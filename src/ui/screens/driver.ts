@@ -1,5 +1,6 @@
+import { TRACK_DEFS } from '../../data/tracks';
 import { pointsToNextLevel } from '../../state/progression';
-import { menuShell, statBars } from '../menuCommon';
+import { fmtLapTime, menuShell, statBars } from '../menuCommon';
 import type { AppContext } from '../screenManager';
 
 export function driverScreen(ctx: AppContext): void {
@@ -31,5 +32,27 @@ export function driverScreen(ctx: AppContext): void {
       <p class="hint-note">Your driver develops on their own with every race — position, clean
       overtakes and fastest laps all earn B-Spec points. Higher pace commands build skill
       under pressure but risk mistakes.</p>
-    </div>`;
+    </div>
+    ${
+      gs.history.length > 0
+        ? `<h3 class="section-title">Recent Races</h3>
+          <table class="results-table history-table">
+            <thead><tr><th>Series</th><th>Event</th><th>Track</th><th>P</th><th>Best Lap</th><th>Cr.</th><th>Pts</th></tr></thead>
+            <tbody>
+              ${gs.history
+                .map(
+                  (h) => `<tr>
+                    <td>${h.series}</td><td>${h.event}</td>
+                    <td>${TRACK_DEFS[h.trackId]?.name ?? '-'}</td>
+                    <td class="mono ${h.position === 1 ? 'win' : ''}">${h.position}</td>
+                    <td class="mono">${fmtLapTime(h.bestLapS)}</td>
+                    <td class="mono">${h.creditsEarned.toLocaleString('en-US')}</td>
+                    <td class="mono">+${h.pointsEarned}</td>
+                  </tr>`,
+                )
+                .join('')}
+            </tbody>
+          </table>`
+        : ''
+    }`;
 }
