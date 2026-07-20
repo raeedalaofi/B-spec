@@ -36,7 +36,9 @@ describe('track compiler', () => {
   it('oval geometry is sane', () => {
     expect(oval.lengthM).toBeGreaterThan(1600);
     expect(oval.lengthM).toBeLessThan(2000);
-    expect(oval.corners.length).toBe(2);
+    // two 180° arcs, each chopped into sub-corners for granular mistakes
+    expect(oval.corners.length).toBeGreaterThanOrEqual(2);
+    expect(oval.corners.length).toBeLessThanOrEqual(6);
     expect(oval.overtakingZones.length).toBe(2);
     // 130 m radius turns at ~1.05 g → about 36 m/s
     for (const c of oval.corners) {

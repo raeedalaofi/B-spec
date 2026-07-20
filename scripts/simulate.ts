@@ -9,8 +9,9 @@ import { buildResult, createRace, raceOrder, tick, TICK_S } from '../src/sim/eng
 import { compileTrack } from '../src/sim/trackCompiler';
 import { CARS } from '../src/data/cars';
 import { TRACK_DEFS } from '../src/data/tracks';
-import { AI_DRIVERS } from '../src/data/aidrivers';
-import type { RaceEntry, RaceEvent, RaceState, Track } from '../src/sim/types';
+import { AI_DRIVERS, AI_BY_ID } from '../src/data/aidrivers';
+import { CHAMPIONSHIPS } from '../src/data/championships';
+import type { Command, DriverStats, RaceEntry, RaceEvent, RaceState, Track } from '../src/sim/types';
 
 const args = process.argv.slice(2);
 const mode = args[0] ?? 'single';
@@ -196,4 +197,95 @@ if (mode === 'single') {
   console.log(`player avg position: ${(playerSum / n).toFixed(2)} (equal cars, 50-stat driver, grid P5)`);
   console.log(`winners: ${[...winners.entries()].map(([k, v]) => `${k}:${v}`).join(' ')}`);
   void raceOrder;
+} else if (mode === 'career') {
+  // Expected-player-path sweep: for each championship event, run N seeded
+  // races with the intended car, tier-appropriate driver stats and an
+  // actively-managed command policy. Flags events outside the target
+  // win-rate band.
+  const n = parseInt(args[1] ?? '40', 10);
+  const tiers: Record<
+    string,
+    { carId: string; stats: DriverStats; perEvent?: Record<string, string> }
+  > = {
+    'sunday-cup': {
+      carId: 'vulpe',
+      stats: { pace: 42, consistency: 38, battle: 35, smoothness: 40, stamina: 45 },
+    },
+    clubman: {
+      carId: 'kite',
+      stats: { pace: 58, consistency: 52, battle: 46, smoothness: 50, stamina: 50 },
+    },
+    national: {
+      carId: 'phantom',
+      perEvent: { 'nc-3': 'arrow', 'nc-4': 'arrow', 'nc-5': 'arrow' },
+      stats: { pace: 71, consistency: 65, battle: 58, smoothness: 58, stamina: 55 },
+    },
+  };
+
+  for (const champ of CHAMPIONSHIPS) {
+    const tier = tiers[champ.id];
+    console.log(`\n=== ${champ.name} (player: ${CARS[tier.carId].name}) ===`);
+    for (const event of champ.events) {
+      const playerCarId = tier.perEvent?.[event.id] ?? tier.carId;
+      const track = getTrack(event.trackId);
+      let winSum = 0;
+      let posSum = 0;
+      let podiumSum = 0;
+      for (let seed = 1; seed <= n; seed++) {
+        const entries: RaceEntry[] = champ.aiDriverIds.map((driverId, i) => ({
+          carId: `ai-${driverId}`,
+          spec: CARS[event.aiCarIds[i]],
+          driverName: AI_BY_ID[driverId].name,
+          stats: AI_BY_ID[driverId].stats,
+          isPlayer: false,
+        }));
+        entries.push({
+          carId: 'player',
+          spec: CARS[playerCarId],
+          driverName: 'YOU',
+          stats: tier.stats,
+          isPlayer: true,
+          paceCmd: 4,
+        });
+        const state = createRace({
+          track,
+          lapsTotal: event.laps,
+          seed: seed * 60013 + event.id.length,
+          entries,
+        });
+        // active management policy at 1 Hz
+        let pitCalled = false;
+        let guard = 0;
+        while (state.phase !== 'finished' && guard++ < 200000) {
+          const cmds: Command[] = [];
+          if (state.tickCount % 10 === 0) {
+            const me = state.cars.find((c) => c.isPlayer)!;
+            const lapsRemaining = state.lapsTotal - me.lap + 1;
+            if (!pitCalled && !me.pit && me.tireWear > 0.8 && lapsRemaining > 2) {
+              cmds.push({ type: 'PIT', carId: 'player', tires: true, refuel: true });
+              pitCalled = true;
+            }
+            const wantPace = me.tireWear > 0.92 ? 2 : 4;
+            if (me.paceCmd !== wantPace)
+              cmds.push({ type: 'SET_PACE', carId: 'player', level: wantPace as 2 | 4 });
+            const wantOt = me.battle !== null;
+            if (me.overtakeMode !== wantOt)
+              cmds.push({ type: 'OVERTAKE_MODE', carId: 'player', on: wantOt });
+            if (me.pit && !me.pit.tires) pitCalled = false;
+          }
+          tick(state, cmds);
+        }
+        const pos = buildResult(state).rows.find((r) => r.isPlayer)!.position;
+        posSum += pos;
+        if (pos === 1) winSum++;
+        if (pos <= 3) podiumSum++;
+      }
+      const winPct = Math.round((winSum / n) * 100);
+      const podPct = Math.round((podiumSum / n) * 100);
+      const flag = winPct < 15 ? '  ⚠ TOO HARD' : winPct > 95 ? '  ⚠ TOO EASY' : '';
+      console.log(
+        `${event.id.padEnd(6)} ${event.name.padEnd(26)} [${playerCarId.padEnd(7)}] win ${String(winPct).padStart(3)}%  podium ${String(podPct).padStart(3)}%  avg P${(posSum / n).toFixed(2)}${flag}`,
+      );
+    }
+  }
 }

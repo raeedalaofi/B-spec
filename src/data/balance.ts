@@ -21,8 +21,13 @@ export const BAL = {
   // -- track zone detection
   /** samples with |curvature| above 1/r are corner candidates */
   cornerRadiusM: 250,
-  /** straights for overtaking zones need radius above this */
+  /** straights (for slipstream) need radius above this */
   straightRadiusM: 420,
+  /** zone-walk tolerance: samples count as straight above this radius
+   *  (transition bands oscillate, so this is looser than straightRadiusM) */
+  zoneStraightRadiusM: 280,
+  /** corner runs longer than this get chopped into sub-corners */
+  cornerMaxLenM: 240,
   /** minimum straight length feeding a braking zone (m) */
   overtakeMinStraightM: 140,
   /** curvature smoothing window (samples) */

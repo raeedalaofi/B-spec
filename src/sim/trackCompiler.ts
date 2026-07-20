@@ -161,9 +161,29 @@ export function compileTrack(def: TrackDef): Track {
     }
   }
 
+  // long technical complexes merge into one huge run — chop those into
+  // sub-corners so mistake rolls and names stay granular
+  const maxLen = Math.round(BAL.cornerMaxLenM / stride);
+  const chopped: Array<{ start: number; end: number }> = [];
+  for (const r of merged) {
+    const len = runLen(r);
+    if (len <= maxLen) {
+      chopped.push(r);
+    } else {
+      const parts = Math.ceil(len / maxLen);
+      const per = Math.floor(len / parts);
+      for (let p = 0; p < parts; p++) {
+        chopped.push({
+          start: (r.start + p * per) % count,
+          end: p === parts - 1 ? r.end : (r.start + (p + 1) * per - 1) % count,
+        });
+      }
+    }
+  }
+
   // order corners by entry position and name them T1, T2, ...
-  merged.sort((a, b) => a.start - b.start);
-  const corners: CornerZone[] = merged.map((r) => {
+  chopped.sort((a, b) => a.start - b.start);
+  const corners: CornerZone[] = chopped.map((r) => {
       let apexIdx = r.start;
       let maxK = 0;
       for (let step = 0; step <= runLen(r); step++) {
@@ -186,7 +206,7 @@ export function compileTrack(def: TrackDef): Track {
   corners.forEach((c, i) => (c.name = `T${i + 1}`));
 
   // 6. overtaking zones: straights >= minLength that feed a corner entry
-  const kStraight = 1 / BAL.straightRadiusM;
+  const kStraight = 1 / BAL.zoneStraightRadiusM;
   const zones: OvertakeZone[] = [];
   for (const corner of corners) {
     const entryIdx = Math.round(corner.entryS / stride) % count;
@@ -213,6 +233,11 @@ export function compileTrack(def: TrackDef): Track {
       }
       i = prev;
       len += stride;
+    }
+    // dev-only diagnostics (TRACK_DEBUG=1 with the Node harness)
+    const env = (globalThis as { process?: { env?: Record<string, string> } }).process?.env;
+    if (env?.TRACK_DEBUG) {
+      console.log(`zone-walk ${corner.name}: entryIdx=${entryIdx} skippedTo=${i} len=${Math.round(len)}`);
     }
     if (len >= BAL.overtakeMinStraightM) {
       const startIdx = i;
