@@ -2,6 +2,7 @@
 // resize) and car chevrons interpolated between sim ticks.
 
 import { biomeOf } from '../data/tracks';
+import { hashSeed, rngNext } from '../sim/rng';
 import { posAt } from '../sim/trackCompiler';
 import type { RaceState, Track } from '../sim/types';
 import { getImage, preload, ready } from '../ui/assets';
@@ -27,6 +28,7 @@ export class RaceRenderer {
 
   private biome: string;
   private tilesApplied = false;
+  private propsApplied = false;
 
   constructor(canvas: HTMLCanvasElement, track: Track) {
     this.canvas = canvas;
@@ -35,9 +37,18 @@ export class RaceRenderer {
     preload([
       `tracks/tiles/${this.biome}-ground.png`,
       `tracks/tiles/${this.biome}-asphalt.png`,
+      ...this.propRels(),
     ]);
     this.ctx = canvas.getContext('2d')!;
     this.resize();
+  }
+
+  private propRels(): string[] {
+    return [
+      ...[1, 2, 3, 4, 5, 6].map((n) => `tracks/props/${this.biome}-${n}.png`),
+      'tracks/props/shared-4.png', // tire wall
+      'tracks/props/shared-8.png', // paddock tent
+    ];
   }
 
   resize(): void {
@@ -50,15 +61,77 @@ export class RaceRenderer {
     this.ribbon = this.buildRibbon();
   }
 
-  /** generated surface tiles may finish loading after construction —
-   *  rebuild the cached ribbon once, when they become drawable */
+  /** generated tiles/props may finish loading after construction —
+   *  rebuild the cached ribbon (at most twice) as they become drawable */
   private refreshRibbonIfTilesReady(): void {
-    if (this.tilesApplied) return;
-    const ground = getImage(`tracks/tiles/${this.biome}-ground.png`);
-    const asphalt = getImage(`tracks/tiles/${this.biome}-asphalt.png`);
-    if (ready(ground) && ready(asphalt)) {
-      this.tilesApplied = true;
-      this.ribbon = this.buildRibbon();
+    if (!this.tilesApplied) {
+      const ground = getImage(`tracks/tiles/${this.biome}-ground.png`);
+      const asphalt = getImage(`tracks/tiles/${this.biome}-asphalt.png`);
+      if (ready(ground) && ready(asphalt)) {
+        this.tilesApplied = true;
+        this.ribbon = this.buildRibbon();
+      }
+    }
+    if (!this.propsApplied) {
+      const imgs = this.propRels().map((r) => getImage(r));
+      // wait until every prop settles (loaded or known-missing)
+      if (imgs.every((im) => im === null || im.complete)) {
+        this.propsApplied = true;
+        if (imgs.some((im) => ready(im))) this.ribbon = this.buildRibbon();
+      }
+    }
+  }
+
+  /** deterministic scenery scatter: seeded per track, never on the road */
+  private drawProps(ctx: CanvasRenderingContext2D): void {
+    const props = this.propRels()
+      .map((r) => getImage(r))
+      .filter((im): im is HTMLImageElement => ready(im));
+    if (!props.length) return;
+    const rng = { rngState: hashSeed(`props-${this.track.def.id}`) };
+    const samples = this.track.samples;
+    const halfRoad = this.track.def.widthM / 2;
+    const placed: Array<[number, number]> = [];
+    const COUNT = Math.min(34, Math.round(this.track.lengthM / 90));
+    for (let k = 0; k < COUNT * 3 && placed.length < COUNT; k++) {
+      const i = Math.floor(rngNext(rng) * samples.length);
+      const s = samples[i];
+      const side = rngNext(rng) < 0.5 ? -1 : 1;
+      const dist = halfRoad + 14 + rngNext(rng) * 60;
+      const nx = -Math.sin(s.heading) * side;
+      const ny = Math.cos(s.heading) * side;
+      const wx = s.x + nx * dist;
+      const wy = s.y + ny * dist;
+      // reject spots too close to any other part of the road or other props
+      let ok = true;
+      for (let j = 0; j < samples.length; j += 6) {
+        const d = Math.hypot(samples[j].x - wx, samples[j].y - wy);
+        if (d < halfRoad + 10) {
+          ok = false;
+          break;
+        }
+      }
+      if (ok) {
+        for (const [px, py] of placed) {
+          if (Math.hypot(px - wx, py - wy) < 30) {
+            ok = false;
+            break;
+          }
+        }
+      }
+      if (!ok) continue;
+      placed.push([wx, wy]);
+      const img = props[Math.floor(rngNext(rng) * props.length)];
+      const [x, y] = toScreen(this.cam, wx, wy);
+      const h = (26 + rngNext(rng) * 22) * this.dpr;
+      const w = h * (img.naturalWidth / img.naturalHeight);
+      ctx.save();
+      ctx.globalAlpha = 0.92;
+      ctx.shadowColor = 'rgba(0,0,0,0.5)';
+      ctx.shadowBlur = 4 * this.dpr;
+      ctx.shadowOffsetY = 2 * this.dpr;
+      ctx.drawImage(img, x - w / 2, y - h, w, h);
+      ctx.restore();
     }
   }
 
@@ -145,6 +218,8 @@ export class RaceRenderer {
     ctx.fillStyle = 'rgba(240,200,80,0.8)';
     ctx.font = `${10 * this.dpr}px sans-serif`;
     ctx.fillText('PIT', px + 8 * this.dpr, py - 6 * this.dpr);
+
+    this.drawProps(ctx);
 
     return off;
   }
