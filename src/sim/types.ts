@@ -44,6 +44,8 @@ export interface TrackDef {
   name: string;
   /** closed loop of control points, meters (centripetal Catmull-Rom) */
   controlPoints: ReadonlyArray<readonly [number, number]>;
+  /** elevation (m) per control point; omit for a flat track */
+  elevations?: ReadonlyArray<number>;
   /** visual ribbon width */
   widthM: number;
   pit: {
@@ -69,6 +71,10 @@ export interface TrackSample {
   curvature: number;
   /** corner speed cap for reference grip 1.0 (m/s) */
   vCapBase: number;
+  /** elevation above datum (m) */
+  elev: number;
+  /** signed gradient dElev/ds (positive = uphill) */
+  grade: number;
 }
 
 export interface CornerZone {

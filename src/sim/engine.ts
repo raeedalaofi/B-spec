@@ -233,15 +233,21 @@ function moveCar(
     return;
   }
 
-  // accelerate / brake toward target
+  // accelerate / brake toward target (gravity along the slope included)
+  const gradeHere =
+    track.samples[
+      Math.floor((((car.s % L) + L) % L) / track.sampleStepM) % track.samples.length
+    ].grade;
   if (vTarget > car.speed) {
     const vp = Math.max(car.speed, 5);
     const aPower = (car.spec.powerKw * 1000) / (car.spec.massKg * vp);
     const a =
-      Math.min(BAL.aAccelGripRef * grip, aPower) - car.spec.dragCoeff * vp * vp;
+      Math.min(BAL.aAccelGripRef * grip, aPower) -
+      car.spec.dragCoeff * vp * vp -
+      9.81 * gradeHere;
     car.speed = Math.min(vTarget, car.speed + Math.max(a, 0.3) * dt);
   } else {
-    const aBrake = BAL.aBrakeRef * grip;
+    const aBrake = Math.max(1, BAL.aBrakeRef * grip + 9.81 * gradeHere);
     car.speed = Math.max(vTarget, car.speed - aBrake * dt);
   }
 

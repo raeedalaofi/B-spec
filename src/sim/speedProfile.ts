@@ -27,22 +27,30 @@ export function buildSpeedProfile(track: Track, car: CarSpec): SpeedProfile {
   }
 
   // Closed loop: run backward+forward passes twice so limits propagate
-  // across the start/finish seam.
+  // across the start/finish seam. Gravity along the slope shifts both
+  // braking capacity and acceleration (grade > 0 = uphill).
+  const G = 9.81;
   for (let pass = 0; pass < 2; pass++) {
-    // backward pass — braking
+    // backward pass — braking (downhill braking is weaker, uphill stronger)
     for (let step = 2 * n - 1; step >= 0; step--) {
       const i = step % n;
       const next = (i + 1) % n;
-      const vAllowed = Math.sqrt(v[next] * v[next] + 2 * aBrake * ds);
+      const brake = Math.max(1, aBrake + G * track.samples[i].grade);
+      const vAllowed = Math.sqrt(v[next] * v[next] + 2 * brake * ds);
       if (vAllowed < v[i]) v[i] = vAllowed;
     }
-    // forward pass — acceleration (power- and traction-limited, minus drag)
+    // forward pass — acceleration (power/traction-limited, minus drag and slope)
     for (let step = 0; step < 2 * n; step++) {
       const i = step % n;
       const prev = (i - 1 + n) % n;
       const vp = Math.max(v[prev], 5);
       const aPower = powerW / (car.massKg * vp);
-      const a = Math.max(0.3, Math.min(aGripCap, aPower) - car.dragCoeff * vp * vp);
+      const a = Math.max(
+        0.3,
+        Math.min(aGripCap, aPower) -
+          car.dragCoeff * vp * vp -
+          G * track.samples[prev].grade,
+      );
       const vAllowed = Math.sqrt(vp * vp + 2 * a * ds);
       if (vAllowed < v[i]) v[i] = vAllowed;
     }

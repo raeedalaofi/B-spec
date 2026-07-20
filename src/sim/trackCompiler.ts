@@ -41,14 +41,49 @@ function wrapAngle(a: number): number {
   return a;
 }
 
+/** uniform Catmull-Rom on a scalar (used for elevation profiles) */
+function catmullRom1D(p0: number, p1: number, p2: number, p3: number, t: number): number {
+  return (
+    0.5 *
+    (2 * p1 +
+      (-p0 + p2) * t +
+      (2 * p0 - 5 * p1 + 4 * p2 - p3) * t * t +
+      (-p0 + 3 * p1 - 3 * p2 + p3) * t * t * t)
+  );
+}
+
+/**
+ * Builds the reverse-direction variant of a track: same ribbon, opposite
+ * racing direction, pit entry/exit mirrored. Compiles like any other def.
+ */
+export function reverseTrackDef(def: TrackDef): TrackDef {
+  return {
+    ...def,
+    id: `${def.id}-r`,
+    name: `${def.name} II`,
+    controlPoints: [...def.controlPoints].reverse(),
+    elevations: def.elevations ? [...def.elevations].reverse() : undefined,
+    pit: {
+      entryT: (1 - def.pit.exitT) % 1,
+      exitT: (1 - def.pit.entryT) % 1,
+      laneTimeLossS: def.pit.laneTimeLossS,
+    },
+  };
+}
+
 export function compileTrack(def: TrackDef): Track {
   const cps = def.controlPoints.map(([x, y]) => ({ x, y }));
   const n = cps.length;
   if (n < 4) throw new Error(`track ${def.id}: need at least 4 control points`);
 
-  // 1. densely sample the closed spline
+  // 1. densely sample the closed spline (positions + elevation)
   const STEPS = 48;
   const dense: Pt[] = [];
+  const denseElev: number[] = [];
+  const elevs = def.elevations;
+  if (elevs && elevs.length !== n) {
+    throw new Error(`track ${def.id}: elevations length must match controlPoints`);
+  }
   for (let i = 0; i < n; i++) {
     const p0 = cps[(i - 1 + n) % n];
     const p1 = cps[i];
@@ -56,6 +91,17 @@ export function compileTrack(def: TrackDef): Track {
     const p3 = cps[(i + 2) % n];
     for (let k = 0; k < STEPS; k++) {
       dense.push(catmullRom(p0, p1, p2, p3, k / STEPS));
+      denseElev.push(
+        elevs
+          ? catmullRom1D(
+              elevs[(i - 1 + n) % n],
+              elevs[i],
+              elevs[(i + 1) % n],
+              elevs[(i + 2) % n],
+              k / STEPS,
+            )
+          : 0,
+      );
     }
   }
 
@@ -71,6 +117,7 @@ export function compileTrack(def: TrackDef): Track {
   const count = Math.max(16, Math.floor(totalLen / DS));
   const stride = totalLen / count; // exact stride so the loop closes cleanly
   const pts: Pt[] = [];
+  const ptElev: number[] = [];
   let j = 0;
   for (let i = 0; i < count; i++) {
     const target = i * stride;
@@ -80,6 +127,9 @@ export function compileTrack(def: TrackDef): Track {
     const a = dense[j];
     const b = dense[(j + 1) % dense.length];
     pts.push({ x: a.x + (b.x - a.x) * u, y: a.y + (b.y - a.y) * u });
+    const ea = denseElev[j];
+    const eb = denseElev[(j + 1) % dense.length];
+    ptElev.push(ea + (eb - ea) * u);
   }
 
   // 3. headings and curvature (finite differences, wrap-aware)
@@ -104,6 +154,19 @@ export function compileTrack(def: TrackDef): Track {
     kappa[i] = sum / (2 * half + 1);
   }
 
+  // 3b. smoothed elevation gradient
+  const rawGrade = new Float64Array(count);
+  for (let i = 0; i < count; i++) {
+    const d = ptElev[(i + 1) % count] - ptElev[(i - 1 + count) % count];
+    rawGrade[i] = d / (2 * stride);
+  }
+  const grade = new Float64Array(count);
+  for (let i = 0; i < count; i++) {
+    let sum = 0;
+    for (let d = -half; d <= half; d++) sum += rawGrade[(i + d + count) % count];
+    grade[i] = sum / (2 * half + 1);
+  }
+
   // 4. corner speed caps for reference grip 1.0
   const samples: TrackSample[] = [];
   for (let i = 0; i < count; i++) {
@@ -116,6 +179,8 @@ export function compileTrack(def: TrackDef): Track {
       heading: headings[i],
       curvature: kappa[i],
       vCapBase: Math.min(vCap, BAL.vCapCeiling),
+      elev: ptElev[i],
+      grade: grade[i],
     });
   }
 
