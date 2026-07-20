@@ -1,0 +1,244 @@
+{
+  "entries": [
+    {
+      "id": "backdrop-meadow",
+      "out": "public/assets/tracks/backdrops/meadow.png",
+      "modelSlot": "photo",
+      "width": 1408,
+      "height": 512,
+      "alpha": "opaque",
+      "prompt": "professional game asset, Gran Turismo era broadcast aesthetic, deep navy and gold palette, soft distant horizon landscape for a race circuit, green countryside meadow grass with small wildflowers, hazy atmospheric perspective, muted colors, wide panoramic",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "backdrop-forest-mountain",
+      "out": "public/assets/tracks/backdrops/forest-mountain.png",
+      "modelSlot": "photo",
+      "width": 1408,
+      "height": 512,
+      "alpha": "opaque",
+      "prompt": "professional game asset, Gran Turismo era broadcast aesthetic, deep navy and gold palette, soft distant horizon landscape for a race circuit, alpine forest floor, pine needles and mossy rock, hazy atmospheric perspective, muted colors, wide panoramic",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "backdrop-speedway",
+      "out": "public/assets/tracks/backdrops/speedway.png",
+      "modelSlot": "photo",
+      "width": 1408,
+      "height": 512,
+      "alpha": "opaque",
+      "prompt": "professional game asset, Gran Turismo era broadcast aesthetic, deep navy and gold palette, soft distant horizon landscape for a race circuit, trimmed infield lawn with dry patches, american speedway, hazy atmospheric perspective, muted colors, wide panoramic",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "backdrop-city",
+      "out": "public/assets/tracks/backdrops/city.png",
+      "modelSlot": "photo",
+      "width": 1408,
+      "height": 512,
+      "alpha": "opaque",
+      "prompt": "professional game asset, Gran Turismo era broadcast aesthetic, deep navy and gold palette, soft distant horizon landscape for a race circuit, urban concrete and paving stones, city street surroundings, hazy atmospheric perspective, muted colors, wide panoramic",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "backdrop-classic-gp",
+      "out": "public/assets/tracks/backdrops/classic-gp.png",
+      "modelSlot": "photo",
+      "width": 1408,
+      "height": 512,
+      "alpha": "opaque",
+      "prompt": "professional game asset, Gran Turismo era broadcast aesthetic, deep navy and gold palette, soft distant horizon landscape for a race circuit, manicured grand prix circuit lawn with white-painted edge zones, hazy atmospheric perspective, muted colors, wide panoramic",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "backdrop-dirt",
+      "out": "public/assets/tracks/backdrops/dirt.png",
+      "modelSlot": "photo",
+      "width": 1408,
+      "height": 512,
+      "alpha": "opaque",
+      "prompt": "professional game asset, Gran Turismo era broadcast aesthetic, deep navy and gold palette, soft distant horizon landscape for a race circuit, dry cracked dirt and sand, rally park terrain, hazy atmospheric perspective, muted colors, wide panoramic",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "avatar-1",
+      "out": "public/assets/portraits/player-1.png",
+      "modelSlot": "photo",
+      "width": 512,
+      "height": 512,
+      "alpha": "remove-bg",
+      "prompt": "professional portrait of a round-faced friendly race team director in his 30s, smart navy team polo shirt with gold collar trim, headset around neck, confident expression, studio headshot, plain light gray background",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "avatar-2",
+      "out": "public/assets/portraits/player-2.png",
+      "modelSlot": "photo",
+      "width": 512,
+      "height": 512,
+      "alpha": "remove-bg",
+      "prompt": "professional portrait of a lean weathered race team director in his 40s, smart navy team polo shirt with gold collar trim, headset around neck, confident expression, studio headshot, plain light gray background",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "avatar-3",
+      "out": "public/assets/portraits/player-3.png",
+      "modelSlot": "photo",
+      "width": 512,
+      "height": 512,
+      "alpha": "remove-bg",
+      "prompt": "professional portrait of a broad-shouldered stocky race team director in his early 20s, smart navy team polo shirt with gold collar trim, headset around neck, confident expression, studio headshot, plain light gray background",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "avatar-4",
+      "out": "public/assets/portraits/player-4.png",
+      "modelSlot": "photo",
+      "width": 512,
+      "height": 512,
+      "alpha": "remove-bg",
+      "prompt": "professional portrait of a youthful energetic race team director in his 30s, smart navy team polo shirt with gold collar trim, headset around neck, confident expression, studio headshot, plain light gray background",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "avatar-5",
+      "out": "public/assets/portraits/player-5.png",
+      "modelSlot": "photo",
+      "width": 512,
+      "height": 512,
+      "alpha": "remove-bg",
+      "prompt": "professional portrait of a silver-templed distinguished race team director in his 40s, smart navy team polo shirt with gold collar trim, headset around neck, confident expression, studio headshot, plain light gray background",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "avatar-6",
+      "out": "public/assets/portraits/player-6.png",
+      "modelSlot": "photo",
+      "width": 512,
+      "height": 512,
+      "alpha": "remove-bg",
+      "prompt": "professional portrait of a focused intense race team director in his early 20s, smart navy team polo shirt with gold collar trim, headset around neck, confident expression, studio headshot, plain light gray background",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "car-damaged-kestrel",
+      "out": "public/assets/cars/kestrel-damaged.png",
+      "modelSlot": "photo",
+      "width": 512,
+      "height": 1024,
+      "alpha": "remove-bg",
+      "prompt": "orthographic top-down view of a compact 2000s Japanese economy hatchback, medium steel blue #4f8edc paint covered in dust and light scuffs, completely debadged, nose pointing up, centered, even overhead lighting, video game sprite, plain white background",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand, extra wheels"
+    },
+    {
+      "id": "car-damaged-vulpe",
+      "out": "public/assets/cars/vulpe-damaged.png",
+      "modelSlot": "photo",
+      "width": 512,
+      "height": 1024,
+      "alpha": "remove-bg",
+      "prompt": "orthographic top-down view of a sporty 2000s European three-door hot hatch, bright rally red #d84a3a paint covered in dust and light scuffs, completely debadged, nose pointing up, centered, even overhead lighting, video game sprite, plain white background",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand, extra wheels"
+    },
+    {
+      "id": "car-damaged-taro",
+      "out": "public/assets/cars/taro-damaged.png",
+      "modelSlot": "photo",
+      "width": 512,
+      "height": 1024,
+      "alpha": "remove-bg",
+      "prompt": "orthographic top-down view of a sleek 2000s Japanese sport compact coupe, warm champagne gold #e8b93c paint covered in dust and light scuffs, completely debadged, nose pointing up, centered, even overhead lighting, video game sprite, plain white background",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand, extra wheels"
+    },
+    {
+      "id": "car-damaged-falcon",
+      "out": "public/assets/cars/falcon-damaged.png",
+      "modelSlot": "photo",
+      "width": 512,
+      "height": 1024,
+      "alpha": "remove-bg",
+      "prompt": "orthographic top-down view of a 2000s Japanese turbocharged sports sedan with subtle rear wing, deep royal blue #3f74e8 paint covered in dust and light scuffs, completely debadged, nose pointing up, centered, even overhead lighting, video game sprite, plain white background",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand, extra wheels"
+    },
+    {
+      "id": "car-damaged-serval",
+      "out": "public/assets/cars/serval-damaged.png",
+      "modelSlot": "photo",
+      "width": 512,
+      "height": 1024,
+      "alpha": "remove-bg",
+      "prompt": "orthographic top-down view of a lightweight 2000s Japanese two-seater roadster, soft top down, racing green #48b06a paint covered in dust and light scuffs, completely debadged, nose pointing up, centered, even overhead lighting, video game sprite, plain white background",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand, extra wheels"
+    },
+    {
+      "id": "car-damaged-kite",
+      "out": "public/assets/cars/kite-damaged.png",
+      "modelSlot": "photo",
+      "width": 512,
+      "height": 1024,
+      "alpha": "remove-bg",
+      "prompt": "orthographic top-down view of a 2000s Japanese AWD rally homologation turbo coupe with hood scoop, vivid violet #8455c8 paint covered in dust and light scuffs, completely debadged, nose pointing up, centered, even overhead lighting, video game sprite, plain white background",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand, extra wheels"
+    },
+    {
+      "id": "car-damaged-phantom",
+      "out": "public/assets/cars/phantom-damaged.png",
+      "modelSlot": "photo",
+      "width": 512,
+      "height": 1024,
+      "alpha": "remove-bg",
+      "prompt": "orthographic top-down view of a wide-body 2000s Japanese GT500-style super coupe, low and aggressive, gloss black #20242c paint covered in dust and light scuffs, completely debadged, nose pointing up, centered, even overhead lighting, video game sprite, plain white background",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand, extra wheels"
+    },
+    {
+      "id": "car-damaged-arrow",
+      "out": "public/assets/cars/arrow-damaged.png",
+      "modelSlot": "photo",
+      "width": 512,
+      "height": 1024,
+      "alpha": "remove-bg",
+      "prompt": "orthographic top-down view of a open-cockpit Le Mans style racing prototype with large rear wing, pearl white and silver #e2e6ee paint covered in dust and light scuffs, completely debadged, nose pointing up, centered, even overhead lighting, video game sprite, plain white background",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand, extra wheels"
+    },
+    {
+      "id": "fx-rain-1",
+      "out": "public/assets/fx/rain-1.png",
+      "modelSlot": "transparent",
+      "width": 512,
+      "height": 512,
+      "alpha": "native",
+      "prompt": "game particle sprite overlay, rain streak overlay particles, soft edges, isolated on transparent background, no text",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "fx-night-vignette",
+      "out": "public/assets/fx/night-vignette.png",
+      "modelSlot": "transparent",
+      "width": 512,
+      "height": 512,
+      "alpha": "native",
+      "prompt": "game particle sprite overlay, soft dark blue night vignette glow, soft edges, isolated on transparent background, no text",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "fx-heat-haze",
+      "out": "public/assets/fx/heat-haze.png",
+      "modelSlot": "transparent",
+      "width": 512,
+      "height": 512,
+      "alpha": "native",
+      "prompt": "game particle sprite overlay, subtle heat shimmer distortion band, soft edges, isolated on transparent background, no text",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "fx-celebration-1",
+      "out": "public/assets/fx/celebration-1.png",
+      "modelSlot": "transparent",
+      "width": 512,
+      "height": 512,
+      "alpha": "native",
+      "prompt": "game particle sprite overlay, champagne spray burst golden droplets, soft edges, isolated on transparent background, no text",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    }
+  ]
+}

@@ -71,11 +71,16 @@ async function waitJob(jobId) {
 }
 
 /** run any generation job; returns asset ids */
+let cuSpent = 0;
+const CU_MAX = Number(process.env.ART_MAX_CU ?? Infinity);
+
 export async function generate(modelId, body) {
+  if (cuSpent >= CU_MAX) throw new Error(`budget stop: ${cuSpent} CU >= ART_MAX_CU ${CU_MAX}`);
   const out = await api(`/generate/custom/${modelId}`, {
     method: 'POST',
     body: JSON.stringify(body),
   });
+  cuSpent += out.creativeUnitsCost ?? out.job?.billing?.cuCost ?? 0;
   const job = await waitJob(out.job.jobId);
   const assets = job.metadata?.assetIds ?? [];
   if (!assets.length) throw new Error(`job ${out.job.jobId} produced no assets`);
@@ -125,42 +130,64 @@ async function logAccepted(row) {
   );
 }
 
-export async function runManifest(entries, { candidates = 2 } = {}) {
-  const failures = [];
-  for (const entry of entries) {
-    const modelId = MODELS[entry.modelSlot] ?? entry.modelSlot;
-    console.log(`\n=== ${entry.id} -> ${modelId}`);
-    try {
-      const assets = await generate(modelId, {
-        prompt: entry.prompt,
-        negativePrompt: entry.negative ?? GLOBAL_NEGATIVE,
-        width: entry.width,
-        height: entry.height,
-        numSamples: entry.candidates ?? candidates,
-        ...(entry.seed !== undefined ? { seed: entry.seed } : {}),
-        ...(entry.extra ?? {}),
-      });
-      for (let i = 0; i < assets.length; i++) {
-        let assetId = assets[i];
-        if (entry.alpha === 'remove-bg') {
-          try {
-            assetId = await removeBackground(assetId);
-          } catch (e) {
-            console.error(`  bg-removal failed (candidate ${i}): ${String(e).slice(0, 160)}`);
-          }
-        }
-        const file = i === 0 ? entry.out : entry.out.replace('.png', `.alt${i}.png`);
-        await download(assetId, file);
-        console.log(`  saved ${file}`);
+async function runEntry(entry, candidates) {
+  const modelId = MODELS[entry.modelSlot] ?? entry.modelSlot;
+  const assets = await generate(modelId, {
+    prompt: entry.prompt,
+    negativePrompt: entry.negative ?? GLOBAL_NEGATIVE,
+    width: entry.width,
+    height: entry.height,
+    numSamples: entry.candidates ?? candidates,
+    ...(entry.seed !== undefined ? { seed: entry.seed } : {}),
+    ...(entry.extra ?? {}),
+  });
+  for (let i = 0; i < assets.length; i++) {
+    let assetId = assets[i];
+    if (entry.alpha === 'remove-bg') {
+      try {
+        assetId = await removeBackground(assetId);
+      } catch (e) {
+        console.error(`  ${entry.id}: bg-removal failed (candidate ${i}): ${String(e).slice(0, 140)}`);
       }
-      await logAccepted({ id: entry.id, model: modelId, prompt: entry.prompt });
-    } catch (e) {
-      console.error(`  FAILED: ${String(e).slice(0, 250)}`);
-      failures.push(entry.id);
     }
+    const file = i === 0 ? entry.out : entry.out.replace('.png', `.alt${i}.png`);
+    await download(assetId, file);
   }
+  await logAccepted({ id: entry.id, model: modelId, prompt: entry.prompt });
+}
+
+export async function runManifest(entries, { candidates = 1, concurrency = 4 } = {}) {
+  const failures = [];
+  const queue = [...entries];
+  let done = 0;
+  const worker = async () => {
+    for (;;) {
+      const entry = queue.shift();
+      if (!entry) return;
+      // skip files that already exist (resumable batches)
+      if (existsSync(entry.out)) {
+        done++;
+        console.log(`[${done}/${entries.length}] SKIP (exists) ${entry.id}`);
+        continue;
+      }
+      try {
+        await runEntry(entry, candidates);
+        done++;
+        console.log(`[${done}/${entries.length}] OK ${entry.id}  (spent ${cuSpent} CU)`);
+      } catch (e) {
+        done++;
+        console.error(`[${done}/${entries.length}] FAILED ${entry.id}: ${String(e).slice(0, 200)}`);
+        failures.push(entry.id);
+        if (String(e).includes('budget stop')) {
+          queue.length = 0;
+        }
+      }
+    }
+  };
+  await Promise.all(Array.from({ length: concurrency }, worker));
+  console.log(`\nbatch done: ${entries.length - failures.length}/${entries.length} ok, ${cuSpent} CU spent this run`);
   if (failures.length) {
-    console.error(`\n${failures.length} failures: ${failures.join(', ')}`);
+    console.error(`failures: ${failures.join(', ')}`);
     process.exitCode = 1;
   }
 }

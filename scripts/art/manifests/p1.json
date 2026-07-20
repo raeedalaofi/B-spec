@@ -1,0 +1,914 @@
+{
+  "entries": [
+    {
+      "id": "prop-meadow-1",
+      "out": "public/assets/tracks/props/meadow-1.png",
+      "modelSlot": "photo",
+      "width": 768,
+      "height": 768,
+      "alpha": "remove-bg",
+      "prompt": "professional game asset, Gran Turismo era broadcast aesthetic, deep navy and gold palette, large oak tree, viewed from high angle 60 degrees, game map object, consistent overcast daylight, isolated subject on plain light background",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "prop-meadow-2",
+      "out": "public/assets/tracks/props/meadow-2.png",
+      "modelSlot": "photo",
+      "width": 768,
+      "height": 768,
+      "alpha": "remove-bg",
+      "prompt": "professional game asset, Gran Turismo era broadcast aesthetic, deep navy and gold palette, row of hay bales, viewed from high angle 60 degrees, game map object, consistent overcast daylight, isolated subject on plain light background",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "prop-meadow-3",
+      "out": "public/assets/tracks/props/meadow-3.png",
+      "modelSlot": "photo",
+      "width": 768,
+      "height": 768,
+      "alpha": "remove-bg",
+      "prompt": "professional game asset, Gran Turismo era broadcast aesthetic, deep navy and gold palette, small wooden spectator stand, viewed from high angle 60 degrees, game map object, consistent overcast daylight, isolated subject on plain light background",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "prop-meadow-4",
+      "out": "public/assets/tracks/props/meadow-4.png",
+      "modelSlot": "photo",
+      "width": 768,
+      "height": 768,
+      "alpha": "remove-bg",
+      "prompt": "professional game asset, Gran Turismo era broadcast aesthetic, deep navy and gold palette, white fence segment, viewed from high angle 60 degrees, game map object, consistent overcast daylight, isolated subject on plain light background",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "prop-meadow-5",
+      "out": "public/assets/tracks/props/meadow-5.png",
+      "modelSlot": "photo",
+      "width": 768,
+      "height": 768,
+      "alpha": "remove-bg",
+      "prompt": "professional game asset, Gran Turismo era broadcast aesthetic, deep navy and gold palette, red-roofed farm shed, viewed from high angle 60 degrees, game map object, consistent overcast daylight, isolated subject on plain light background",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "prop-meadow-6",
+      "out": "public/assets/tracks/props/meadow-6.png",
+      "modelSlot": "photo",
+      "width": 768,
+      "height": 768,
+      "alpha": "remove-bg",
+      "prompt": "professional game asset, Gran Turismo era broadcast aesthetic, deep navy and gold palette, cluster of bushes, viewed from high angle 60 degrees, game map object, consistent overcast daylight, isolated subject on plain light background",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "prop-forest-mountain-1",
+      "out": "public/assets/tracks/props/forest-mountain-1.png",
+      "modelSlot": "photo",
+      "width": 768,
+      "height": 768,
+      "alpha": "remove-bg",
+      "prompt": "professional game asset, Gran Turismo era broadcast aesthetic, deep navy and gold palette, tall pine tree, viewed from high angle 60 degrees, game map object, consistent overcast daylight, isolated subject on plain light background",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "prop-forest-mountain-2",
+      "out": "public/assets/tracks/props/forest-mountain-2.png",
+      "modelSlot": "photo",
+      "width": 768,
+      "height": 768,
+      "alpha": "remove-bg",
+      "prompt": "professional game asset, Gran Turismo era broadcast aesthetic, deep navy and gold palette, granite boulder, viewed from high angle 60 degrees, game map object, consistent overcast daylight, isolated subject on plain light background",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "prop-forest-mountain-3",
+      "out": "public/assets/tracks/props/forest-mountain-3.png",
+      "modelSlot": "photo",
+      "width": 768,
+      "height": 768,
+      "alpha": "remove-bg",
+      "prompt": "professional game asset, Gran Turismo era broadcast aesthetic, deep navy and gold palette, alpine wooden chalet, viewed from high angle 60 degrees, game map object, consistent overcast daylight, isolated subject on plain light background",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "prop-forest-mountain-4",
+      "out": "public/assets/tracks/props/forest-mountain-4.png",
+      "modelSlot": "photo",
+      "width": 768,
+      "height": 768,
+      "alpha": "remove-bg",
+      "prompt": "professional game asset, Gran Turismo era broadcast aesthetic, deep navy and gold palette, rocky cliff outcrop, viewed from high angle 60 degrees, game map object, consistent overcast daylight, isolated subject on plain light background",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "prop-forest-mountain-5",
+      "out": "public/assets/tracks/props/forest-mountain-5.png",
+      "modelSlot": "photo",
+      "width": 768,
+      "height": 768,
+      "alpha": "remove-bg",
+      "prompt": "professional game asset, Gran Turismo era broadcast aesthetic, deep navy and gold palette, wooden safety barrier, viewed from high angle 60 degrees, game map object, consistent overcast daylight, isolated subject on plain light background",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "prop-forest-mountain-6",
+      "out": "public/assets/tracks/props/forest-mountain-6.png",
+      "modelSlot": "photo",
+      "width": 768,
+      "height": 768,
+      "alpha": "remove-bg",
+      "prompt": "professional game asset, Gran Turismo era broadcast aesthetic, deep navy and gold palette, mountain spruce cluster, viewed from high angle 60 degrees, game map object, consistent overcast daylight, isolated subject on plain light background",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "prop-speedway-1",
+      "out": "public/assets/tracks/props/speedway-1.png",
+      "modelSlot": "photo",
+      "width": 768,
+      "height": 768,
+      "alpha": "remove-bg",
+      "prompt": "professional game asset, Gran Turismo era broadcast aesthetic, deep navy and gold palette, tall floodlight tower, viewed from high angle 60 degrees, game map object, consistent overcast daylight, isolated subject on plain light background",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "prop-speedway-2",
+      "out": "public/assets/tracks/props/speedway-2.png",
+      "modelSlot": "photo",
+      "width": 768,
+      "height": 768,
+      "alpha": "remove-bg",
+      "prompt": "professional game asset, Gran Turismo era broadcast aesthetic, deep navy and gold palette, large grandstand section, viewed from high angle 60 degrees, game map object, consistent overcast daylight, isolated subject on plain light background",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "prop-speedway-3",
+      "out": "public/assets/tracks/props/speedway-3.png",
+      "modelSlot": "photo",
+      "width": 768,
+      "height": 768,
+      "alpha": "remove-bg",
+      "prompt": "professional game asset, Gran Turismo era broadcast aesthetic, deep navy and gold palette, concrete wall segment with fence, viewed from high angle 60 degrees, game map object, consistent overcast daylight, isolated subject on plain light background",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "prop-speedway-4",
+      "out": "public/assets/tracks/props/speedway-4.png",
+      "modelSlot": "photo",
+      "width": 768,
+      "height": 768,
+      "alpha": "remove-bg",
+      "prompt": "professional game asset, Gran Turismo era broadcast aesthetic, deep navy and gold palette, infield care center building, viewed from high angle 60 degrees, game map object, consistent overcast daylight, isolated subject on plain light background",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "prop-speedway-5",
+      "out": "public/assets/tracks/props/speedway-5.png",
+      "modelSlot": "photo",
+      "width": 768,
+      "height": 768,
+      "alpha": "remove-bg",
+      "prompt": "professional game asset, Gran Turismo era broadcast aesthetic, deep navy and gold palette, row of parked service trucks, viewed from high angle 60 degrees, game map object, consistent overcast daylight, isolated subject on plain light background",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "prop-speedway-6",
+      "out": "public/assets/tracks/props/speedway-6.png",
+      "modelSlot": "photo",
+      "width": 768,
+      "height": 768,
+      "alpha": "remove-bg",
+      "prompt": "professional game asset, Gran Turismo era broadcast aesthetic, deep navy and gold palette, giant scoreboard tower seen from afar, viewed from high angle 60 degrees, game map object, consistent overcast daylight, isolated subject on plain light background",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "prop-city-1",
+      "out": "public/assets/tracks/props/city-1.png",
+      "modelSlot": "photo",
+      "width": 768,
+      "height": 768,
+      "alpha": "remove-bg",
+      "prompt": "professional game asset, Gran Turismo era broadcast aesthetic, deep navy and gold palette, modern glass office tower, viewed from high angle 60 degrees, game map object, consistent overcast daylight, isolated subject on plain light background",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "prop-city-2",
+      "out": "public/assets/tracks/props/city-2.png",
+      "modelSlot": "photo",
+      "width": 768,
+      "height": 768,
+      "alpha": "remove-bg",
+      "prompt": "professional game asset, Gran Turismo era broadcast aesthetic, deep navy and gold palette, city apartment block, viewed from high angle 60 degrees, game map object, consistent overcast daylight, isolated subject on plain light background",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "prop-city-3",
+      "out": "public/assets/tracks/props/city-3.png",
+      "modelSlot": "photo",
+      "width": 768,
+      "height": 768,
+      "alpha": "remove-bg",
+      "prompt": "professional game asset, Gran Turismo era broadcast aesthetic, deep navy and gold palette, street lamp pair, viewed from high angle 60 degrees, game map object, consistent overcast daylight, isolated subject on plain light background",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "prop-city-4",
+      "out": "public/assets/tracks/props/city-4.png",
+      "modelSlot": "photo",
+      "width": 768,
+      "height": 768,
+      "alpha": "remove-bg",
+      "prompt": "professional game asset, Gran Turismo era broadcast aesthetic, deep navy and gold palette, concrete barrier with mesh fence, viewed from high angle 60 degrees, game map object, consistent overcast daylight, isolated subject on plain light background",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "prop-city-5",
+      "out": "public/assets/tracks/props/city-5.png",
+      "modelSlot": "photo",
+      "width": 768,
+      "height": 768,
+      "alpha": "remove-bg",
+      "prompt": "professional game asset, Gran Turismo era broadcast aesthetic, deep navy and gold palette, pedestrian bridge segment, viewed from high angle 60 degrees, game map object, consistent overcast daylight, isolated subject on plain light background",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "prop-city-6",
+      "out": "public/assets/tracks/props/city-6.png",
+      "modelSlot": "photo",
+      "width": 768,
+      "height": 768,
+      "alpha": "remove-bg",
+      "prompt": "professional game asset, Gran Turismo era broadcast aesthetic, deep navy and gold palette, row of street trees in planters, viewed from high angle 60 degrees, game map object, consistent overcast daylight, isolated subject on plain light background",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "prop-classic-gp-1",
+      "out": "public/assets/tracks/props/classic-gp-1.png",
+      "modelSlot": "photo",
+      "width": 768,
+      "height": 768,
+      "alpha": "remove-bg",
+      "prompt": "professional game asset, Gran Turismo era broadcast aesthetic, deep navy and gold palette, pit building with terrace, viewed from high angle 60 degrees, game map object, consistent overcast daylight, isolated subject on plain light background",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "prop-classic-gp-2",
+      "out": "public/assets/tracks/props/classic-gp-2.png",
+      "modelSlot": "photo",
+      "width": 768,
+      "height": 768,
+      "alpha": "remove-bg",
+      "prompt": "professional game asset, Gran Turismo era broadcast aesthetic, deep navy and gold palette, covered main grandstand, viewed from high angle 60 degrees, game map object, consistent overcast daylight, isolated subject on plain light background",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "prop-classic-gp-3",
+      "out": "public/assets/tracks/props/classic-gp-3.png",
+      "modelSlot": "photo",
+      "width": 768,
+      "height": 768,
+      "alpha": "remove-bg",
+      "prompt": "professional game asset, Gran Turismo era broadcast aesthetic, deep navy and gold palette, marshal post hut, viewed from high angle 60 degrees, game map object, consistent overcast daylight, isolated subject on plain light background",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "prop-classic-gp-4",
+      "out": "public/assets/tracks/props/classic-gp-4.png",
+      "modelSlot": "photo",
+      "width": 768,
+      "height": 768,
+      "alpha": "remove-bg",
+      "prompt": "professional game asset, Gran Turismo era broadcast aesthetic, deep navy and gold palette, stack of race tires painted white and red, viewed from high angle 60 degrees, game map object, consistent overcast daylight, isolated subject on plain light background",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "prop-classic-gp-5",
+      "out": "public/assets/tracks/props/classic-gp-5.png",
+      "modelSlot": "photo",
+      "width": 768,
+      "height": 768,
+      "alpha": "remove-bg",
+      "prompt": "professional game asset, Gran Turismo era broadcast aesthetic, deep navy and gold palette, gravel trap patch, viewed from high angle 60 degrees, game map object, consistent overcast daylight, isolated subject on plain light background",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "prop-classic-gp-6",
+      "out": "public/assets/tracks/props/classic-gp-6.png",
+      "modelSlot": "photo",
+      "width": 768,
+      "height": 768,
+      "alpha": "remove-bg",
+      "prompt": "professional game asset, Gran Turismo era broadcast aesthetic, deep navy and gold palette, trimmed hedge row, viewed from high angle 60 degrees, game map object, consistent overcast daylight, isolated subject on plain light background",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "prop-dirt-1",
+      "out": "public/assets/tracks/props/dirt-1.png",
+      "modelSlot": "photo",
+      "width": 768,
+      "height": 768,
+      "alpha": "remove-bg",
+      "prompt": "professional game asset, Gran Turismo era broadcast aesthetic, deep navy and gold palette, weathered water tower, viewed from high angle 60 degrees, game map object, consistent overcast daylight, isolated subject on plain light background",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "prop-dirt-2",
+      "out": "public/assets/tracks/props/dirt-2.png",
+      "modelSlot": "photo",
+      "width": 768,
+      "height": 768,
+      "alpha": "remove-bg",
+      "prompt": "professional game asset, Gran Turismo era broadcast aesthetic, deep navy and gold palette, rusty corrugated shed, viewed from high angle 60 degrees, game map object, consistent overcast daylight, isolated subject on plain light background",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "prop-dirt-3",
+      "out": "public/assets/tracks/props/dirt-3.png",
+      "modelSlot": "photo",
+      "width": 768,
+      "height": 768,
+      "alpha": "remove-bg",
+      "prompt": "professional game asset, Gran Turismo era broadcast aesthetic, deep navy and gold palette, dead tree, viewed from high angle 60 degrees, game map object, consistent overcast daylight, isolated subject on plain light background",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "prop-dirt-4",
+      "out": "public/assets/tracks/props/dirt-4.png",
+      "modelSlot": "photo",
+      "width": 768,
+      "height": 768,
+      "alpha": "remove-bg",
+      "prompt": "professional game asset, Gran Turismo era broadcast aesthetic, deep navy and gold palette, pile of old tires, viewed from high angle 60 degrees, game map object, consistent overcast daylight, isolated subject on plain light background",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "prop-dirt-5",
+      "out": "public/assets/tracks/props/dirt-5.png",
+      "modelSlot": "photo",
+      "width": 768,
+      "height": 768,
+      "alpha": "remove-bg",
+      "prompt": "professional game asset, Gran Turismo era broadcast aesthetic, deep navy and gold palette, wooden spectator berm, viewed from high angle 60 degrees, game map object, consistent overcast daylight, isolated subject on plain light background",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "prop-dirt-6",
+      "out": "public/assets/tracks/props/dirt-6.png",
+      "modelSlot": "photo",
+      "width": 768,
+      "height": 768,
+      "alpha": "remove-bg",
+      "prompt": "professional game asset, Gran Turismo era broadcast aesthetic, deep navy and gold palette, dusty service truck, viewed from high angle 60 degrees, game map object, consistent overcast daylight, isolated subject on plain light background",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "prop-shared-1",
+      "out": "public/assets/tracks/props/shared-1.png",
+      "modelSlot": "photo",
+      "width": 768,
+      "height": 768,
+      "alpha": "remove-bg",
+      "prompt": "professional game asset, Gran Turismo era broadcast aesthetic, deep navy and gold palette, race control tower with checkered pattern, viewed from high angle 60 degrees, game map object, consistent overcast daylight, isolated subject on plain light background",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "prop-shared-2",
+      "out": "public/assets/tracks/props/shared-2.png",
+      "modelSlot": "photo",
+      "width": 768,
+      "height": 768,
+      "alpha": "remove-bg",
+      "prompt": "professional game asset, Gran Turismo era broadcast aesthetic, deep navy and gold palette, start-finish overhead gantry, viewed from high angle 60 degrees, game map object, consistent overcast daylight, isolated subject on plain light background",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "prop-shared-3",
+      "out": "public/assets/tracks/props/shared-3.png",
+      "modelSlot": "photo",
+      "width": 768,
+      "height": 768,
+      "alpha": "remove-bg",
+      "prompt": "professional game asset, Gran Turismo era broadcast aesthetic, deep navy and gold palette, pit crew equipment cart, viewed from high angle 60 degrees, game map object, consistent overcast daylight, isolated subject on plain light background",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "prop-shared-4",
+      "out": "public/assets/tracks/props/shared-4.png",
+      "modelSlot": "photo",
+      "width": 768,
+      "height": 768,
+      "alpha": "remove-bg",
+      "prompt": "professional game asset, Gran Turismo era broadcast aesthetic, deep navy and gold palette, tire wall barrier white and blue, viewed from high angle 60 degrees, game map object, consistent overcast daylight, isolated subject on plain light background",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "prop-shared-5",
+      "out": "public/assets/tracks/props/shared-5.png",
+      "modelSlot": "photo",
+      "width": 768,
+      "height": 768,
+      "alpha": "remove-bg",
+      "prompt": "professional game asset, Gran Turismo era broadcast aesthetic, deep navy and gold palette, safety car parked, viewed from high angle 60 degrees, game map object, consistent overcast daylight, isolated subject on plain light background",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "prop-shared-6",
+      "out": "public/assets/tracks/props/shared-6.png",
+      "modelSlot": "photo",
+      "width": 768,
+      "height": 768,
+      "alpha": "remove-bg",
+      "prompt": "professional game asset, Gran Turismo era broadcast aesthetic, deep navy and gold palette, television broadcast camera crane, viewed from high angle 60 degrees, game map object, consistent overcast daylight, isolated subject on plain light background",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "prop-shared-7",
+      "out": "public/assets/tracks/props/shared-7.png",
+      "modelSlot": "photo",
+      "width": 768,
+      "height": 768,
+      "alpha": "remove-bg",
+      "prompt": "professional game asset, Gran Turismo era broadcast aesthetic, deep navy and gold palette, podium structure with three steps, viewed from high angle 60 degrees, game map object, consistent overcast daylight, isolated subject on plain light background",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "prop-shared-8",
+      "out": "public/assets/tracks/props/shared-8.png",
+      "modelSlot": "photo",
+      "width": 768,
+      "height": 768,
+      "alpha": "remove-bg",
+      "prompt": "professional game asset, Gran Turismo era broadcast aesthetic, deep navy and gold palette, paddock tent, viewed from high angle 60 degrees, game map object, consistent overcast daylight, isolated subject on plain light background",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "portrait-miller",
+      "out": "public/assets/portraits/miller.png",
+      "modelSlot": "photo",
+      "width": 512,
+      "height": 512,
+      "alpha": "remove-bg",
+      "prompt": "professional portrait of a sharp-jawed racing driver in his early 20s, plain dark navy racing suit with steel blue trim and no sponsor patches, confident expression, studio headshot chest-up, soft key light, plain light gray background, motorsport team photo style",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "portrait-sato",
+      "out": "public/assets/portraits/sato.png",
+      "modelSlot": "photo",
+      "width": 512,
+      "height": 512,
+      "alpha": "remove-bg",
+      "prompt": "professional portrait of a round-faced friendly racing driver in his early 20s, plain dark navy racing suit with steel blue trim and no sponsor patches, confident expression, studio headshot chest-up, soft key light, plain light gray background, motorsport team photo style",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "portrait-weber",
+      "out": "public/assets/portraits/weber.png",
+      "modelSlot": "photo",
+      "width": 512,
+      "height": 512,
+      "alpha": "remove-bg",
+      "prompt": "professional portrait of a lean weathered racing driver in his early 20s, plain dark navy racing suit with steel blue trim and no sponsor patches, confident expression, studio headshot chest-up, soft key light, plain light gray background, motorsport team photo style",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "portrait-rossi",
+      "out": "public/assets/portraits/rossi.png",
+      "modelSlot": "photo",
+      "width": 512,
+      "height": 512,
+      "alpha": "remove-bg",
+      "prompt": "professional portrait of a broad-shouldered stocky racing driver in his early 20s, plain dark navy racing suit with steel blue trim and no sponsor patches, confident expression, studio headshot chest-up, soft key light, plain light gray background, motorsport team photo style",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "portrait-tanaka",
+      "out": "public/assets/portraits/tanaka.png",
+      "modelSlot": "photo",
+      "width": 512,
+      "height": 512,
+      "alpha": "remove-bg",
+      "prompt": "professional portrait of a youthful energetic racing driver in his early 20s, plain dark navy racing suit with steel blue trim and no sponsor patches, confident expression, studio headshot chest-up, soft key light, plain light gray background, motorsport team photo style",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "portrait-lindqvist",
+      "out": "public/assets/portraits/lindqvist.png",
+      "modelSlot": "photo",
+      "width": 512,
+      "height": 512,
+      "alpha": "remove-bg",
+      "prompt": "professional portrait of a silver-templed distinguished racing driver in his early 20s, plain dark navy racing suit with steel blue trim and no sponsor patches, confident expression, studio headshot chest-up, soft key light, plain light gray background, motorsport team photo style",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "portrait-dubois",
+      "out": "public/assets/portraits/dubois.png",
+      "modelSlot": "photo",
+      "width": 512,
+      "height": 512,
+      "alpha": "remove-bg",
+      "prompt": "professional portrait of a focused intense racing driver in his early 20s, plain dark navy racing suit with steel blue trim and no sponsor patches, confident expression, studio headshot chest-up, soft key light, plain light gray background, motorsport team photo style",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "portrait-okafor",
+      "out": "public/assets/portraits/okafor.png",
+      "modelSlot": "photo",
+      "width": 512,
+      "height": 512,
+      "alpha": "remove-bg",
+      "prompt": "professional portrait of a sharp-jawed racing driver in his 30s, plain dark navy racing suit with silver trim and no sponsor patches, confident expression, studio headshot chest-up, soft key light, plain light gray background, motorsport team photo style",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "portrait-novak",
+      "out": "public/assets/portraits/novak.png",
+      "modelSlot": "photo",
+      "width": 512,
+      "height": 512,
+      "alpha": "remove-bg",
+      "prompt": "professional portrait of a round-faced friendly racing driver in his 30s, plain dark navy racing suit with silver trim and no sponsor patches, confident expression, studio headshot chest-up, soft key light, plain light gray background, motorsport team photo style",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "portrait-reyes",
+      "out": "public/assets/portraits/reyes.png",
+      "modelSlot": "photo",
+      "width": 512,
+      "height": 512,
+      "alpha": "remove-bg",
+      "prompt": "professional portrait of a lean weathered racing driver in his 30s, plain dark navy racing suit with silver trim and no sponsor patches, confident expression, studio headshot chest-up, soft key light, plain light gray background, motorsport team photo style",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "portrait-kim",
+      "out": "public/assets/portraits/kim.png",
+      "modelSlot": "photo",
+      "width": 512,
+      "height": 512,
+      "alpha": "remove-bg",
+      "prompt": "professional portrait of a broad-shouldered stocky racing driver in his 30s, plain dark navy racing suit with silver trim and no sponsor patches, confident expression, studio headshot chest-up, soft key light, plain light gray background, motorsport team photo style",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "portrait-bauer",
+      "out": "public/assets/portraits/bauer.png",
+      "modelSlot": "photo",
+      "width": 512,
+      "height": 512,
+      "alpha": "remove-bg",
+      "prompt": "professional portrait of a youthful energetic racing driver in his 30s, plain dark navy racing suit with silver trim and no sponsor patches, confident expression, studio headshot chest-up, soft key light, plain light gray background, motorsport team photo style",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "portrait-costa",
+      "out": "public/assets/portraits/costa.png",
+      "modelSlot": "photo",
+      "width": 512,
+      "height": 512,
+      "alpha": "remove-bg",
+      "prompt": "professional portrait of a silver-templed distinguished racing driver in his 30s, plain dark navy racing suit with silver trim and no sponsor patches, confident expression, studio headshot chest-up, soft key light, plain light gray background, motorsport team photo style",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "portrait-yamada",
+      "out": "public/assets/portraits/yamada.png",
+      "modelSlot": "photo",
+      "width": 512,
+      "height": 512,
+      "alpha": "remove-bg",
+      "prompt": "professional portrait of a focused intense racing driver in his 30s, plain dark navy racing suit with silver trim and no sponsor patches, confident expression, studio headshot chest-up, soft key light, plain light gray background, motorsport team photo style",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "portrait-vasseur",
+      "out": "public/assets/portraits/vasseur.png",
+      "modelSlot": "photo",
+      "width": 512,
+      "height": 512,
+      "alpha": "remove-bg",
+      "prompt": "professional portrait of a sharp-jawed racing driver in his 40s, plain dark navy racing suit with gold trim and no sponsor patches, confident expression, studio headshot chest-up, soft key light, plain light gray background, motorsport team photo style",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "portrait-kowalski",
+      "out": "public/assets/portraits/kowalski.png",
+      "modelSlot": "photo",
+      "width": 512,
+      "height": 512,
+      "alpha": "remove-bg",
+      "prompt": "professional portrait of a round-faced friendly racing driver in his 40s, plain dark navy racing suit with gold trim and no sponsor patches, confident expression, studio headshot chest-up, soft key light, plain light gray background, motorsport team photo style",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "portrait-ibarra",
+      "out": "public/assets/portraits/ibarra.png",
+      "modelSlot": "photo",
+      "width": 512,
+      "height": 512,
+      "alpha": "remove-bg",
+      "prompt": "professional portrait of a lean weathered racing driver in his 40s, plain dark navy racing suit with gold trim and no sponsor patches, confident expression, studio headshot chest-up, soft key light, plain light gray background, motorsport team photo style",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "portrait-schmidt",
+      "out": "public/assets/portraits/schmidt.png",
+      "modelSlot": "photo",
+      "width": 512,
+      "height": 512,
+      "alpha": "remove-bg",
+      "prompt": "professional portrait of a broad-shouldered stocky racing driver in his 40s, plain dark navy racing suit with gold trim and no sponsor patches, confident expression, studio headshot chest-up, soft key light, plain light gray background, motorsport team photo style",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "portrait-fontaine",
+      "out": "public/assets/portraits/fontaine.png",
+      "modelSlot": "photo",
+      "width": 512,
+      "height": 512,
+      "alpha": "remove-bg",
+      "prompt": "professional portrait of a youthful energetic racing driver in his 40s, plain dark navy racing suit with gold trim and no sponsor patches, confident expression, studio headshot chest-up, soft key light, plain light gray background, motorsport team photo style",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "portrait-nakamura",
+      "out": "public/assets/portraits/nakamura.png",
+      "modelSlot": "photo",
+      "width": 512,
+      "height": 512,
+      "alpha": "remove-bg",
+      "prompt": "professional portrait of a silver-templed distinguished racing driver in his 40s, plain dark navy racing suit with gold trim and no sponsor patches, confident expression, studio headshot chest-up, soft key light, plain light gray background, motorsport team photo style",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "portrait-hale",
+      "out": "public/assets/portraits/hale.png",
+      "modelSlot": "photo",
+      "width": 512,
+      "height": 512,
+      "alpha": "remove-bg",
+      "prompt": "professional portrait of a focused intense racing driver in his 40s, plain dark navy racing suit with gold trim and no sponsor patches, confident expression, studio headshot chest-up, soft key light, plain light gray background, motorsport team photo style",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "license-b",
+      "out": "public/assets/ui/license-b.png",
+      "modelSlot": "transparent",
+      "width": 512,
+      "height": 512,
+      "alpha": "native",
+      "prompt": "heraldic racing license badge, letter-free shield emblem in brushed bronze, laurel wreath detail, flat premium emblem style, deep navy accents, game UI asset, no text",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "license-a",
+      "out": "public/assets/ui/license-a.png",
+      "modelSlot": "transparent",
+      "width": 512,
+      "height": 512,
+      "alpha": "native",
+      "prompt": "heraldic racing license badge, letter-free shield emblem in polished silver, laurel wreath detail, flat premium emblem style, deep navy accents, game UI asset, no text",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "license-ic",
+      "out": "public/assets/ui/license-ic.png",
+      "modelSlot": "transparent",
+      "width": 512,
+      "height": 512,
+      "alpha": "native",
+      "prompt": "heraldic racing license badge, letter-free shield emblem in rich gold, laurel wreath detail, flat premium emblem style, deep navy accents, game UI asset, no text",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "license-ia",
+      "out": "public/assets/ui/license-ia.png",
+      "modelSlot": "transparent",
+      "width": 512,
+      "height": 512,
+      "alpha": "native",
+      "prompt": "heraldic racing license badge, letter-free shield emblem in platinum with blue inlay, laurel wreath detail, flat premium emblem style, deep navy accents, game UI asset, no text",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "license-s",
+      "out": "public/assets/ui/license-s.png",
+      "modelSlot": "transparent",
+      "width": 512,
+      "height": 512,
+      "alpha": "native",
+      "prompt": "heraldic racing license badge, letter-free shield emblem in black and gold with laurel crown, laurel wreath detail, flat premium emblem style, deep navy accents, game UI asset, no text",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "medal-gold",
+      "out": "public/assets/ui/medal-gold.png",
+      "modelSlot": "transparent",
+      "width": 512,
+      "height": 512,
+      "alpha": "native",
+      "prompt": "flat minimal game UI icon of round gold race medal with ribbon, gold metal finish, single weight geometric line-and-fill, dark metallic gold #C9A54A with heavier solid fill, subtle silver accent, premium motorsport broadcast style, centered, no text",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "medal-silver",
+      "out": "public/assets/ui/medal-silver.png",
+      "modelSlot": "transparent",
+      "width": 512,
+      "height": 512,
+      "alpha": "native",
+      "prompt": "flat minimal game UI icon of round silver race medal with ribbon, silver metal finish, single weight geometric line-and-fill, dark metallic gold #C9A54A with heavier solid fill, subtle silver accent, premium motorsport broadcast style, centered, no text",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "medal-bronze",
+      "out": "public/assets/ui/medal-bronze.png",
+      "modelSlot": "transparent",
+      "width": 512,
+      "height": 512,
+      "alpha": "native",
+      "prompt": "flat minimal game UI icon of round bronze race medal with ribbon, bronze metal finish, single weight geometric line-and-fill, dark metallic gold #C9A54A with heavier solid fill, subtle silver accent, premium motorsport broadcast style, centered, no text",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "icon-part-power-1",
+      "out": "public/assets/ui/icon-part-power-1.png",
+      "modelSlot": "transparent",
+      "width": 512,
+      "height": 512,
+      "alpha": "native",
+      "prompt": "flat minimal game UI icon of engine control unit chip, single weight geometric line-and-fill, dark metallic gold #C9A54A with heavier solid fill, subtle silver accent, premium motorsport broadcast style, centered, no text",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "icon-part-power-2",
+      "out": "public/assets/ui/icon-part-power-2.png",
+      "modelSlot": "transparent",
+      "width": 512,
+      "height": 512,
+      "alpha": "native",
+      "prompt": "flat minimal game UI icon of turbocharger snail housing, single weight geometric line-and-fill, dark metallic gold #C9A54A with heavier solid fill, subtle silver accent, premium motorsport broadcast style, centered, no text",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "icon-part-power-3",
+      "out": "public/assets/ui/icon-part-power-3.png",
+      "modelSlot": "transparent",
+      "width": 512,
+      "height": 512,
+      "alpha": "native",
+      "prompt": "flat minimal game UI icon of full racing engine block, single weight geometric line-and-fill, dark metallic gold #C9A54A with heavier solid fill, subtle silver accent, premium motorsport broadcast style, centered, no text",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "icon-part-weight-1",
+      "out": "public/assets/ui/icon-part-weight-1.png",
+      "modelSlot": "transparent",
+      "width": 512,
+      "height": 512,
+      "alpha": "native",
+      "prompt": "flat minimal game UI icon of feather over car panel, single weight geometric line-and-fill, dark metallic gold #C9A54A with heavier solid fill, subtle silver accent, premium motorsport broadcast style, centered, no text",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "icon-part-weight-2",
+      "out": "public/assets/ui/icon-part-weight-2.png",
+      "modelSlot": "transparent",
+      "width": 512,
+      "height": 512,
+      "alpha": "native",
+      "prompt": "flat minimal game UI icon of stripped roll cage, single weight geometric line-and-fill, dark metallic gold #C9A54A with heavier solid fill, subtle silver accent, premium motorsport broadcast style, centered, no text",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "icon-part-tires-1",
+      "out": "public/assets/ui/icon-part-tires-1.png",
+      "modelSlot": "transparent",
+      "width": 512,
+      "height": 512,
+      "alpha": "native",
+      "prompt": "flat minimal game UI icon of sports tire with tread, single weight geometric line-and-fill, dark metallic gold #C9A54A with heavier solid fill, subtle silver accent, premium motorsport broadcast style, centered, no text",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "icon-part-tires-2",
+      "out": "public/assets/ui/icon-part-tires-2.png",
+      "modelSlot": "transparent",
+      "width": 512,
+      "height": 512,
+      "alpha": "native",
+      "prompt": "flat minimal game UI icon of racing slick tire, single weight geometric line-and-fill, dark metallic gold #C9A54A with heavier solid fill, subtle silver accent, premium motorsport broadcast style, centered, no text",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "icon-part-aero-1",
+      "out": "public/assets/ui/icon-part-aero-1.png",
+      "modelSlot": "transparent",
+      "width": 512,
+      "height": 512,
+      "alpha": "native",
+      "prompt": "flat minimal game UI icon of rear wing spoiler, single weight geometric line-and-fill, dark metallic gold #C9A54A with heavier solid fill, subtle silver accent, premium motorsport broadcast style, centered, no text",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "icon-part-gearbox-1",
+      "out": "public/assets/ui/icon-part-gearbox-1.png",
+      "modelSlot": "transparent",
+      "width": 512,
+      "height": 512,
+      "alpha": "native",
+      "prompt": "flat minimal game UI icon of gear shift knob with gate, single weight geometric line-and-fill, dark metallic gold #C9A54A with heavier solid fill, subtle silver accent, premium motorsport broadcast style, centered, no text",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "icon-partcat-power",
+      "out": "public/assets/ui/icon-partcat-power.png",
+      "modelSlot": "transparent",
+      "width": 512,
+      "height": 512,
+      "alpha": "native",
+      "prompt": "flat minimal game UI icon of engine block, single weight geometric line-and-fill, dark metallic gold #C9A54A with heavier solid fill, subtle silver accent, premium motorsport broadcast style, centered, no text",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "icon-partcat-weight",
+      "out": "public/assets/ui/icon-partcat-weight.png",
+      "modelSlot": "transparent",
+      "width": 512,
+      "height": 512,
+      "alpha": "native",
+      "prompt": "flat minimal game UI icon of weight scale, single weight geometric line-and-fill, dark metallic gold #C9A54A with heavier solid fill, subtle silver accent, premium motorsport broadcast style, centered, no text",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "icon-partcat-tires",
+      "out": "public/assets/ui/icon-partcat-tires.png",
+      "modelSlot": "transparent",
+      "width": 512,
+      "height": 512,
+      "alpha": "native",
+      "prompt": "flat minimal game UI icon of tire, single weight geometric line-and-fill, dark metallic gold #C9A54A with heavier solid fill, subtle silver accent, premium motorsport broadcast style, centered, no text",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "icon-partcat-aero",
+      "out": "public/assets/ui/icon-partcat-aero.png",
+      "modelSlot": "transparent",
+      "width": 512,
+      "height": 512,
+      "alpha": "native",
+      "prompt": "flat minimal game UI icon of aerodynamic wing, single weight geometric line-and-fill, dark metallic gold #C9A54A with heavier solid fill, subtle silver accent, premium motorsport broadcast style, centered, no text",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "icon-partcat-gearbox",
+      "out": "public/assets/ui/icon-partcat-gearbox.png",
+      "modelSlot": "transparent",
+      "width": 512,
+      "height": 512,
+      "alpha": "native",
+      "prompt": "flat minimal game UI icon of gear cog pair, single weight geometric line-and-fill, dark metallic gold #C9A54A with heavier solid fill, subtle silver accent, premium motorsport broadcast style, centered, no text",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "flag-green",
+      "out": "public/assets/fx/flag-green.png",
+      "modelSlot": "transparent",
+      "width": 512,
+      "height": 512,
+      "alpha": "native",
+      "prompt": "flat minimal game UI icon of waving green racing flag on pole, single weight geometric line-and-fill, dark metallic gold #C9A54A with heavier solid fill, subtle silver accent, premium motorsport broadcast style, centered, no text",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "flag-checkered",
+      "out": "public/assets/fx/flag-checkered.png",
+      "modelSlot": "transparent",
+      "width": 512,
+      "height": 512,
+      "alpha": "native",
+      "prompt": "flat minimal game UI icon of waving checkered racing flag on pole, single weight geometric line-and-fill, dark metallic gold #C9A54A with heavier solid fill, subtle silver accent, premium motorsport broadcast style, centered, no text",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "flag-yellow",
+      "out": "public/assets/fx/flag-yellow.png",
+      "modelSlot": "transparent",
+      "width": 512,
+      "height": 512,
+      "alpha": "native",
+      "prompt": "flat minimal game UI icon of waving yellow caution flag on pole, single weight geometric line-and-fill, dark metallic gold #C9A54A with heavier solid fill, subtle silver accent, premium motorsport broadcast style, centered, no text",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "start-lights",
+      "out": "public/assets/fx/start-lights.png",
+      "modelSlot": "transparent",
+      "width": 512,
+      "height": 512,
+      "alpha": "native",
+      "prompt": "flat minimal game UI icon of race start light gantry with five lights, single weight geometric line-and-fill, dark metallic gold #C9A54A with heavier solid fill, subtle silver accent, premium motorsport broadcast style, centered, no text",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    }
+  ]
+}

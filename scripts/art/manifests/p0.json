@@ -1,0 +1,624 @@
+{
+  "entries": [
+    {
+      "id": "car-studio-kestrel",
+      "out": "public/assets/cars/kestrel-studio.png",
+      "modelSlot": "photo",
+      "width": 1408,
+      "height": 896,
+      "alpha": "remove-bg",
+      "prompt": "professional game asset, Gran Turismo era broadcast aesthetic, deep navy and gold palette, compact 2000s Japanese economy hatchback, medium steel blue #4f8edc paint, completely debadged with no manufacturer emblem and no license plate, three-quarter front studio shot, soft key light with subtle gold rim light, plain light gray studio background, clean showroom quality",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand, extra wheels"
+    },
+    {
+      "id": "car-topdown-kestrel",
+      "out": "public/assets/cars/kestrel-topdown.png",
+      "modelSlot": "photo",
+      "width": 512,
+      "height": 1024,
+      "alpha": "remove-bg",
+      "prompt": "orthographic top-down view of a compact 2000s Japanese economy hatchback, medium steel blue #4f8edc paint, completely debadged with no manufacturer emblem and no license plate, nose pointing up, full car visible and centered, even neutral overhead lighting, crisp silhouette, video game sprite, plain white background",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand, extra wheels"
+    },
+    {
+      "id": "car-studio-vulpe",
+      "out": "public/assets/cars/vulpe-studio.png",
+      "modelSlot": "photo",
+      "width": 1408,
+      "height": 896,
+      "alpha": "remove-bg",
+      "prompt": "professional game asset, Gran Turismo era broadcast aesthetic, deep navy and gold palette, sporty 2000s European three-door hot hatch, bright rally red #d84a3a paint, completely debadged with no manufacturer emblem and no license plate, three-quarter front studio shot, soft key light with subtle gold rim light, plain light gray studio background, clean showroom quality",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand, extra wheels"
+    },
+    {
+      "id": "car-topdown-vulpe",
+      "out": "public/assets/cars/vulpe-topdown.png",
+      "modelSlot": "photo",
+      "width": 512,
+      "height": 1024,
+      "alpha": "remove-bg",
+      "prompt": "orthographic top-down view of a sporty 2000s European three-door hot hatch, bright rally red #d84a3a paint, completely debadged with no manufacturer emblem and no license plate, nose pointing up, full car visible and centered, even neutral overhead lighting, crisp silhouette, video game sprite, plain white background",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand, extra wheels"
+    },
+    {
+      "id": "car-studio-taro",
+      "out": "public/assets/cars/taro-studio.png",
+      "modelSlot": "photo",
+      "width": 1408,
+      "height": 896,
+      "alpha": "remove-bg",
+      "prompt": "professional game asset, Gran Turismo era broadcast aesthetic, deep navy and gold palette, sleek 2000s Japanese sport compact coupe, warm champagne gold #e8b93c paint, completely debadged with no manufacturer emblem and no license plate, three-quarter front studio shot, soft key light with subtle gold rim light, plain light gray studio background, clean showroom quality",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand, extra wheels"
+    },
+    {
+      "id": "car-topdown-taro",
+      "out": "public/assets/cars/taro-topdown.png",
+      "modelSlot": "photo",
+      "width": 512,
+      "height": 1024,
+      "alpha": "remove-bg",
+      "prompt": "orthographic top-down view of a sleek 2000s Japanese sport compact coupe, warm champagne gold #e8b93c paint, completely debadged with no manufacturer emblem and no license plate, nose pointing up, full car visible and centered, even neutral overhead lighting, crisp silhouette, video game sprite, plain white background",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand, extra wheels"
+    },
+    {
+      "id": "car-studio-falcon",
+      "out": "public/assets/cars/falcon-studio.png",
+      "modelSlot": "photo",
+      "width": 1408,
+      "height": 896,
+      "alpha": "remove-bg",
+      "prompt": "professional game asset, Gran Turismo era broadcast aesthetic, deep navy and gold palette, 2000s Japanese turbocharged sports sedan with subtle rear wing, deep royal blue #3f74e8 paint, completely debadged with no manufacturer emblem and no license plate, three-quarter front studio shot, soft key light with subtle gold rim light, plain light gray studio background, clean showroom quality",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand, extra wheels"
+    },
+    {
+      "id": "car-topdown-falcon",
+      "out": "public/assets/cars/falcon-topdown.png",
+      "modelSlot": "photo",
+      "width": 512,
+      "height": 1024,
+      "alpha": "remove-bg",
+      "prompt": "orthographic top-down view of a 2000s Japanese turbocharged sports sedan with subtle rear wing, deep royal blue #3f74e8 paint, completely debadged with no manufacturer emblem and no license plate, nose pointing up, full car visible and centered, even neutral overhead lighting, crisp silhouette, video game sprite, plain white background",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand, extra wheels"
+    },
+    {
+      "id": "car-studio-serval",
+      "out": "public/assets/cars/serval-studio.png",
+      "modelSlot": "photo",
+      "width": 1408,
+      "height": 896,
+      "alpha": "remove-bg",
+      "prompt": "professional game asset, Gran Turismo era broadcast aesthetic, deep navy and gold palette, lightweight 2000s Japanese two-seater roadster, soft top down, racing green #48b06a paint, completely debadged with no manufacturer emblem and no license plate, three-quarter front studio shot, soft key light with subtle gold rim light, plain light gray studio background, clean showroom quality",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand, extra wheels"
+    },
+    {
+      "id": "car-topdown-serval",
+      "out": "public/assets/cars/serval-topdown.png",
+      "modelSlot": "photo",
+      "width": 512,
+      "height": 1024,
+      "alpha": "remove-bg",
+      "prompt": "orthographic top-down view of a lightweight 2000s Japanese two-seater roadster, soft top down, racing green #48b06a paint, completely debadged with no manufacturer emblem and no license plate, nose pointing up, full car visible and centered, even neutral overhead lighting, crisp silhouette, video game sprite, plain white background",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand, extra wheels"
+    },
+    {
+      "id": "car-studio-kite",
+      "out": "public/assets/cars/kite-studio.png",
+      "modelSlot": "photo",
+      "width": 1408,
+      "height": 896,
+      "alpha": "remove-bg",
+      "prompt": "professional game asset, Gran Turismo era broadcast aesthetic, deep navy and gold palette, 2000s Japanese AWD rally homologation turbo coupe with hood scoop, vivid violet #8455c8 paint, completely debadged with no manufacturer emblem and no license plate, three-quarter front studio shot, soft key light with subtle gold rim light, plain light gray studio background, clean showroom quality",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand, extra wheels"
+    },
+    {
+      "id": "car-topdown-kite",
+      "out": "public/assets/cars/kite-topdown.png",
+      "modelSlot": "photo",
+      "width": 512,
+      "height": 1024,
+      "alpha": "remove-bg",
+      "prompt": "orthographic top-down view of a 2000s Japanese AWD rally homologation turbo coupe with hood scoop, vivid violet #8455c8 paint, completely debadged with no manufacturer emblem and no license plate, nose pointing up, full car visible and centered, even neutral overhead lighting, crisp silhouette, video game sprite, plain white background",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand, extra wheels"
+    },
+    {
+      "id": "car-studio-phantom",
+      "out": "public/assets/cars/phantom-studio.png",
+      "modelSlot": "photo",
+      "width": 1408,
+      "height": 896,
+      "alpha": "remove-bg",
+      "prompt": "professional game asset, Gran Turismo era broadcast aesthetic, deep navy and gold palette, wide-body 2000s Japanese GT500-style super coupe, low and aggressive, gloss black #20242c paint, completely debadged with no manufacturer emblem and no license plate, three-quarter front studio shot, soft key light with subtle gold rim light, plain light gray studio background, clean showroom quality",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand, extra wheels"
+    },
+    {
+      "id": "car-topdown-phantom",
+      "out": "public/assets/cars/phantom-topdown.png",
+      "modelSlot": "photo",
+      "width": 512,
+      "height": 1024,
+      "alpha": "remove-bg",
+      "prompt": "orthographic top-down view of a wide-body 2000s Japanese GT500-style super coupe, low and aggressive, gloss black #20242c paint, completely debadged with no manufacturer emblem and no license plate, nose pointing up, full car visible and centered, even neutral overhead lighting, crisp silhouette, video game sprite, plain white background",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand, extra wheels"
+    },
+    {
+      "id": "car-studio-arrow",
+      "out": "public/assets/cars/arrow-studio.png",
+      "modelSlot": "photo",
+      "width": 1408,
+      "height": 896,
+      "alpha": "remove-bg",
+      "prompt": "professional game asset, Gran Turismo era broadcast aesthetic, deep navy and gold palette, open-cockpit Le Mans style racing prototype with large rear wing, pearl white and silver #e2e6ee paint, completely debadged with no manufacturer emblem and no license plate, three-quarter front studio shot, soft key light with subtle gold rim light, plain light gray studio background, clean showroom quality",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand, extra wheels"
+    },
+    {
+      "id": "car-topdown-arrow",
+      "out": "public/assets/cars/arrow-topdown.png",
+      "modelSlot": "photo",
+      "width": 512,
+      "height": 1024,
+      "alpha": "remove-bg",
+      "prompt": "orthographic top-down view of a open-cockpit Le Mans style racing prototype with large rear wing, pearl white and silver #e2e6ee paint, completely debadged with no manufacturer emblem and no license plate, nose pointing up, full car visible and centered, even neutral overhead lighting, crisp silhouette, video game sprite, plain white background",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand, extra wheels"
+    },
+    {
+      "id": "tile-ground-meadow",
+      "out": "public/assets/tracks/tiles/meadow-ground.png",
+      "modelSlot": "photo",
+      "width": 512,
+      "height": 512,
+      "alpha": "opaque",
+      "prompt": "seamless tileable texture, green countryside meadow grass with small wildflowers, top-down orthographic, even diffuse lighting, no vignette, photorealistic game texture",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "tile-asphalt-meadow",
+      "out": "public/assets/tracks/tiles/meadow-asphalt.png",
+      "modelSlot": "photo",
+      "width": 512,
+      "height": 512,
+      "alpha": "opaque",
+      "prompt": "seamless tileable texture, worn race track asphalt with fine aggregate and faint rubber lines, top-down orthographic, even diffuse lighting, no vignette, photorealistic game texture",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "tile-ground-forest-mountain",
+      "out": "public/assets/tracks/tiles/forest-mountain-ground.png",
+      "modelSlot": "photo",
+      "width": 512,
+      "height": 512,
+      "alpha": "opaque",
+      "prompt": "seamless tileable texture, alpine forest floor, pine needles and mossy rock, top-down orthographic, even diffuse lighting, no vignette, photorealistic game texture",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "tile-asphalt-forest-mountain",
+      "out": "public/assets/tracks/tiles/forest-mountain-asphalt.png",
+      "modelSlot": "photo",
+      "width": 512,
+      "height": 512,
+      "alpha": "opaque",
+      "prompt": "seamless tileable texture, worn race track asphalt with fine aggregate and faint rubber lines, top-down orthographic, even diffuse lighting, no vignette, photorealistic game texture",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "tile-ground-speedway",
+      "out": "public/assets/tracks/tiles/speedway-ground.png",
+      "modelSlot": "photo",
+      "width": 512,
+      "height": 512,
+      "alpha": "opaque",
+      "prompt": "seamless tileable texture, trimmed infield lawn with dry patches, american speedway, top-down orthographic, even diffuse lighting, no vignette, photorealistic game texture",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "tile-asphalt-speedway",
+      "out": "public/assets/tracks/tiles/speedway-asphalt.png",
+      "modelSlot": "photo",
+      "width": 512,
+      "height": 512,
+      "alpha": "opaque",
+      "prompt": "seamless tileable texture, worn race track asphalt with fine aggregate and faint rubber lines, top-down orthographic, even diffuse lighting, no vignette, photorealistic game texture",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "tile-ground-city",
+      "out": "public/assets/tracks/tiles/city-ground.png",
+      "modelSlot": "photo",
+      "width": 512,
+      "height": 512,
+      "alpha": "opaque",
+      "prompt": "seamless tileable texture, urban concrete and paving stones, city street surroundings, top-down orthographic, even diffuse lighting, no vignette, photorealistic game texture",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "tile-asphalt-city",
+      "out": "public/assets/tracks/tiles/city-asphalt.png",
+      "modelSlot": "photo",
+      "width": 512,
+      "height": 512,
+      "alpha": "opaque",
+      "prompt": "seamless tileable texture, worn race track asphalt with fine aggregate and faint rubber lines, top-down orthographic, even diffuse lighting, no vignette, photorealistic game texture",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "tile-ground-classic-gp",
+      "out": "public/assets/tracks/tiles/classic-gp-ground.png",
+      "modelSlot": "photo",
+      "width": 512,
+      "height": 512,
+      "alpha": "opaque",
+      "prompt": "seamless tileable texture, manicured grand prix circuit lawn with white-painted edge zones, top-down orthographic, even diffuse lighting, no vignette, photorealistic game texture",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "tile-asphalt-classic-gp",
+      "out": "public/assets/tracks/tiles/classic-gp-asphalt.png",
+      "modelSlot": "photo",
+      "width": 512,
+      "height": 512,
+      "alpha": "opaque",
+      "prompt": "seamless tileable texture, worn race track asphalt with fine aggregate and faint rubber lines, top-down orthographic, even diffuse lighting, no vignette, photorealistic game texture",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "tile-ground-dirt",
+      "out": "public/assets/tracks/tiles/dirt-ground.png",
+      "modelSlot": "photo",
+      "width": 512,
+      "height": 512,
+      "alpha": "opaque",
+      "prompt": "seamless tileable texture, dry cracked dirt and sand, rally park terrain, top-down orthographic, even diffuse lighting, no vignette, photorealistic game texture",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "tile-asphalt-dirt",
+      "out": "public/assets/tracks/tiles/dirt-asphalt.png",
+      "modelSlot": "photo",
+      "width": 512,
+      "height": 512,
+      "alpha": "opaque",
+      "prompt": "seamless tileable texture, compacted gravel rally road surface, top-down orthographic, even diffuse lighting, no vignette, photorealistic game texture",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "tile-curb",
+      "out": "public/assets/tracks/tiles/curb.png",
+      "modelSlot": "photo",
+      "width": 512,
+      "height": 256,
+      "alpha": "opaque",
+      "prompt": "seamless tileable texture, red and white striped race track curb, repeating pattern, straight strip, top-down orthographic, even diffuse lighting, no vignette, photorealistic game texture",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "tile-runoff",
+      "out": "public/assets/tracks/tiles/runoff.png",
+      "modelSlot": "photo",
+      "width": 512,
+      "height": 256,
+      "alpha": "opaque",
+      "prompt": "seamless tileable texture, light gray runoff tarmac with drainage grooves, top-down orthographic, even diffuse lighting, no vignette, photorealistic game texture",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "tile-dirt-road",
+      "out": "public/assets/tracks/tiles/dirt-road.png",
+      "modelSlot": "photo",
+      "width": 512,
+      "height": 256,
+      "alpha": "opaque",
+      "prompt": "seamless tileable texture, loose brown gravel road surface, top-down orthographic, even diffuse lighting, no vignette, photorealistic game texture",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "logo-main",
+      "out": "public/assets/ui/logo-main.png",
+      "modelSlot": "transparent",
+      "width": 1024,
+      "height": 512,
+      "alpha": "native",
+      "prompt": "premium racing game logo, the wordmark \"B-SPEC\" in bold condensed metallic gold letters with thin silver outline, small subtitle \"RACE DIRECTOR\" beneath in silver capitals, subtle chevron emblem to the left, dark navy and gold palette, broadcast television aesthetic, on transparent background",
+      "negative": "watermark, blurry, cartoon, low quality"
+    },
+    {
+      "id": "logo-mark",
+      "out": "public/assets/ui/logo-mark.png",
+      "modelSlot": "transparent",
+      "width": 512,
+      "height": 512,
+      "alpha": "native",
+      "prompt": "minimal emblem mark for a racing management game, two overlapping forward chevrons forming motion, metallic gold on transparent, thin silver accent line, premium broadcast style, no text",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "icon-credits",
+      "out": "public/assets/ui/icon-credits.png",
+      "modelSlot": "transparent",
+      "width": 512,
+      "height": 512,
+      "alpha": "native",
+      "prompt": "flat minimal game UI icon of stack of gold coins, single weight geometric line-and-fill, dark metallic gold #C9A54A with heavier solid fill, subtle silver accent, premium motorsport broadcast style, centered, no text",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "icon-pp",
+      "out": "public/assets/ui/icon-pp.png",
+      "modelSlot": "transparent",
+      "width": 512,
+      "height": 512,
+      "alpha": "native",
+      "prompt": "flat minimal game UI icon of circular performance gauge dial, single weight geometric line-and-fill, dark metallic gold #C9A54A with heavier solid fill, subtle silver accent, premium motorsport broadcast style, centered, no text",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "icon-laps",
+      "out": "public/assets/ui/icon-laps.png",
+      "modelSlot": "transparent",
+      "width": 512,
+      "height": 512,
+      "alpha": "native",
+      "prompt": "flat minimal game UI icon of circuit loop with checkered flag, single weight geometric line-and-fill, dark metallic gold #C9A54A with heavier solid fill, subtle silver accent, premium motorsport broadcast style, centered, no text",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "icon-fuel",
+      "out": "public/assets/ui/icon-fuel.png",
+      "modelSlot": "transparent",
+      "width": 512,
+      "height": 512,
+      "alpha": "native",
+      "prompt": "flat minimal game UI icon of fuel pump nozzle, single weight geometric line-and-fill, dark metallic gold #C9A54A with heavier solid fill, subtle silver accent, premium motorsport broadcast style, centered, no text",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "icon-fatigue",
+      "out": "public/assets/ui/icon-fatigue.png",
+      "modelSlot": "transparent",
+      "width": 512,
+      "height": 512,
+      "alpha": "native",
+      "prompt": "flat minimal game UI icon of racing helmet with sweat drop, single weight geometric line-and-fill, dark metallic gold #C9A54A with heavier solid fill, subtle silver accent, premium motorsport broadcast style, centered, no text",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "icon-morale",
+      "out": "public/assets/ui/icon-morale.png",
+      "modelSlot": "transparent",
+      "width": 512,
+      "height": 512,
+      "alpha": "native",
+      "prompt": "flat minimal game UI icon of rising star, single weight geometric line-and-fill, dark metallic gold #C9A54A with heavier solid fill, subtle silver accent, premium motorsport broadcast style, centered, no text",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "icon-pace",
+      "out": "public/assets/ui/icon-pace.png",
+      "modelSlot": "transparent",
+      "width": 512,
+      "height": 512,
+      "alpha": "native",
+      "prompt": "flat minimal game UI icon of speedometer needle at redline, single weight geometric line-and-fill, dark metallic gold #C9A54A with heavier solid fill, subtle silver accent, premium motorsport broadcast style, centered, no text",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "icon-overtake",
+      "out": "public/assets/ui/icon-overtake.png",
+      "modelSlot": "transparent",
+      "width": 512,
+      "height": 512,
+      "alpha": "native",
+      "prompt": "flat minimal game UI icon of two arrows overtaking, single weight geometric line-and-fill, dark metallic gold #C9A54A with heavier solid fill, subtle silver accent, premium motorsport broadcast style, centered, no text",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "icon-pit",
+      "out": "public/assets/ui/icon-pit.png",
+      "modelSlot": "transparent",
+      "width": 512,
+      "height": 512,
+      "alpha": "native",
+      "prompt": "flat minimal game UI icon of crossed wrench and tire, single weight geometric line-and-fill, dark metallic gold #C9A54A with heavier solid fill, subtle silver accent, premium motorsport broadcast style, centered, no text",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "icon-speed",
+      "out": "public/assets/ui/icon-speed.png",
+      "modelSlot": "transparent",
+      "width": 512,
+      "height": 512,
+      "alpha": "native",
+      "prompt": "flat minimal game UI icon of fast forward chevrons, single weight geometric line-and-fill, dark metallic gold #C9A54A with heavier solid fill, subtle silver accent, premium motorsport broadcast style, centered, no text",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "icon-audio-on",
+      "out": "public/assets/ui/icon-audio-on.png",
+      "modelSlot": "transparent",
+      "width": 512,
+      "height": 512,
+      "alpha": "native",
+      "prompt": "flat minimal game UI icon of speaker with sound waves, single weight geometric line-and-fill, dark metallic gold #C9A54A with heavier solid fill, subtle silver accent, premium motorsport broadcast style, centered, no text",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "icon-audio-off",
+      "out": "public/assets/ui/icon-audio-off.png",
+      "modelSlot": "transparent",
+      "width": 512,
+      "height": 512,
+      "alpha": "native",
+      "prompt": "flat minimal game UI icon of muted speaker with slash, single weight geometric line-and-fill, dark metallic gold #C9A54A with heavier solid fill, subtle silver accent, premium motorsport broadcast style, centered, no text",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "icon-back",
+      "out": "public/assets/ui/icon-back.png",
+      "modelSlot": "transparent",
+      "width": 512,
+      "height": 512,
+      "alpha": "native",
+      "prompt": "flat minimal game UI icon of left-pointing chevron arrow, single weight geometric line-and-fill, dark metallic gold #C9A54A with heavier solid fill, subtle silver accent, premium motorsport broadcast style, centered, no text",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "icon-settings",
+      "out": "public/assets/ui/icon-settings.png",
+      "modelSlot": "transparent",
+      "width": 512,
+      "height": 512,
+      "alpha": "native",
+      "prompt": "flat minimal game UI icon of gear cog, single weight geometric line-and-fill, dark metallic gold #C9A54A with heavier solid fill, subtle silver accent, premium motorsport broadcast style, centered, no text",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "icon-save",
+      "out": "public/assets/ui/icon-save.png",
+      "modelSlot": "transparent",
+      "width": 512,
+      "height": 512,
+      "alpha": "native",
+      "prompt": "flat minimal game UI icon of floppy disk, single weight geometric line-and-fill, dark metallic gold #C9A54A with heavier solid fill, subtle silver accent, premium motorsport broadcast style, centered, no text",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "icon-lock",
+      "out": "public/assets/ui/icon-lock.png",
+      "modelSlot": "transparent",
+      "width": 512,
+      "height": 512,
+      "alpha": "native",
+      "prompt": "flat minimal game UI icon of closed padlock, single weight geometric line-and-fill, dark metallic gold #C9A54A with heavier solid fill, subtle silver accent, premium motorsport broadcast style, centered, no text",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "icon-check",
+      "out": "public/assets/ui/icon-check.png",
+      "modelSlot": "transparent",
+      "width": 512,
+      "height": 512,
+      "alpha": "native",
+      "prompt": "flat minimal game UI icon of bold checkmark, single weight geometric line-and-fill, dark metallic gold #C9A54A with heavier solid fill, subtle silver accent, premium motorsport broadcast style, centered, no text",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "icon-warning",
+      "out": "public/assets/ui/icon-warning.png",
+      "modelSlot": "transparent",
+      "width": 512,
+      "height": 512,
+      "alpha": "native",
+      "prompt": "flat minimal game UI icon of warning triangle, single weight geometric line-and-fill, dark metallic gold #C9A54A with heavier solid fill, subtle silver accent, premium motorsport broadcast style, centered, no text",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "icon-info",
+      "out": "public/assets/ui/icon-info.png",
+      "modelSlot": "transparent",
+      "width": 512,
+      "height": 512,
+      "alpha": "native",
+      "prompt": "flat minimal game UI icon of information circle, single weight geometric line-and-fill, dark metallic gold #C9A54A with heavier solid fill, subtle silver accent, premium motorsport broadcast style, centered, no text",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "icon-home",
+      "out": "public/assets/ui/icon-home.png",
+      "modelSlot": "transparent",
+      "width": 512,
+      "height": 512,
+      "alpha": "native",
+      "prompt": "flat minimal game UI icon of garage building facade, single weight geometric line-and-fill, dark metallic gold #C9A54A with heavier solid fill, subtle silver accent, premium motorsport broadcast style, centered, no text",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "icon-garage",
+      "out": "public/assets/ui/icon-garage.png",
+      "modelSlot": "transparent",
+      "width": 512,
+      "height": 512,
+      "alpha": "native",
+      "prompt": "flat minimal game UI icon of car under a roof, single weight geometric line-and-fill, dark metallic gold #C9A54A with heavier solid fill, subtle silver accent, premium motorsport broadcast style, centered, no text",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "icon-dealership",
+      "out": "public/assets/ui/icon-dealership.png",
+      "modelSlot": "transparent",
+      "width": 512,
+      "height": 512,
+      "alpha": "native",
+      "prompt": "flat minimal game UI icon of car with price tag, single weight geometric line-and-fill, dark metallic gold #C9A54A with heavier solid fill, subtle silver accent, premium motorsport broadcast style, centered, no text",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "icon-driver",
+      "out": "public/assets/ui/icon-driver.png",
+      "modelSlot": "transparent",
+      "width": 512,
+      "height": 512,
+      "alpha": "native",
+      "prompt": "flat minimal game UI icon of classic racing helmet, single weight geometric line-and-fill, dark metallic gold #C9A54A with heavier solid fill, subtle silver accent, premium motorsport broadcast style, centered, no text",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "icon-events",
+      "out": "public/assets/ui/icon-events.png",
+      "modelSlot": "transparent",
+      "width": 512,
+      "height": 512,
+      "alpha": "native",
+      "prompt": "flat minimal game UI icon of calendar page with flag, single weight geometric line-and-fill, dark metallic gold #C9A54A with heavier solid fill, subtle silver accent, premium motorsport broadcast style, centered, no text",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "icon-freerace",
+      "out": "public/assets/ui/icon-freerace.png",
+      "modelSlot": "transparent",
+      "width": 512,
+      "height": 512,
+      "alpha": "native",
+      "prompt": "flat minimal game UI icon of steering wheel, single weight geometric line-and-fill, dark metallic gold #C9A54A with heavier solid fill, subtle silver accent, premium motorsport broadcast style, centered, no text",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "icon-retire",
+      "out": "public/assets/ui/icon-retire.png",
+      "modelSlot": "transparent",
+      "width": 512,
+      "height": 512,
+      "alpha": "native",
+      "prompt": "flat minimal game UI icon of exit door with flag, single weight geometric line-and-fill, dark metallic gold #C9A54A with heavier solid fill, subtle silver accent, premium motorsport broadcast style, centered, no text",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "icon-trophy",
+      "out": "public/assets/ui/icon-trophy.png",
+      "modelSlot": "transparent",
+      "width": 512,
+      "height": 512,
+      "alpha": "native",
+      "prompt": "flat minimal game UI icon of race winner trophy cup, single weight geometric line-and-fill, dark metallic gold #C9A54A with heavier solid fill, subtle silver accent, premium motorsport broadcast style, centered, no text",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "icon-calendar",
+      "out": "public/assets/ui/icon-calendar.png",
+      "modelSlot": "transparent",
+      "width": 512,
+      "height": 512,
+      "alpha": "native",
+      "prompt": "flat minimal game UI icon of calendar page, single weight geometric line-and-fill, dark metallic gold #C9A54A with heavier solid fill, subtle silver accent, premium motorsport broadcast style, centered, no text",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    },
+    {
+      "id": "icon-stopwatch",
+      "out": "public/assets/ui/icon-stopwatch.png",
+      "modelSlot": "transparent",
+      "width": 512,
+      "height": 512,
+      "alpha": "native",
+      "prompt": "flat minimal game UI icon of chronograph stopwatch, single weight geometric line-and-fill, dark metallic gold #C9A54A with heavier solid fill, subtle silver accent, premium motorsport broadcast style, centered, no text",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
+    }
+  ]
+}
