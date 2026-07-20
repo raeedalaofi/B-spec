@@ -5,10 +5,11 @@
       "id": "pilot-car-studio-kestrel",
       "out": "public/assets/cars/kestrel-studio.png",
       "modelSlot": "photo",
-      "width": 1600,
-      "height": 1000,
+      "width": 1408,
+      "height": 896,
       "alpha": "remove-bg",
-      "prompt": "professional game asset, Gran Turismo era broadcast aesthetic, compact 2000s Japanese economy hatchback, medium steel blue #4f8edc paint, sponsor-less, three-quarter front studio shot, soft key light with subtle gold rim light, dark navy studio background, clean showroom quality"
+      "prompt": "professional game asset, Gran Turismo era broadcast aesthetic, compact 2000s Japanese economy hatchback, medium steel blue #4f8edc paint, completely debadged with no manufacturer emblem and no license plate, three-quarter front studio shot, soft key light with subtle gold rim light, plain light gray studio background, clean showroom quality",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, extra wheels, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
     },
     {
       "id": "pilot-car-topdown-kestrel",
@@ -17,7 +18,8 @@
       "width": 512,
       "height": 1024,
       "alpha": "remove-bg",
-      "prompt": "orthographic top-down view of a compact 2000s Japanese economy hatchback, medium steel blue #4f8edc paint, sponsor-less, nose pointing up, full car visible and centered, even neutral overhead lighting, crisp silhouette, video game sprite, plain background"
+      "prompt": "orthographic top-down view of a compact 2000s Japanese economy hatchback, medium steel blue #4f8edc paint, completely debadged, no license plate, nose pointing up, full car visible and centered, even neutral overhead lighting, crisp silhouette, video game sprite, plain white background",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, extra wheels, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
     },
     {
       "id": "pilot-icon-tires",
@@ -26,7 +28,8 @@
       "width": 512,
       "height": 512,
       "alpha": "native",
-      "prompt": "flat minimal game UI icon of a racing tire with subtle wear marks, single weight geometric line-and-fill, metallic gold #C9A54A on transparent background, subtle silver accent, premium motorsport broadcast style, no text"
+      "prompt": "flat minimal game UI icon of a racing tire with subtle wear marks, single weight geometric line-and-fill, metallic gold #C9A54A on transparent background, subtle silver accent, premium motorsport broadcast style, no text",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, extra wheels, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
     },
     {
       "id": "pilot-license-badge-b",
@@ -34,8 +37,9 @@
       "modelSlot": "vector",
       "width": 512,
       "height": 512,
-      "alpha": "remove-bg",
-      "prompt": "heraldic racing license badge, letter-free bronze shield emblem with laurel wreath detail, flat premium emblem style, deep navy and bronze palette, isolated on plain background, game UI asset, no text"
+      "alpha": "native",
+      "prompt": "heraldic racing license badge, letter-free bronze shield emblem with laurel wreath detail, flat premium emblem style, deep navy and bronze palette, isolated on plain background, game UI asset, no text",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, extra wheels, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
     },
     {
       "id": "pilot-portrait-ace",
@@ -44,7 +48,8 @@
       "width": 512,
       "height": 512,
       "alpha": "remove-bg",
-      "prompt": "professional portrait of a veteran racing driver in his 40s, dark navy racing suit with gold trim, confident calm expression, studio headshot chest-up, soft key light, dark neutral background, motorsport team photo style"
+      "prompt": "professional portrait of a veteran racing driver in his 40s, plain dark navy racing suit with gold trim and no sponsor patches or logos, confident calm expression, studio headshot chest-up, soft key light, plain light gray background, motorsport team photo style",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, extra wheels, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
     },
     {
       "id": "pilot-tile-asphalt",
@@ -53,7 +58,8 @@
       "width": 512,
       "height": 512,
       "alpha": "opaque",
-      "prompt": "seamless tileable texture, worn race track asphalt with fine aggregate detail and faint tire rubber lines, top-down orthographic, even diffuse lighting, no vignette, no markings, photorealistic game texture"
+      "prompt": "seamless tileable texture, worn race track asphalt with fine aggregate detail and faint tire rubber lines, top-down orthographic, even diffuse lighting, no vignette, no markings, photorealistic game texture",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, extra wheels, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand"
     }
   ]
 }

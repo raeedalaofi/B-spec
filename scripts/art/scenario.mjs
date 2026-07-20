@@ -30,7 +30,8 @@ export const MODELS = {
   photo: 'model_bfl-flux-2-pro-editing', // FLUX 2 (Pro): car renders, portraits, props
   transparent: 'model_ideogram-v3-generate-transparent', // native-alpha icons/badges
   texture: 'model_bfl-flux-2-dev', // seamless tiles
-  removeBg: 'model_ideogram-remove-background', // img2img alpha cutout
+  vector: 'model_ideogram-v3-generate-transparent', // flat badges/emblems lane
+  removeBg: 'model_bria-remove-background', // clean matting (Photoroom as backup)
   upscale: 'model_recraft-crisp-upscale',
 };
 
