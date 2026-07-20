@@ -1,9 +1,13 @@
 import { AI_BY_ID } from '../../data/aidrivers';
 import { CARS } from '../../data/cars';
 import { CHAMPIONSHIPS, CHAMPIONSHIP_BY_ID, type ChampionshipDef } from '../../data/championships';
+import { CATALOG, CATEGORY_INFO } from '../../data/eventCatalog';
 import { generateInvitational } from '../../data/invitationals';
+import { MISSIONS } from '../../data/missions';
 import { TRACK_DEFS } from '../../data/tracks';
+import { tunedSpec } from '../../data/parts';
 import { championshipProgress } from '../../state/gameState';
+import { ppOf } from '../../state/pp';
 import { standingsOf } from '../../state/progression';
 import { hasLicense } from '../../state/trials';
 import { fmtCr, fmtLapTime, menuShell } from '../menuCommon';
@@ -50,27 +54,71 @@ function invitationalSection(ctx: AppContext): string {
     ${carOk ? '' : '<div class="entry-warning">Invitationals require a Class A car.</div>'}`;
 }
 
+function categoryCards(ctx: AppContext): string {
+  const gs = ctx.gs!;
+  const cards = [
+    ...CATEGORY_INFO.map((c) => ({
+      id: c.id as string,
+      title: c.title,
+      sub: c.sub,
+      count: `${CATALOG[c.id].filter((e) => gs.standaloneResults[e.id]).length}/${CATALOG[c.id].length}`,
+    })),
+    {
+      id: 'missions',
+      title: 'Driving Missions',
+      sub: 'Skill trials on loaner cars, medals pay credits',
+      count: `${MISSIONS.filter((m) => gs.trialMedals[m.id]).length}/${MISSIONS.length}`,
+    },
+  ];
+  return `
+    <h2 class="section-title">Event Categories</h2>
+    <div class="hub-cards category-cards">
+      ${cards
+        .map(
+          (c) => `<button class="hub-card" data-category="${c.id}">
+            <b>${c.title}</b><span>${c.sub}</span><span class="champ-progress">${c.count}</span>
+          </button>`,
+        )
+        .join('')}
+    </div>`;
+}
+
+function champCard(ctx: AppContext, champ: ChampionshipDef): string {
+  const gs = ctx.gs!;
+  const progress = championshipProgress(gs, champ.id);
+  const unlocked = isUnlocked(ctx, champ);
+  const done = Object.keys(progress.completedEvents).length;
+  return `
+    <button class="champ-card ${unlocked ? '' : 'locked'}" data-champ="${champ.id}" ${unlocked ? '' : 'disabled'}>
+      <div class="champ-title">
+        <b>${champ.name} ${progress.champion ? '🏆' : ''}</b>
+        <span class="label">Class ${champ.allowedClasses.join('/')}${champ.licenseReq ? ` · ${champ.licenseReq.toUpperCase()} license` : ''}${champ.ppMax ? ` · ≤${champ.ppMax} PP` : ''} · ${champ.events.length} races</span>
+      </div>
+      <span class="champ-tagline">${champ.tagline}</span>
+      <span class="champ-progress">${unlocked ? `${done}/${champ.events.length} raced` : lockReason(ctx, champ)}</span>
+    </button>`;
+}
+
 function championshipList(ctx: AppContext): void {
   const gs = ctx.gs!;
   const content = menuShell(ctx, 'Race Events', { backTo: 'home' });
-  content.innerHTML = `<div class="champ-list">${CHAMPIONSHIPS.map((champ) => {
-    const progress = championshipProgress(gs, champ.id);
-    const unlocked = isUnlocked(ctx, champ);
-    const done = Object.keys(progress.completedEvents).length;
-    return `
-      <button class="champ-card ${unlocked ? '' : 'locked'}" data-champ="${champ.id}" ${unlocked ? '' : 'disabled'}>
-        <div class="champ-title">
-          <b>${champ.name} ${progress.champion ? '🏆' : ''}</b>
-          <span class="label">Class ${champ.allowedClasses.join('/')}${champ.licenseReq ? ` · ${champ.licenseReq.toUpperCase()} license` : ''} · ${champ.events.length} races</span>
-        </div>
-        <span class="champ-tagline">${champ.tagline}</span>
-        <span class="champ-progress">${unlocked ? `${done}/${champ.events.length} raced` : lockReason(ctx, champ)}</span>
-      </button>`;
-  }).join('')}</div>
+  const byCategory = (cat: string): ChampionshipDef[] =>
+    CHAMPIONSHIPS.filter((c) => (c.category ?? 'core') === cat);
+  content.innerHTML = `
+  <h2 class="section-title">Career Championships</h2>
+  <div class="champ-list">${byCategory('core').map((c) => champCard(ctx, c)).join('')}</div>
+  ${categoryCards(ctx)}
+  <h2 class="section-title">Grand Tour Series</h2>
+  <div class="champ-list">${byCategory('grandtour').map((c) => champCard(ctx, c)).join('')}</div>
+  <h2 class="section-title">One-Make Cups</h2>
+  <div class="champ-list">${byCategory('onemake').map((c) => champCard(ctx, c)).join('')}</div>
   ${invitationalSection(ctx)}`;
 
   content.querySelectorAll<HTMLButtonElement>('[data-champ]').forEach((btn) =>
     btn.addEventListener('click', () => ctx.go('events', { championshipId: btn.dataset.champ })),
+  );
+  content.querySelectorAll<HTMLButtonElement>('[data-category]').forEach((btn) =>
+    btn.addEventListener('click', () => ctx.go('catalog', { category: btn.dataset.category })),
   );
   content
     .querySelector('#enter-inv')
@@ -82,17 +130,26 @@ function championshipDetail(ctx: AppContext, champ: ChampionshipDef): void {
   const content = menuShell(ctx, champ.name, { backTo: 'home' });
   const progress = championshipProgress(gs, champ.id);
   const activeCar = gs.activeCarId ? CARS[gs.activeCarId] : null;
-  const carOk = activeCar !== null && champ.allowedClasses.includes(activeCar.class);
+  let entryProblem: string | null = null;
+  if (!activeCar) {
+    entryProblem = 'You own no eligible car. Visit the dealership.';
+  } else if (champ.requiredCarId && gs.activeCarId !== champ.requiredCarId) {
+    entryProblem = `This one-make cup requires the ${CARS[champ.requiredCarId].name} as your active car.`;
+  } else if (!champ.allowedClasses.includes(activeCar.class)) {
+    entryProblem = `Entry requires a Class ${champ.allowedClasses.join(' or ')} car — your ${activeCar.name} is Class ${activeCar.class}.`;
+  } else if (champ.ppMax) {
+    const pp = ppOf(tunedSpec(activeCar, gs.tuning[gs.activeCarId] ?? []));
+    if (pp > champ.ppMax) {
+      entryProblem = `PP limit ${champ.ppMax} — your ${activeCar.name} is at ${pp} PP. Remove some tuning.`;
+    }
+  }
+  const carOk = entryProblem === null;
   const aiNames = Object.fromEntries(champ.aiDriverIds.map((id) => [id, AI_BY_ID[id].name]));
   const standings = standingsOf(gs, champ, aiNames);
 
   content.innerHTML = `
     <button class="btn" id="back-events">‹ All Championships</button>
-    ${
-      carOk
-        ? ''
-        : `<div class="entry-warning">Entry requires a Class ${champ.allowedClasses.join(' or ')} car${activeCar ? ` — your ${activeCar.name} is Class ${activeCar.class}` : ' — you own no eligible car'}. Visit the dealership or garage.</div>`
-    }
+    ${carOk ? '' : `<div class="entry-warning">${entryProblem}</div>`}
     <div class="events-layout">
       <div>
         <h2 class="section-title">Races</h2>

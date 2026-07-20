@@ -8,6 +8,7 @@ import { PART_CATEGORIES, activeParts } from '../data/parts';
 import type { RaceResult } from '../sim/types';
 import { championshipProgress, type GameState } from './gameState';
 import type { RaceRewards } from './progression';
+import { hasLicense } from './trials';
 
 export interface AchievementContext {
   type: 'race' | 'purchase' | 'generic';
@@ -185,6 +186,25 @@ export const ACHIEVEMENTS: AchievementDef[] = [
     desc: 'Win an Invitational Series event.',
     check: (_gs, ctx) =>
       ctx.type === 'race' && !!ctx.invitational && playerRow(ctx)?.position === 1,
+  },
+  {
+    id: 'first-license',
+    name: 'Certified',
+    desc: 'Earn the National B Director License.',
+    check: (gs) => hasLicense(gs, 'b'),
+  },
+  {
+    id: 'super-license',
+    name: 'Super Director',
+    desc: 'Earn the Super Director License.',
+    check: (gs) => hasLicense(gs, 's'),
+  },
+  {
+    id: 'trophy-hunter',
+    name: 'Trophy Hunter',
+    desc: 'Win 10 standalone catalog events.',
+    check: (gs) =>
+      Object.values(gs.standaloneResults).filter((r) => r.position === 1).length >= 10,
   },
 ];
 

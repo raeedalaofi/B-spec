@@ -32,6 +32,10 @@ export interface ChampionshipDef {
   licenseReq?: LicenseId;
   /** entries limited to this Performance Points ceiling */
   ppMax?: number;
+  /** grouping in the events browser */
+  category?: 'core' | 'onemake' | 'grandtour';
+  /** one-make cups: the player must race this exact car */
+  requiredCarId?: string;
 }
 
 /** championship points per finishing position */
@@ -70,6 +74,7 @@ export const CHAMPIONSHIPS: ChampionshipDef[] = [
     prize: [4000, 2800, 2000, 1500, 1100, 800, 600, 400],
     titleBonus: 8000,
     unlockAfter: null,
+    category: 'core',
   },
   {
     id: 'clubman',
@@ -111,6 +116,7 @@ export const CHAMPIONSHIPS: ChampionshipDef[] = [
     titleBonus: 15000,
     unlockAfter: 'sunday-cup',
     licenseReq: 'b',
+    category: 'core',
   },
   {
     id: 'national',
@@ -159,9 +165,158 @@ export const CHAMPIONSHIPS: ChampionshipDef[] = [
     titleBonus: 45000,
     unlockAfter: 'clubman',
     licenseReq: 'ia',
+    category: 'core',
   },
 ];
 
 export const CHAMPIONSHIP_BY_ID: Record<string, ChampionshipDef> = Object.fromEntries(
   CHAMPIONSHIPS.map((c) => [c.id, c]),
 );
+
+// ---------------------------------------------------------------------------
+// Generated championships: One-Make Cups (every car gets its own spec
+// series) and the Grand Tour (multi-race series across the expanded
+// track roster with PP ceilings).
+
+import { AI_DRIVERS } from './aidrivers';
+import { CAR_LIST } from './cars';
+
+const GEN_ROOKIES = AI_DRIVERS.slice(0, 7).map((d) => d.id);
+const GEN_PROS = AI_DRIVERS.slice(7, 14).map((d) => d.id);
+const GEN_ACES = AI_DRIVERS.slice(14, 21).map((d) => d.id);
+
+const ONEMAKE_TRACKS = [
+  'tsubame', 'greenpark', 'sonora', 'copperline', 'lumiere', 'motegrand',
+  'condorpass', 'hanriver', 'fujimi', 'newport', 'kowloon', 'shirakawa',
+];
+
+function rotateIds(arr: string[], by: number): string[] {
+  return arr.map((_, i) => arr[(i + by) % arr.length]);
+}
+
+function onemakeCups(): ChampionshipDef[] {
+  return CAR_LIST.map((car, idx) => {
+    const roster = car.class === 'C' ? GEN_ROOKIES : car.class === 'B' ? GEN_PROS : GEN_ACES;
+    const prize1 = car.class === 'C' ? 3500 : car.class === 'B' ? 6500 : 13000;
+    const licenseReq = car.class === 'C' ? undefined : car.class === 'B' ? 'b' : 'a';
+    return {
+      id: `cup-${car.id}`,
+      name: `${car.name} Cup`,
+      tagline: `One-make racing: everyone in identical ${car.name}s. Pure direction.`,
+      allowedClasses: [car.class],
+      aiDriverIds: rotateIds(roster, idx),
+      events: [0, 1, 2].map((n) => ({
+        id: `cup-${car.id}-${n + 1}`,
+        name: `${car.name} Cup — Round ${n + 1}`,
+        trackId: ONEMAKE_TRACKS[(idx * 3 + n) % ONEMAKE_TRACKS.length],
+        laps: 5 + n * 2,
+        aiCarIds: Array(7).fill(car.id),
+      })),
+      prize: [prize1, prize1 * 0.7, prize1 * 0.5, prize1 * 0.38, prize1 * 0.28, prize1 * 0.2, prize1 * 0.15, prize1 * 0.1].map(
+        (v) => Math.round(v / 100) * 100,
+      ),
+      titleBonus: prize1 * 2,
+      unlockAfter: null,
+      licenseReq,
+      category: 'onemake' as const,
+      requiredCarId: car.id,
+    };
+  });
+}
+
+const GRAND_TOUR_SPECS: Array<{
+  id: string;
+  name: string;
+  tagline: string;
+  cls: 'B' | 'A';
+  tracks: string[];
+  ppMax: number;
+}> = [
+  {
+    id: 'gt-pacific',
+    name: 'Pacific Tour',
+    tagline: 'Four rounds across the eastern circuits.',
+    cls: 'B',
+    tracks: ['tsubame', 'shirakawa', 'motegrand', 'fujimi'],
+    ppMax: 650,
+  },
+  {
+    id: 'gt-city',
+    name: 'City Lights Tour',
+    tagline: 'Street racing at its finest: four city rounds.',
+    cls: 'B',
+    tracks: ['newport', 'lumiere', 'kowloon', 'hanriver'],
+    ppMax: 650,
+  },
+  {
+    id: 'gt-continental',
+    name: 'Continental Tour',
+    tagline: 'The classic road courses, four rounds.',
+    cls: 'B',
+    tracks: ['greenpark', 'sonora', 'condorpass', 'copperline'],
+    ppMax: 650,
+  },
+  {
+    id: 'gt-speed',
+    name: 'Speed Kings Tour',
+    tagline: 'Top-speed circuits only — slipstream warfare.',
+    cls: 'A',
+    tracks: ['neonspeedway', 'oval', 'fujimi', 'lacourbe'],
+    ppMax: 730,
+  },
+  {
+    id: 'gt-mountain',
+    name: 'Mountain Masters Tour',
+    tagline: 'Gradients, gravity and guts.',
+    cls: 'A',
+    tracks: ['condorpass', 'alpenstrasse', 'shirakawa', 'kaiserwald'],
+    ppMax: 730,
+  },
+  {
+    id: 'gt-world',
+    name: 'World Tour Finale',
+    tagline: 'The complete test across four continents of racing.',
+    cls: 'A',
+    tracks: ['hanriver', 'lacourbe', 'aria', 'kaiserwald'],
+    ppMax: 730,
+  },
+];
+
+function grandTours(): ChampionshipDef[] {
+  return GRAND_TOUR_SPECS.map((spec, idx) => {
+    const roster = spec.cls === 'B' ? GEN_PROS : GEN_ACES;
+    const cars =
+      spec.cls === 'B'
+        ? ['falcon', 'serval', 'falcon', 'kite', 'serval', 'falcon', 'serval']
+        : ['phantom', 'phantom', 'arrow', 'phantom', 'phantom', 'arrow', 'phantom'];
+    const prize1 = spec.cls === 'B' ? 8500 : 18000;
+    return {
+      id: spec.id,
+      name: spec.name,
+      tagline: spec.tagline,
+      allowedClasses: [spec.cls],
+      aiDriverIds: rotateIds(roster, idx),
+      events: spec.tracks.map((trackId, n) => ({
+        id: `${spec.id}-${n + 1}`,
+        name: `${spec.name} — Round ${n + 1}`,
+        trackId,
+        laps: trackId === 'kaiserwald' ? 4 : trackId === 'lacourbe' ? 6 : 8,
+        aiCarIds: rotateIds(cars, n),
+      })),
+      prize: [prize1, prize1 * 0.7, prize1 * 0.52, prize1 * 0.4, prize1 * 0.3, prize1 * 0.22, prize1 * 0.16, prize1 * 0.12].map(
+        (v) => Math.round(v / 100) * 100,
+      ),
+      titleBonus: prize1 * 3,
+      unlockAfter: null,
+      licenseReq: spec.cls === 'B' ? ('a' as const) : ('ia' as const),
+      ppMax: spec.ppMax,
+      category: 'grandtour' as const,
+    };
+  });
+}
+
+export const GENERATED_CHAMPIONSHIPS: ChampionshipDef[] = [...onemakeCups(), ...grandTours()];
+CHAMPIONSHIPS.push(...GENERATED_CHAMPIONSHIPS);
+for (const champ of GENERATED_CHAMPIONSHIPS) {
+  CHAMPIONSHIP_BY_ID[champ.id] = champ;
+}

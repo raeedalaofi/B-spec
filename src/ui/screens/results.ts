@@ -10,6 +10,7 @@ import type { AppContext } from '../screenManager';
 interface ResultsParams {
   championshipId?: string;
   invitational?: boolean;
+  standaloneCategory?: string;
   result: RaceResult;
   rewards: RaceRewards;
 }
@@ -17,9 +18,9 @@ interface ResultsParams {
 const ORDINALS = ['1st', '2nd', '3rd', '4th', '5th', '6th', '7th', '8th'];
 
 export function resultsScreen(ctx: AppContext, params?: unknown): void {
-  const { championshipId, result, rewards } = params as ResultsParams;
+  const { championshipId, standaloneCategory, result, rewards } = params as ResultsParams;
   const champ = championshipId ? CHAMPIONSHIP_BY_ID[championshipId] : null;
-  const seriesName = champ?.name ?? 'Invitational Series';
+  const seriesName = champ?.name ?? (standaloneCategory ? 'Event Result' : 'Invitational Series');
   const content = menuShell(ctx, 'Race Rewards');
 
   const posClass = rewards.position === 1 ? 'gold' : rewards.position <= 3 ? 'silver' : '';
@@ -80,9 +81,9 @@ export function resultsScreen(ctx: AppContext, params?: unknown): void {
     </div>`;
 
   content.querySelector('#res-home')!.addEventListener('click', () => ctx.go('home'));
-  content
-    .querySelector('#res-back')!
-    .addEventListener('click', () =>
-      ctx.go('events', championshipId ? { championshipId } : undefined),
-    );
+  content.querySelector('#res-back')!.addEventListener('click', () => {
+    if (championshipId) ctx.go('events', { championshipId });
+    else if (standaloneCategory) ctx.go('catalog', { category: standaloneCategory });
+    else ctx.go('events');
+  });
 }

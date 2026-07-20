@@ -205,6 +205,72 @@ export function applyRaceResult(
 }
 
 /**
+ * Applies a finished standalone catalog event (trophies, endurance, rally,
+ * super league): credits + B-Spec points + history + best-result record.
+ */
+export function applyStandaloneResult(
+  gs: GameState,
+  event: {
+    id: string;
+    name: string;
+    trackId: string;
+    prize: number[];
+    category: string;
+  },
+  result: RaceResult,
+  gridSlot: number,
+): RaceRewards {
+  const playerRow = result.rows.find((r) => r.isPlayer)!;
+  const position = playerRow.position;
+  const creditsEarned = event.prize[position - 1] ?? 0;
+  gs.credits += creditsEarned;
+  const { points, breakdown } = racePoints(playerRow, gridSlot);
+  recordTotals(gs, playerRow);
+  const prev = gs.standaloneResults[event.id];
+  if (!prev || position < prev.position) {
+    gs.standaloneResults[event.id] = { position, bestLapS: playerRow.bestLapS };
+  }
+  const levelUps = awardBspecPoints(gs, points);
+  pushHistory(gs, {
+    at: Date.now(),
+    series: seriesLabel(event.category),
+    event: event.name,
+    trackId: event.trackId,
+    position,
+    bestLapS: playerRow.bestLapS,
+    creditsEarned,
+    pointsEarned: points,
+  });
+  return {
+    position,
+    creditsEarned,
+    pointsEarned: points,
+    pointsBreakdown: breakdown,
+    levelUps,
+    championshipDecided: false,
+    wonTitle: false,
+    titleBonus: 0,
+  };
+}
+
+function seriesLabel(category: string): string {
+  switch (category) {
+    case 'trophy':
+      return 'Track Trophy';
+    case 'trophy-reverse':
+      return 'Reverse GP';
+    case 'endurance':
+      return 'Endurance Series';
+    case 'rally':
+      return 'Rally Sprint';
+    case 'super':
+      return 'Super League';
+    default:
+      return 'Event';
+  }
+}
+
+/**
  * Applies a finished Invitational Series event (the endless endgame):
  * credits + B-Spec points + history, no championship standings.
  */

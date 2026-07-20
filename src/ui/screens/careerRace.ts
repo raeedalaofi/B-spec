@@ -7,12 +7,18 @@
 import { AI_BY_ID } from '../../data/aidrivers';
 import { CARS } from '../../data/cars';
 import { CHAMPIONSHIP_BY_ID } from '../../data/championships';
+import { STANDALONE_BY_ID } from '../../data/eventCatalog';
 import { generateInvitational } from '../../data/invitationals';
 import { LICENSE_BY_ID, TRIAL_BY_ID } from '../../data/licenses';
+import { MISSION_BY_ID } from '../../data/missions';
 import { tunedSpec } from '../../data/parts';
-import { TRACK_DEFS } from '../../data/tracks';
+import { getTrackDef, TRACK_DEFS } from '../../data/tracks';
 import { evaluateAchievements } from '../../state/achievements';
-import { applyInvitationalResult, applyRaceResult } from '../../state/progression';
+import {
+  applyInvitationalResult,
+  applyRaceResult,
+  applyStandaloneResult,
+} from '../../state/progression';
 import { applyTrialMedal, evaluateTrial, trialTrackDef } from '../../state/trials';
 import { hashSeed } from '../../sim/rng';
 import { compileTrack } from '../../sim/trackCompiler';
@@ -33,7 +39,8 @@ export type CareerRaceParams =
   | { championshipId: string; eventId: string }
   | { invitational: number }
   | { free: FreeRaceConfig }
-  | { trial: string };
+  | { trial: string }
+  | { standalone: string };
 
 function aiEntries(driverIds: string[], carIds: string[]): RaceEntry[] {
   return driverIds.map((driverId, i) => ({
@@ -127,8 +134,43 @@ export function careerRaceScreen(ctx: AppContext, params?: unknown): (() => void
     });
   }
 
+  if ('standalone' in p) {
+    const event = STANDALONE_BY_ID[p.standalone];
+    const baseDef = getTrackDef(event.trackId);
+    const def = event.trackMods
+      ? {
+          ...baseDef,
+          gripBase: baseDef.gripBase * (event.trackMods.gripMult ?? 1),
+          tireWearBase: baseDef.tireWearBase * (event.trackMods.wearMult ?? 1),
+        }
+      : baseDef;
+    const track = compileTrack(def);
+    const entries = aiEntries(event.aiDriverIds, event.aiCarIds);
+    const gridSlot = entries.length + 1;
+    entries.push(playerEntry(gs.activeCarId));
+    return mountRaceScreen(ctx.root, {
+      ...common,
+      config: {
+        track,
+        lapsTotal: event.laps,
+        seed: hashSeed(`${event.id}-${gs.totals.races}-${Date.now()}`),
+        entries,
+      },
+      title: event.name,
+      subtitle: `${track.def.name} · ${event.laps} laps`,
+      onFinished: (result) => {
+        const rewards = applyStandaloneResult(gs, event, result, gridSlot);
+        const unlocked = evaluateAchievements(gs, { type: 'race', result, rewards, gridSlot });
+        ctx.save();
+        showAchievementToasts(unlocked);
+        ctx.go('results', { standaloneCategory: event.category, result, rewards });
+      },
+      onRetire: () => ctx.go('catalog', { category: event.category }),
+    });
+  }
+
   if ('trial' in p) {
-    const trial = TRIAL_BY_ID[p.trial];
+    const trial = TRIAL_BY_ID[p.trial] ?? MISSION_BY_ID[p.trial];
     const track = compileTrack(trialTrackDef(trial));
     const entries: RaceEntry[] = trial.ai.map(({ driverId, carId }, i) => ({
       carId: `ai-${driverId}-${i}`,
@@ -147,7 +189,10 @@ export function careerRaceScreen(ctx: AppContext, params?: unknown): (() => void
       paceCmd: 3,
     });
     const license = trial.licenseId ? LICENSE_BY_ID[trial.licenseId] : null;
-    const backTo = license ? 'licenses' : 'events';
+    const goBack = (flash?: unknown): void => {
+      if (license) ctx.go('licenses', flash ? { flash } : undefined);
+      else ctx.go('catalog', { category: 'missions', ...(flash ? { flash } : {}) });
+    };
     return mountRaceScreen(ctx.root, {
       ...common,
       config: { track, lapsTotal: trial.laps, seed: trial.seed, entries },
@@ -159,15 +204,13 @@ export function careerRaceScreen(ctx: AppContext, params?: unknown): (() => void
         const unlocked = evaluateAchievements(gs, { type: 'generic' });
         ctx.save();
         showAchievementToasts(unlocked);
-        ctx.go(backTo, {
-          flash: {
-            trialId: trial.id,
-            medal: grade.medal,
-            detail: grade.detail + (earned > 0 ? ` (+${earned.toLocaleString('en-US')} Cr.)` : ''),
-          },
+        goBack({
+          trialId: trial.id,
+          medal: grade.medal,
+          detail: grade.detail + (earned > 0 ? ` (+${earned.toLocaleString('en-US')} Cr.)` : ''),
         });
       },
-      onRetire: () => ctx.go(backTo),
+      onRetire: () => goBack(),
     });
   }
 

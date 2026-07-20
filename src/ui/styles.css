@@ -1444,3 +1444,15 @@ select.text-input {
   color: var(--accent);
   font-family: var(--font-timing);
 }
+
+/* catalog extras */
+
+.event-block {
+  font-size: 11px;
+  color: var(--bad);
+  letter-spacing: 0.06em;
+}
+
+.category-cards .hub-card {
+  padding: 14px 16px;
+}
