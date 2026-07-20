@@ -6,6 +6,7 @@ import { CARS } from '../../data/cars';
 import { LICENSES, trialsOf, type Medal } from '../../data/licenses';
 import { getTrackDef } from '../../data/tracks';
 import { hasLicense, licenseAttemptable } from '../../state/trials';
+import { assetUrl } from '../assets';
 import { menuShell } from '../menuCommon';
 import type { AppContext } from '../screenManager';
 
@@ -34,7 +35,12 @@ export function licensesScreen(ctx: AppContext, params?: unknown): void {
       return `
         <div class="license-block ${held ? 'held' : ''} ${attemptable ? '' : 'locked'}">
           <div class="license-head">
-            <div class="license-badge">${lic.short}</div>
+            <div class="license-badge">
+              <img src="${assetUrl(`ui/license-${lic.id}.png`)}" alt="${lic.short}" draggable="false"
+                onerror="this.style.display='none'"
+                onload="this.nextElementSibling.style.display='none'" />
+              <span>${lic.short}</span>
+            </div>
             <div>
               <b>${lic.name} ${held ? '✓' : ''}</b>
               <span class="label">${lic.tagline}</span>

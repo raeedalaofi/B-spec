@@ -1,5 +1,6 @@
 import { CARS } from '../../data/cars';
 import { activeParts, tunedSpec } from '../../data/parts';
+import { imgTag } from '../assets';
 import { fmtCr, menuShell } from '../menuCommon';
 import type { AppContext } from '../screenManager';
 
@@ -26,6 +27,7 @@ export function garageScreen(ctx: AppContext): void {
       const kmh = Math.round(eff.topSpeedMs * 3.6);
       return `
         <div class="car-card ${active ? 'active-car' : ''}">
+          ${imgTag(`cars/${id}-studio.png`, 'car-thumb', car.name)}
           <div class="car-chip" style="background:${car.color}"></div>
           <div class="car-info">
             <b>${car.name} ${active ? '<span class="active-tag">ACTIVE</span>' : ''}

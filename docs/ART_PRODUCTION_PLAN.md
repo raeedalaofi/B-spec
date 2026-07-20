@@ -210,7 +210,7 @@ All flat, gold/silver/navy, alpha-native (Ideogram V3 Transparent / Recraft).
 ## 5. Prompt Template Library
 
 **Shared prefix (every generation):**
-`professional game asset, Gran Turismo era broadcast aesthetic, deep navy and gold palette, clean studio quality, isolated on transparent background` *(+ global negative prompt from §1)*
+`professional game asset, classic 2000s racing game broadcast aesthetic, deep navy and gold palette, clean studio quality, isolated on transparent background` *(+ global negative prompt from §1)*
 
 - **Car studio render** — *Flux + BSPEC-Vehicle + BSPEC-Style:*
   `{car description from data file: e.g. "compact 2000s Japanese hatchback, {colorHex} paint, sponsor-less"}, three-quarter front studio shot, soft key light with gold rim light, glossy showroom floor reflection cropped out`

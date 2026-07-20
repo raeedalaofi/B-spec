@@ -13,6 +13,33 @@ export const TRACK_DEFS: Record<string, TrackDef> = Object.fromEntries(
 
 export const TRACK_COUNT = Object.keys(TRACK_DEFS).length;
 
+/** visual biome per circuit — drives ground/asphalt tiles and prop packs */
+export const TRACK_BIOME: Record<string, string> = {
+  oval: 'speedway',
+  greenpark: 'meadow',
+  copperline: 'classic-gp',
+  aria: 'classic-gp',
+  tsubame: 'classic-gp',
+  fujimi: 'speedway',
+  shirakawa: 'classic-gp',
+  motegrand: 'speedway',
+  condorpass: 'forest-mountain',
+  sonora: 'meadow',
+  neonspeedway: 'speedway',
+  newport: 'city',
+  lumiere: 'city',
+  kowloon: 'city',
+  hanriver: 'city',
+  alpenstrasse: 'forest-mountain',
+  kaiserwald: 'forest-mountain',
+  lacourbe: 'meadow',
+  dustbowl: 'dirt',
+};
+
+export function biomeOf(trackId: string): string {
+  return TRACK_BIOME[trackId.replace(/-r$/, '')] ?? 'meadow';
+}
+
 /**
  * Resolves a track def by id, including reverse-layout variants
  * ('<id>-r'), which are generated on demand from the base layout.

@@ -10,6 +10,7 @@ import { championshipProgress } from '../../state/gameState';
 import { ppOf } from '../../state/pp';
 import { standingsOf } from '../../state/progression';
 import { hasLicense } from '../../state/trials';
+import { imgTag } from '../assets';
 import { fmtCr, fmtLapTime, menuShell } from '../menuCommon';
 import type { AppContext } from '../screenManager';
 
@@ -184,7 +185,9 @@ function championshipDetail(ctx: AppContext, champ: ChampionshipDef): void {
             ${standings
               .map(
                 (s, i) => `<tr class="${s.isPlayer ? 'player' : ''}">
-                  <td class="mono">${i + 1}</td><td>${s.name}</td><td class="mono">${s.points}</td>
+                  <td class="mono">${i + 1}</td>
+                  <td>${s.isPlayer ? '' : imgTag(`portraits/${s.key}.png`, 'standing-face', s.name)}${s.name}</td>
+                  <td class="mono">${s.points}</td>
                 </tr>`,
               )
               .join('')}

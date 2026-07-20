@@ -12,7 +12,7 @@ import { LICENSES } from '../../src/data/licenses';
 import { AI_DRIVERS } from '../../src/data/aidrivers';
 
 const STYLE =
-  'professional game asset, Gran Turismo era broadcast aesthetic, deep navy and gold palette';
+  'professional game asset, classic 2000s racing game broadcast aesthetic, deep navy and gold palette';
 const NEG =
   'text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, deformed, brand logo, manufacturer badge, sponsor logos, emblem of real brand';
 const NEG_CAR = NEG + ', extra wheels';

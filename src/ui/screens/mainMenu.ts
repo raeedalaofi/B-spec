@@ -1,5 +1,6 @@
 import { createNewGame } from '../../state/gameState';
 import { deleteSave, hasSave, loadGame } from '../../state/save';
+import { assetUrl } from '../assets';
 import type { AppContext } from '../screenManager';
 
 export function mainMenuScreen(ctx: AppContext): void {
@@ -8,6 +9,9 @@ export function mainMenuScreen(ctx: AppContext): void {
   const canContinue = hasSave();
   wrap.innerHTML = `
     <div class="menu-logo">
+      <img src="${assetUrl('ui/logo-main.png')}" class="logo-img" alt="B-SPEC" draggable="false"
+        onerror="this.style.display='none'"
+        onload="this.parentElement.querySelector('.logo-b').style.display='none'" />
       <div class="logo-b">B-SPEC</div>
       <div class="logo-sub">Race Director Simulation</div>
       <div class="logo-tag">You don't drive. You decide.</div>

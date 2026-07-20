@@ -10,6 +10,7 @@ import {
   partPrice,
   tunedSpec,
 } from '../../data/parts';
+import { imgTag } from '../assets';
 import { fmtCr, menuShell } from '../menuCommon';
 import type { AppContext } from '../screenManager';
 import { evaluateAchievements } from '../../state/achievements';
@@ -48,6 +49,7 @@ export function tuningScreen(ctx: AppContext, params?: unknown): void {
             const affordable = next !== null && gs.credits >= price;
             return `
               <div class="part-card">
+                ${next ? imgTag(`ui/icon-part-${next.id}.png`, 'part-icon') : imgTag(`ui/icon-partcat-${id}.png`, 'part-icon')}
                 <div class="part-info">
                   <b>${label}</b>
                   <span class="label">${active ? `Installed: ${active.name}` : 'Stock'}</span>

@@ -1,8 +1,10 @@
 // Canvas race view: track ribbon (cached to an offscreen canvas once per
 // resize) and car chevrons interpolated between sim ticks.
 
+import { biomeOf } from '../data/tracks';
 import { posAt } from '../sim/trackCompiler';
 import type { RaceState, Track } from '../sim/types';
+import { getImage, preload, ready } from '../ui/assets';
 import { fitTrack, toScreen, type Camera } from './camera';
 
 export interface CarSnapshot {
@@ -23,9 +25,17 @@ export class RaceRenderer {
   private ribbon: HTMLCanvasElement | null = null;
   private dpr = 1;
 
+  private biome: string;
+  private tilesApplied = false;
+
   constructor(canvas: HTMLCanvasElement, track: Track) {
     this.canvas = canvas;
     this.track = track;
+    this.biome = biomeOf(track.def.id);
+    preload([
+      `tracks/tiles/${this.biome}-ground.png`,
+      `tracks/tiles/${this.biome}-asphalt.png`,
+    ]);
     this.ctx = canvas.getContext('2d')!;
     this.resize();
   }
@@ -36,7 +46,20 @@ export class RaceRenderer {
     this.canvas.width = Math.max(1, Math.round(rect.width * this.dpr));
     this.canvas.height = Math.max(1, Math.round(rect.height * this.dpr));
     this.cam = fitTrack(this.track, this.canvas.width, this.canvas.height, 60 * this.dpr);
+    this.tilesApplied = false;
     this.ribbon = this.buildRibbon();
+  }
+
+  /** generated surface tiles may finish loading after construction —
+   *  rebuild the cached ribbon once, when they become drawable */
+  private refreshRibbonIfTilesReady(): void {
+    if (this.tilesApplied) return;
+    const ground = getImage(`tracks/tiles/${this.biome}-ground.png`);
+    const asphalt = getImage(`tracks/tiles/${this.biome}-asphalt.png`);
+    if (ready(ground) && ready(asphalt)) {
+      this.tilesApplied = true;
+      this.ribbon = this.buildRibbon();
+    }
   }
 
   private buildRibbon(): HTMLCanvasElement {
@@ -57,13 +80,34 @@ export class RaceRenderer {
     }
     path.closePath();
 
+    // ground: generated biome tile when available, flat navy otherwise
+    const ground = getImage(`tracks/tiles/${this.biome}-ground.png`);
+    if (ready(ground)) {
+      const pat = ctx.createPattern(ground, 'repeat')!;
+      const s = (140 * this.dpr) / ground.naturalWidth;
+      pat.setTransform(new DOMMatrix().scale(s, s));
+      ctx.fillStyle = pat;
+      ctx.fillRect(0, 0, off.width, off.height);
+      // soften toward the broadcast navy so HUD panels still sit well
+      ctx.fillStyle = 'rgba(8, 14, 26, 0.45)';
+      ctx.fillRect(0, 0, off.width, off.height);
+    }
+
     // grass shadow / outline
     ctx.lineJoin = 'round';
     ctx.strokeStyle = '#0c1420';
     ctx.lineWidth = widthPx + 8 * this.dpr;
     ctx.stroke(path);
-    // tarmac
-    ctx.strokeStyle = '#3a4150';
+    // tarmac: generated asphalt tile when available
+    const asphalt = getImage(`tracks/tiles/${this.biome}-asphalt.png`);
+    if (ready(asphalt)) {
+      const pat = ctx.createPattern(asphalt, 'repeat')!;
+      const s = (90 * this.dpr) / asphalt.naturalWidth;
+      pat.setTransform(new DOMMatrix().scale(s, s));
+      ctx.strokeStyle = pat;
+    } else {
+      ctx.strokeStyle = '#3a4150';
+    }
     ctx.lineWidth = widthPx;
     ctx.stroke(path);
     // edge lines
@@ -110,6 +154,7 @@ export class RaceRenderer {
    * current tick; `alpha` in [0,1] blends between them for smooth motion.
    */
   draw(state: RaceState, interp: InterpState, alpha: number): void {
+    this.refreshRibbonIfTilesReady();
     const ctx = this.ctx;
     ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
     if (this.ribbon) ctx.drawImage(this.ribbon, 0, 0);
@@ -139,19 +184,37 @@ export class RaceRenderer {
       if (car.mistake?.severity === 'spin') {
         ctx.rotate((state.tickCount % 20) * 0.31); // spinning wildly
       }
-      const size = (car.isPlayer ? 7.5 : 6) * this.dpr;
-      // chevron pointing along heading (+x before rotation)
-      ctx.beginPath();
-      ctx.moveTo(size, 0);
-      ctx.lineTo(-size * 0.7, size * 0.62);
-      ctx.lineTo(-size * 0.35, 0);
-      ctx.lineTo(-size * 0.7, -size * 0.62);
-      ctx.closePath();
-      ctx.fillStyle = car.spec.color;
-      ctx.fill();
-      ctx.lineWidth = 1.5 * this.dpr;
-      ctx.strokeStyle = car.isPlayer ? '#ffd75e' : 'rgba(255,255,255,0.55)';
-      ctx.stroke();
+      const sprite = getImage(`cars/${car.spec.id}-topdown.png`);
+      if (ready(sprite)) {
+        // generated sprite is nose-up; +90° aligns it with +x heading
+        ctx.rotate(Math.PI / 2);
+        const h = Math.max(4.7 * this.cam.scale, (car.isPlayer ? 17 : 15) * this.dpr);
+        const w = h * (sprite.naturalWidth / sprite.naturalHeight);
+        if (car.isPlayer) {
+          ctx.shadowColor = '#ffd75e';
+          ctx.shadowBlur = 7 * this.dpr;
+        } else {
+          // team-color underglow keeps identical models distinguishable
+          ctx.shadowColor = car.spec.color;
+          ctx.shadowBlur = 4 * this.dpr;
+        }
+        ctx.drawImage(sprite, -w / 2, -h / 2, w, h);
+        ctx.shadowBlur = 0;
+      } else {
+        const size = (car.isPlayer ? 7.5 : 6) * this.dpr;
+        // chevron pointing along heading (+x before rotation)
+        ctx.beginPath();
+        ctx.moveTo(size, 0);
+        ctx.lineTo(-size * 0.7, size * 0.62);
+        ctx.lineTo(-size * 0.35, 0);
+        ctx.lineTo(-size * 0.7, -size * 0.62);
+        ctx.closePath();
+        ctx.fillStyle = car.spec.color;
+        ctx.fill();
+        ctx.lineWidth = 1.5 * this.dpr;
+        ctx.strokeStyle = car.isPlayer ? '#ffd75e' : 'rgba(255,255,255,0.55)';
+        ctx.stroke();
+      }
       ctx.restore();
 
       if (car.isPlayer) {

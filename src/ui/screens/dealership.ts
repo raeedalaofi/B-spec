@@ -1,5 +1,6 @@
 import { CAR_LIST } from '../../data/cars';
 import { evaluateAchievements } from '../../state/achievements';
+import { imgTag } from '../assets';
 import { fmtCr, menuShell } from '../menuCommon';
 import type { AppContext } from '../screenManager';
 import { showAchievementToasts } from '../toasts';
@@ -12,6 +13,7 @@ function carCard(ctx: AppContext, car: CarSpec): string {
   const kmh = Math.round(car.topSpeedMs * 3.6);
   return `
     <div class="car-card ${owned ? 'owned' : ''}">
+      ${imgTag(`cars/${car.id}-studio.png`, 'car-thumb', car.name)}
       <div class="car-chip" style="background:${car.color}"></div>
       <div class="car-info">
         <b>${car.name}</b>
