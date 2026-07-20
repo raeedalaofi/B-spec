@@ -1,51 +1,28 @@
-// Entry point. For M3 this boots straight into a demo race; the career
-// shell and menu screens arrive in M4.
+// Entry point: boot the career.
 
 import './ui/styles.css';
-import { AI_DRIVERS } from './data/aidrivers';
-import { CARS } from './data/cars';
-import { TRACK_DEFS } from './data/tracks';
-import { hashSeed } from './sim/rng';
-import { compileTrack } from './sim/trackCompiler';
-import type { RaceEntry } from './sim/types';
-import { mountRaceScreen } from './ui/screens/race';
+import { loadGame, saveGame } from './state/save';
+import type { GameState } from './state/gameState';
+import { goTo, type AppContext, type ScreenId } from './ui/screenManager';
+import { registerAllScreens } from './ui/screens';
 
-const app = document.querySelector<HTMLDivElement>('#app')!;
+registerAllScreens();
 
-function startDemoRace(): void {
-  const track = compileTrack(TRACK_DEFS.greenpark);
-  const rookies = AI_DRIVERS.slice(0, 7);
-  const carPool = ['kestrel', 'vulpe', 'taro', 'kestrel', 'vulpe', 'taro', 'kestrel'];
-  const entries: RaceEntry[] = rookies.map((drv, i) => ({
-    carId: `ai-${drv.id}`,
-    spec: CARS[carPool[i]],
-    driverName: drv.name,
-    stats: drv.stats,
-    isPlayer: false,
-  }));
-  entries.splice(5, 0, {
-    carId: 'player',
-    spec: CARS.vulpe,
-    driverName: 'A. Driver',
-    stats: { pace: 45, consistency: 42, battle: 40, smoothness: 44, stamina: 48 },
-    isPlayer: true,
-  });
+const root = document.querySelector<HTMLDivElement>('#app')!;
 
-  const params = new URLSearchParams(location.search);
-  const laps = Math.max(1, parseInt(params.get('laps') ?? '6', 10) || 6);
-  const seedParam = params.get('seed');
+const ctx: AppContext = {
+  root,
+  gs: null as GameState | null,
+  save() {
+    if (ctx.gs) saveGame(ctx.gs);
+  },
+  go(id: ScreenId, params?: unknown) {
+    // guard: everything except the main menu needs a loaded game
+    if (id !== 'main-menu' && !ctx.gs) id = 'main-menu';
+    goTo(ctx, id, params);
+  },
+};
 
-  mountRaceScreen(app, {
-    config: {
-      track,
-      lapsTotal: laps,
-      seed: seedParam ? parseInt(seedParam, 10) : hashSeed(`demo-${Date.now()}`),
-      entries,
-    },
-    title: 'B-Spec Demo Race',
-    subtitle: `Green Park Circuit · ${laps} laps`,
-    onFinished: () => startDemoRace(),
-  });
-}
-
-startDemoRace();
+// resume directly into the career if a save exists
+ctx.gs = loadGame();
+ctx.go(ctx.gs ? 'home' : 'main-menu');
