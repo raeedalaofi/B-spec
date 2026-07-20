@@ -1,11 +1,5 @@
 {
-  "comment": "Pilot batch — 6 assets, one per pipeline lane, for style approval BEFORE mass production. Slots resolve to ready-made platform models by name pattern at runtime.",
-  "slots": {
-    "photo": ["flux.2", "flux 2", "flux.1.1", "flux-pro", "flux.1-pro", "flux"],
-    "transparent": ["ideogram-v3-transparent", "generate transparent", "ideogram v3", "ideogram"],
-    "vector": ["recraft-v3", "recraft v3", "recraft"],
-    "texture": ["flux.2", "flux.1", "flux"]
-  },
+  "comment": "Pilot batch - 6 assets, one per pipeline lane, for style approval BEFORE mass production. modelSlot resolves via MODELS in scenario.mjs.",
   "entries": [
     {
       "id": "pilot-car-studio-kestrel",

@@ -1,18 +1,16 @@
 // Scenario API client + batch runner for the B-Spec art pipeline.
-// Ready-made platform models only (no custom training).
+// Ready-made platform models only. Verified against the live API (July 2026):
+//   POST /v1/generate/custom/{modelId}   -> { job: { jobId, ... } }
+//   GET  /v1/jobs/{jobId}                -> { job: { status, metadata.assetIds } }
+//   GET  /v1/assets/{assetId}            -> { asset: { url } }
 //
-// Credentials come from the environment — NEVER hardcode or commit them:
-//   export SCENARIO_KEY=api_xxx
-//   export SCENARIO_SECRET=xxx
+// Credentials from env only — NEVER hardcode or commit:
+//   export SCENARIO_KEY=api_xxx SCENARIO_SECRET=xxx
 //
 // Usage:
-//   node scripts/art/scenario.mjs models                 # list usable platform models
-//   node scripts/art/scenario.mjs pilot                  # generate the pilot batch
-//   node scripts/art/scenario.mjs batch manifest.json    # run any manifest
-//
-// Every accepted image is saved under public/assets/... and logged to
-// docs/art-manifest.csv (id, model, prompt, seed, date) so any asset can be
-// re-generated consistently later.
+//   node scripts/art/scenario.mjs models [filter]     # list platform models
+//   node scripts/art/scenario.mjs pilot               # style-approval batch
+//   node scripts/art/scenario.mjs batch <manifest>    # run any manifest
 
 import { mkdir, writeFile, appendFile, readFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
@@ -27,14 +25,19 @@ if (!KEY || !SECRET) {
 }
 const AUTH = 'Basic ' + Buffer.from(`${KEY}:${SECRET}`).toString('base64');
 
+/** resolved platform model ids per pipeline lane */
+export const MODELS = {
+  photo: 'model_bfl-flux-2-pro-editing', // FLUX 2 (Pro): car renders, portraits, props
+  transparent: 'model_ideogram-v3-generate-transparent', // native-alpha icons/badges
+  texture: 'model_bfl-flux-2-dev', // seamless tiles
+  removeBg: 'model_ideogram-remove-background', // img2img alpha cutout
+  upscale: 'model_recraft-crisp-upscale',
+};
+
 async function api(pathname, options = {}) {
   const res = await fetch(`${BASE}${pathname}`, {
     ...options,
-    headers: {
-      Authorization: AUTH,
-      'Content-Type': 'application/json',
-      ...(options.headers ?? {}),
-    },
+    headers: { Authorization: AUTH, 'Content-Type': 'application/json', ...(options.headers ?? {}) },
   });
   const text = await res.text();
   let json;
@@ -44,106 +47,70 @@ async function api(pathname, options = {}) {
     json = { raw: text };
   }
   if (!res.ok) {
-    throw new Error(`${options.method ?? 'GET'} ${pathname} -> ${res.status}: ${text.slice(0, 400)}`);
+    throw new Error(`${options.method ?? 'GET'} ${pathname} -> ${res.status}: ${text.slice(0, 300)}`);
   }
   return json;
 }
 
-// ---------------------------------------------------------------- models
-
 export async function listModels() {
-  // platform ("public") models — try the documented shapes, newest first
-  const attempts = [
-    '/models?privacy=public&pageSize=100',
-    '/models?pageSize=100',
-    '/platform-models',
-  ];
-  for (const p of attempts) {
-    try {
-      const out = await api(p);
-      const models = out.models ?? out.data ?? out;
-      if (Array.isArray(models) && models.length) return models;
-    } catch (e) {
-      console.error(`  (${p} failed: ${String(e).slice(0, 120)})`);
+  const out = await api('/models?privacy=public&pageSize=100');
+  return out.models ?? [];
+}
+
+async function waitJob(jobId) {
+  for (let i = 0; i < 200; i++) {
+    const { job } = await api(`/jobs/${jobId}`);
+    if (job.status === 'success') return job;
+    if (job.status === 'failure' || job.status === 'canceled') {
+      throw new Error(`job ${jobId} ${job.status}: ${JSON.stringify(job.error ?? {}).slice(0, 300)}`);
     }
+    await new Promise((r) => setTimeout(r, 4000));
   }
-  throw new Error('could not list models — check API docs/endpoint');
+  throw new Error(`job ${jobId} timed out`);
 }
 
-// ------------------------------------------------------------- generation
-
-async function pollInference(modelId, inferenceId) {
-  for (let i = 0; i < 120; i++) {
-    const out = await api(`/models/${encodeURIComponent(modelId)}/inferences/${inferenceId}`);
-    const inf = out.inference ?? out;
-    if (inf.status === 'succeeded') return inf;
-    if (inf.status === 'failed') throw new Error(`inference failed: ${JSON.stringify(inf).slice(0, 300)}`);
-    await new Promise((r) => setTimeout(r, 3000));
-  }
-  throw new Error('inference timed out');
+/** run any generation job; returns asset ids */
+export async function generate(modelId, body) {
+  const out = await api(`/generate/custom/${modelId}`, {
+    method: 'POST',
+    body: JSON.stringify(body),
+  });
+  const job = await waitJob(out.job.jobId);
+  const assets = job.metadata?.assetIds ?? [];
+  if (!assets.length) throw new Error(`job ${out.job.jobId} produced no assets`);
+  return assets;
 }
 
-/**
- * Text-to-image on a platform model. Tries the inference-style endpoint,
- * falls back to the flat /generate endpoint shape.
- */
-export async function txt2img({ modelId, prompt, negativePrompt, width, height, numSamples = 4, seed }) {
-  const params = {
-    type: 'txt2img',
-    prompt,
-    negativePrompt,
-    width,
-    height,
-    numSamples,
-    ...(seed !== undefined ? { seed } : {}),
-  };
-  try {
-    const out = await api(`/models/${encodeURIComponent(modelId)}/inferences`, {
-      method: 'POST',
-      body: JSON.stringify({ parameters: params }),
-    });
-    const inf = out.inference ?? out;
-    const done = inf.status === 'succeeded' ? inf : await pollInference(modelId, inf.id);
-    return (done.images ?? []).map((im) => ({ url: im.url, seed: im.seed ?? done.parameters?.seed }));
-  } catch (e) {
-    // fallback: flat generate API
-    const out = await api(`/generate/txt2img`, {
-      method: 'POST',
-      body: JSON.stringify({ modelId, ...params }),
-    });
-    const job = out.job ?? out.inference ?? out;
-    if (Array.isArray(job.images)) return job.images.map((im) => ({ url: im.url ?? im, seed: im.seed }));
-    throw e;
-  }
+export async function assetUrl(assetId) {
+  const out = await api(`/assets/${assetId}`);
+  return (out.asset ?? out).url;
 }
 
-export async function removeBackground(imageUrlOrAssetId) {
-  const bodies = [
-    { image: imageUrlOrAssetId, backgroundColor: 'transparent' },
-    { assetId: imageUrlOrAssetId },
-  ];
-  for (const body of bodies) {
-    for (const p of ['/images/erase-background', '/generate/remove-background']) {
-      try {
-        const out = await api(p, { method: 'POST', body: JSON.stringify(body) });
-        const img = out.image ?? out.asset ?? out;
-        if (img.url) return img.url;
-      } catch {
-        // try next shape
-      }
-    }
-  }
-  throw new Error('background removal endpoint mismatch — check API docs');
-}
-
-async function download(url, filePath) {
-  const res = await fetch(url, { headers: { Authorization: AUTH } });
+export async function download(assetId, filePath) {
+  const url = await assetUrl(assetId);
+  const res = await fetch(url);
   if (!res.ok) throw new Error(`download ${res.status}`);
   await mkdir(path.dirname(filePath), { recursive: true });
   await writeFile(filePath, Buffer.from(await res.arrayBuffer()));
 }
 
-// -------------------------------------------------------------- manifest
+/** alpha cutout via the Ideogram Remove Background img2img model */
+export async function removeBackground(assetId) {
+  const bodies = [{ image: assetId }, { assetIds: [assetId] }, { imageAssetId: assetId }];
+  let lastErr;
+  for (const body of bodies) {
+    try {
+      const assets = await generate(MODELS.removeBg, body);
+      return assets[0];
+    } catch (e) {
+      lastErr = e;
+    }
+  }
+  throw lastErr;
+}
+
+export const GLOBAL_NEGATIVE =
+  'text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, extra wheels, deformed';
 
 const MANIFEST_LOG = 'docs/art-manifest.csv';
 
@@ -157,47 +124,45 @@ async function logAccepted(row) {
   );
 }
 
-/**
- * Runs a manifest: [{ id, out, modelSlot, prompt, width, height, alpha }]
- * modelSlot is resolved against resolved model ids (see slots below).
- */
-export async function runManifest(entries, slots, { candidates = 4 } = {}) {
+export async function runManifest(entries, { candidates = 2 } = {}) {
+  const failures = [];
   for (const entry of entries) {
-    const modelId = slots[entry.modelSlot];
-    if (!modelId) {
-      console.error(`SKIP ${entry.id}: no model resolved for slot '${entry.modelSlot}'`);
-      continue;
-    }
-    console.log(`\n=== ${entry.id} (${entry.modelSlot} -> ${modelId})`);
-    const images = await txt2img({
-      modelId,
-      prompt: entry.prompt,
-      negativePrompt: entry.negative ?? GLOBAL_NEGATIVE,
-      width: entry.width,
-      height: entry.height,
-      numSamples: candidates,
-    });
-    // save all candidates for review; the first is the provisional pick
-    for (let i = 0; i < images.length; i++) {
-      let url = images[i].url;
-      if (entry.alpha === 'remove-bg') {
-        try {
-          url = await removeBackground(url);
-        } catch (e) {
-          console.error(`  bg-removal failed for candidate ${i}: ${e}`);
+    const modelId = MODELS[entry.modelSlot] ?? entry.modelSlot;
+    console.log(`\n=== ${entry.id} -> ${modelId}`);
+    try {
+      const assets = await generate(modelId, {
+        prompt: entry.prompt,
+        negativePrompt: entry.negative ?? GLOBAL_NEGATIVE,
+        width: entry.width,
+        height: entry.height,
+        numSamples: entry.candidates ?? candidates,
+        ...(entry.seed !== undefined ? { seed: entry.seed } : {}),
+        ...(entry.extra ?? {}),
+      });
+      for (let i = 0; i < assets.length; i++) {
+        let assetId = assets[i];
+        if (entry.alpha === 'remove-bg') {
+          try {
+            assetId = await removeBackground(assetId);
+          } catch (e) {
+            console.error(`  bg-removal failed (candidate ${i}): ${String(e).slice(0, 160)}`);
+          }
         }
+        const file = i === 0 ? entry.out : entry.out.replace('.png', `.alt${i}.png`);
+        await download(assetId, file);
+        console.log(`  saved ${file}`);
       }
-      const suffix = i === 0 ? '' : `.alt${i}`;
-      const file = i === 0 ? entry.out : entry.out.replace('.png', `${suffix}.png`);
-      await download(url, file);
-      console.log(`  saved ${file}`);
+      await logAccepted({ id: entry.id, model: modelId, prompt: entry.prompt });
+    } catch (e) {
+      console.error(`  FAILED: ${String(e).slice(0, 250)}`);
+      failures.push(entry.id);
     }
-    await logAccepted({ id: entry.id, model: modelId, seed: images[0]?.seed, prompt: entry.prompt });
+  }
+  if (failures.length) {
+    console.error(`\n${failures.length} failures: ${failures.join(', ')}`);
+    process.exitCode = 1;
   }
 }
-
-export const GLOBAL_NEGATIVE =
-  'text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, low-poly, blurry, oversaturated, extra wheels, deformed';
 
 // ------------------------------------------------------------------ CLI
 
@@ -205,22 +170,15 @@ const [, , cmd, arg] = process.argv;
 
 if (cmd === 'models') {
   const models = await listModels();
+  const filter = (arg ?? '').toLowerCase();
   for (const m of models) {
-    console.log(`${m.id ?? m.modelId}  |  ${m.name ?? ''}  |  ${m.type ?? m.category ?? ''}`);
+    const line = `${m.id}  |  ${m.name ?? ''}`;
+    if (!filter || line.toLowerCase().includes(filter)) console.log(line);
   }
 } else if (cmd === 'pilot' || cmd === 'batch') {
   const manifestPath = cmd === 'pilot' ? 'scripts/art/manifest-pilot.json' : arg;
-  const { slots: slotPatterns, entries } = JSON.parse(await readFile(manifestPath, 'utf8'));
-  const models = await listModels();
-  const slots = {};
-  for (const [slot, patterns] of Object.entries(slotPatterns)) {
-    const hit = models.find((m) =>
-      patterns.some((p) => `${m.id ?? ''} ${m.name ?? ''}`.toLowerCase().includes(p.toLowerCase())),
-    );
-    slots[slot] = hit?.id ?? hit?.modelId ?? null;
-    console.log(`slot ${slot} -> ${slots[slot] ?? 'NOT FOUND (' + patterns.join('|') + ')'}`);
-  }
-  await runManifest(entries, slots);
+  const { entries } = JSON.parse(await readFile(manifestPath, 'utf8'));
+  await runManifest(entries);
 } else {
-  console.log('usage: node scripts/art/scenario.mjs models | pilot | batch <manifest.json>');
+  console.log('usage: node scripts/art/scenario.mjs models [filter] | pilot | batch <manifest.json>');
 }
