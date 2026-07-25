@@ -2272,3 +2272,83 @@ select.text-input {
   padding: 12px;
   font-size: 13px;
 }
+
+/* ---------------------------------------------------- broadcast presentation */
+
+.shot-caption {
+  position: absolute;
+  left: 50%;
+  top: 78px;
+  transform: translateX(-50%);
+  padding: 4px 14px;
+  border-radius: 3px;
+  background: rgba(8, 14, 26, 0.85);
+  border-left: 2px solid var(--gold);
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--gold-bright);
+  opacity: 0;
+  transition: opacity 0.25s;
+  pointer-events: none;
+}
+
+.shot-caption.visible {
+  opacity: 1;
+}
+
+.results-body {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+}
+
+@media (min-width: 900px) {
+  .results-body {
+    grid-template-columns: 1.35fr 1fr;
+    align-items: start;
+  }
+}
+
+.reel {
+  background: rgba(255, 255, 255, 0.03);
+  border-left: 2px solid var(--panel-line);
+  border-radius: 4px;
+  padding: 10px 12px 12px;
+}
+
+.reel-row {
+  display: flex;
+  gap: 10px;
+  align-items: baseline;
+  padding: 5px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  font-size: 12px;
+}
+
+.reel-row:last-child {
+  border-bottom: none;
+}
+
+.reel-time {
+  font-family: var(--font-timing);
+  font-size: 10px;
+  color: var(--text-dim);
+  min-width: 74px;
+}
+
+.reel-row.good .reel-text {
+  color: var(--good);
+}
+
+.reel-row.bad .reel-text {
+  color: var(--bad);
+}
+
+.results-card {
+  max-width: min(980px, 94vw);
+}
+
+.results-table {
+  width: 100%;
+}

@@ -12,6 +12,7 @@ import type {
   RaceState,
 } from '../../sim/types';
 import { RaceHud } from '../raceHud';
+import { highlightFor, type Highlight } from '../highlights';
 import { nextRadioPrompt, type RadioPrompt } from '../radio';
 import { SOUND } from '../sound';
 
@@ -53,6 +54,7 @@ export function mountRaceScreen(root: HTMLElement, opts: RaceScreenOptions): () 
       pending.push({ type: 'PIT', carId: playerId, tires, refuel, fuelTargetL }),
     onSpeed: (mult) => (speedMult = mult),
     onPause: (on) => (paused = on),
+    onWideView: (on) => renderer.setWideMode(on),
     onRetire: () => opts.onRetire?.(),
     audioOn: opts.audio ?? true,
     onAudioToggle: (on) => {
@@ -91,6 +93,15 @@ export function mountRaceScreen(root: HTMLElement, opts: RaceScreenOptions): () 
     radio = { prompt, remainingS: prompt.timeoutS };
     SOUND.radioIn();
     hud.showRadio(prompt, answerRadio);
+  };
+
+  // The sim already emits a complete typed record of everything that
+  // happened, so a highlight reel is nearly free — it is a filter over the
+  // event log, not a second system that has to be kept in sync with it.
+  const highlights: Highlight[] = [];
+  const recordHighlight = (s: RaceState, e: RaceEvent): void => {
+    const h = highlightFor(s, e, playerId);
+    if (h) highlights.push(h);
   };
 
   const playSoundFor = (e: RaceEvent): void => {
@@ -209,6 +220,7 @@ export function mountRaceScreen(root: HTMLElement, opts: RaceScreenOptions): () 
           hud.pushEvent(state, e);
           playSoundFor(e);
           effectFor(e);
+          recordHighlight(state, e);
         }
         acc -= TICK_S;
         ticks++;
@@ -228,7 +240,14 @@ export function mountRaceScreen(root: HTMLElement, opts: RaceScreenOptions): () 
       if (hud.updateCountdown(state)) SOUND.countdownTick();
     }
 
-    renderer.draw(state, interp, Math.max(0, Math.min(1, acc / TICK_S)), running ? dt : 0);
+    renderer.draw(
+      state,
+      interp,
+      Math.max(0, Math.min(1, acc / TICK_S)),
+      running ? dt : 0,
+      playerId,
+    );
+    hud.setShotCaption(renderer.caption());
 
     if (state.phase === 'finished' && !finishedShown) {
       finishedShown = true;
@@ -236,8 +255,8 @@ export function mountRaceScreen(root: HTMLElement, opts: RaceScreenOptions): () 
       hud.update(state);
       const result = buildResult(state);
       setTimeout(() => {
-        hud.showResults(state, result, () => opts.onFinished(result, state));
-      }, 800);
+        hud.showResults(state, result, highlights, () => opts.onFinished(result, state));
+      }, 900);
     }
 
     raf = requestAnimationFrame(frame);

@@ -16,6 +16,7 @@ import type {
 } from '../sim/types';
 import { DRIVER_ORDERS, TIRE_COMPOUNDS } from '../sim/types';
 import { imgTag } from './assets';
+import { buildReel, type Highlight } from './highlights';
 import { messageFor } from './messages';
 import type { RadioPrompt } from './radio';
 
@@ -24,6 +25,7 @@ export interface HudCallbacks {
   onPit(tires: TireCompound | null, refuel: boolean, fuelTargetL?: number): void;
   onSpeed(mult: number): void;
   onPause(paused: boolean): void;
+  onWideView(on: boolean): void;
   onRetire(): void;
   audioOn: boolean;
   onAudioToggle(on: boolean): void;
@@ -60,6 +62,9 @@ export class RaceHud {
   private pitBtn!: HTMLButtonElement;
   private speedBtns: HTMLButtonElement[] = [];
   private pauseBtn!: HTMLButtonElement;
+  private shotCaption!: HTMLElement;
+  private wideBtn!: HTMLButtonElement;
+  private wideOn = false;
   private radioEl: HTMLElement | null = null;
   private radioId: string | null = null;
   private currentOrder: DriverOrder = 'push';
@@ -83,6 +88,13 @@ export class RaceHud {
     this.lapCounter = top.querySelector('.lap-counter')!;
     this.flag = top.querySelector('.flag-state')!;
     const speeds = top.querySelector('.speed-controls')!;
+
+    this.wideBtn = document.createElement('button');
+    this.wideBtn.textContent = '⛶';
+    this.wideBtn.title = 'Whole circuit view (V)';
+    this.wideBtn.setAttribute('aria-label', 'Toggle the whole-circuit view');
+    this.wideBtn.addEventListener('click', () => this.toggleWide());
+    speeds.appendChild(this.wideBtn);
 
     this.pauseBtn = document.createElement('button');
     this.pauseBtn.textContent = '❚❚';
@@ -142,6 +154,10 @@ export class RaceHud {
 
     this.root.appendChild(this.buildCommandBar());
 
+    this.shotCaption = document.createElement('div');
+    this.shotCaption.className = 'shot-caption';
+    this.root.appendChild(this.shotCaption);
+
     this.log = document.createElement('div');
     this.log.className = 'message-log';
     this.log.setAttribute('aria-live', 'polite');
@@ -159,7 +175,7 @@ export class RaceHud {
 
     const group = document.createElement('div');
     group.className = 'order-group';
-    group.innerHTML = `<span class="label">Team radio — 1-6 orders · P pit · Space pause · S speed</span>`;
+    group.innerHTML = `<span class="label">Team radio — 1-6 orders · P pit · Space pause · V view · S speed</span>`;
     const row = document.createElement('div');
     row.className = 'order-buttons';
     DRIVER_ORDERS.forEach((id, i) => {
@@ -192,6 +208,19 @@ export class RaceHud {
     this.currentOrder = order;
     for (const [id, btn] of this.orderBtns) btn.classList.toggle('active', id === order);
     this.cb.onOrder(order);
+  }
+
+  /** the camera caption: what the current shot is showing */
+  setShotCaption(text: string): void {
+    if (this.shotCaption.textContent === text) return;
+    this.shotCaption.textContent = text;
+    this.shotCaption.classList.toggle('visible', text.length > 0);
+  }
+
+  toggleWide(): void {
+    this.wideOn = !this.wideOn;
+    this.wideBtn.classList.toggle('active', this.wideOn);
+    this.cb.onWideView(this.wideOn);
   }
 
   togglePause(): void {
@@ -284,6 +313,10 @@ export class RaceHud {
     }
     if (key === ' ') {
       this.togglePause();
+      return true;
+    }
+    if (key === 'v' || key === 'V') {
+      this.toggleWide();
       return true;
     }
     if (key === 's' || key === 'S') {
@@ -525,7 +558,12 @@ export class RaceHud {
     this.overlay = null;
   }
 
-  showResults(state: RaceState, result: RaceResult, onContinue: () => void): void {
+  showResults(
+    state: RaceState,
+    result: RaceResult,
+    highlights: Highlight[],
+    onContinue: () => void,
+  ): void {
     const rows = result.rows
       .map(
         (r) => `<tr class="${r.isPlayer ? 'player' : ''}${r.retired ? ' out' : ''}">
@@ -545,13 +583,34 @@ export class RaceHud {
         </tr>`,
       )
       .join('');
+    const reel = buildReel(highlights);
+    const fmtClock = (t: number): string => {
+      const m = Math.floor(t / 60);
+      return `${m}:${Math.floor(t - m * 60).toString().padStart(2, '0')}`;
+    };
+    const reelHtml = reel.length
+      ? `<div class="reel">
+          <div class="label">How the race went</div>
+          ${reel
+            .map(
+              (h) => `<div class="reel-row ${h.tone}">
+                <span class="reel-time">L${h.lap} · ${fmtClock(h.atS)}</span>
+                <span class="reel-text">${h.text}</span>
+              </div>`,
+            )
+            .join('')}
+        </div>`
+      : '';
     this.showOverlay(`
       <div class="results-card">
         <h2>${imgTag('fx/flag-checkered.png', 'flag-img inline')}Race Result</h2>
-        <table class="results-table">
-          <thead><tr><th>P</th><th>Driver</th><th>Car</th><th>Gap</th><th>Best</th></tr></thead>
-          <tbody>${rows}</tbody>
-        </table>
+        <div class="results-body">
+          <table class="results-table">
+            <thead><tr><th>P</th><th>Driver</th><th>Car</th><th>Gap</th><th>Best</th></tr></thead>
+            <tbody>${rows}</tbody>
+          </table>
+          ${reelHtml}
+        </div>
         <div class="results-actions"><button class="btn primary" id="race-continue">Continue</button></div>
       </div>`);
     this.overlay!.querySelector('#race-continue')!.addEventListener('click', onContinue);
