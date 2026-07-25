@@ -92,7 +92,10 @@ async function recolour(file, rel, rule) {
   const ch = info.channels;
   let touched = 0;
   for (let i = 0; i < data.length; i += ch) {
-    if (data[i + ch - 1] === 0) continue;
+    // Fully transparent pixels are recoloured too. Their RGB is invisible when
+    // composited, but leaving it behind means the matte no longer matches the
+    // subject it surrounds — which is exactly what the QA gate's matte-residue
+    // check looks for, and it would be this script's own fault.
     const [, s, l] = rgbToHsl(data[i], data[i + 1], data[i + 2]);
     // leave true neutrals alone — they are the white/black structure of the icon
     if (s < 0.08 && rule.hue !== null) continue;

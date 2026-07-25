@@ -95,7 +95,30 @@ background-removal pass, and it would bite immediately if anyone resampled
 these masters with a naive non-premultiplied filter. It is not a reason to
 regenerate anything.
 
-## 5. Adding an asset
+## 5. Known-open issues
+
+Fixed in this pass: the green icon lane (41 assets re-hued), the flags, the
+letterboxed backdrops, the photoreal lanes' palettisation, the inconsistent
+sprite scales, and the missing type system.
+
+Still open, because none of it can be fixed by editing pixels:
+
+| Issue | Where | Needs |
+| --- | --- | --- |
+| **Car likeness** | all 8 `cars/*-studio` | regeneration — see `CAR_LIKENESS.md` |
+| **Top-downs are cel-shaded** while the studio renders are photoreal, against a negative prompt that bans `anime` | `cars/*-topdown`, `*-damaged` | regeneration through the Kontext lane from approved studio renders |
+| **Garbled text on the menu backdrop** — nine monitors of AI pseudo-text, behind the title | `cinematic/intro-pitwall.png` | regeneration, text-free |
+| **11 tiles do not tile** | `tracks/tiles/` | regeneration with a seamless workflow, or an offline seam-blend pass |
+| **Trim varies 7.7% across the car family** | `cars/` | the renderer compensates via `spriteMetrics.ts`; a re-cut would remove the need |
+| Matte residue on one prop | `tracks/props/speedway-3.png` | advisory only — see the note above |
+
+The icons were re-hued rather than redrawn. That fixes the palette, and it
+does not fix draughtsmanship: `icon-part-power-{1,2,3}` are still three
+detailed engine drawings that differ only in interior linework, which is not a
+difference you can see at 24px. A redraw as flat geometric glyphs is the right
+answer and is not done.
+
+## 6. Adding an asset
 
 1. Generate against the prompt template in `ART_PRODUCTION_PLAN.md` §4–5.
 2. `node scripts/art/qaAssets.mjs --filter <your-asset>` until it is clean.
