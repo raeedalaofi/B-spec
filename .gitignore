@@ -23,5 +23,6 @@ dist-ssr
 *.sln
 *.sw?
 
-# store build artefacts (regenerate with `npm run store`)
-store/
+# Build artefacts from `npm run store`. Anchored to the root on purpose:
+# an unanchored `store/` also matches docs/store, which is committed art.
+/store/
