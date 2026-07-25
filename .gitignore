@@ -25,3 +25,7 @@ dist-ssr
 
 # store build artefacts (regenerate with `npm run store`)
 store/
+art-qa-report.json
+
+# generated candidates awaiting the likeness review (never masters)
+art-review/

@@ -32,6 +32,8 @@ const MIME = {
   '.png': 'image/png',
   '.svg': 'image/svg+xml',
   '.json': 'application/json',
+  '.woff2': 'font/woff2',
+  '.webp': 'image/webp',
 };
 
 // A static server just large enough to serve a built SPA. Bringing in a

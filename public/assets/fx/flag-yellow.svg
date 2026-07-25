@@ -1,0 +1,15 @@
+<!--
+  Yellow flag. The sim has had cautions since the beginning and there was never
+  a flag on screen for them — the raster fx/flag-yellow.png was generated,
+  came back olive, and was never referenced by any code path.
+
+  Double-waved, so it is distinguishable from the solid green by shape and not
+  only by colour.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Yellow caution flag">
+  <path d="M10 6c12-5 22 5 38 0v22c-16 5-26-5-38 0z" fill="#f2c230"/>
+  <path d="M10 6c12-5 22 5 38 0v22c-16 5-26-5-38 0z" fill="none" stroke="#8a6e2a" stroke-width="2"/>
+  <path d="M10 30c12-5 22 5 38 0v14c-16 5-26-5-38 0z" fill="#f2c230" opacity="0.85"/>
+  <path d="M10 30c12-5 22 5 38 0v14c-16 5-26-5-38 0z" fill="none" stroke="#8a6e2a" stroke-width="2"/>
+  <rect x="6" y="4" width="4" height="56" rx="2" fill="#5b6472"/>
+</svg>

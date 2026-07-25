@@ -16,7 +16,7 @@
 //
 //   node scripts/optimizeAssets.mjs [distDir]
 
-import { existsSync, readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync, statSync, unlinkSync, writeFileSync } from 'node:fs';
 import { join, relative, sep } from 'node:path';
 import sharp from 'sharp';
 
@@ -25,30 +25,48 @@ import sharp from 'sharp';
  * size the asset is ever drawn at, so it still looks sharp on a retina panel
  * and at the closest camera shot.
  */
-const MAX_EDGE = [
+/**
+ * Longest edge and encoder, per asset folder.
+ *
+ * The encoder used to be one line for everything: `png({palette: true})`,
+ * justified in a comment as fine because "these are flat illustration-style
+ * renders". That is true of the icons and false of everything else. Quantising
+ * a photographic driver portrait to 256 colours takes it from ~7,000 colours
+ * to 256, and a 1280px sky gradient from ~50,000 to 256, which bands visibly.
+ *
+ * So the photoreal lanes ship WebP instead — measured on this asset set it is
+ * both smaller *and* far more faithful than the palettised PNG it replaces
+ * (the forest backdrop: 490 KB / 256 colours becomes 138 KB / 37,581). The
+ * flat lanes stay palettised PNG, where 256 colours genuinely is enough and
+ * the alpha edges matter more than the colour count.
+ *
+ * `assetUrl()` in src/ui/assets.ts rewrites the extension for the WebP lanes
+ * in production builds. Dev keeps serving the PNG masters.
+ */
+const LANES = [
   // drawn at up to ~30 device px even in the tightest battle shot
-  ['cars/', 160],
+  ['cars/', 160, 'webp'],
   // 54px rival portrait, 28px in standings
-  ['portraits/', 192],
+  ['portraits/', 192, 'webp'],
   // particles scale with the camera; these get the most headroom
-  ['fx/', 224],
+  ['fx/', 224, 'png'],
   // trackside scenery, ~70 device px at the closest shot
-  ['tracks/props/', 160],
+  ['tracks/props/', 160, 'webp'],
   // tiled patterns — they repeat, so they never need to be large
-  ['tracks/tiles/', 256],
+  ['tracks/tiles/', 256, 'webp'],
   // a full-width banner, 130px tall
-  ['tracks/backdrops/', 1280],
+  ['tracks/backdrops/', 1280, 'webp'],
   // full-screen menu backdrops
-  ['cinematic/', 1600],
+  ['cinematic/', 1600, 'webp'],
   // icons, medals, licence cards: 24-90px on screen
-  ['ui/', 192],
+  ['ui/', 192, 'png'],
 ];
 
-function maxEdgeFor(rel) {
-  for (const [prefix, edge] of MAX_EDGE) {
-    if (rel.startsWith(prefix)) return edge;
-  }
-  return 256;
+/** Keep this list in sync with WEBP_LANES in src/ui/assets.ts. */
+export const WEBP_LANES = LANES.filter(([, , fmt]) => fmt === 'webp').map(([p]) => p);
+
+function laneFor(rel) {
+  return LANES.find(([prefix]) => rel.startsWith(prefix)) ?? ['', 256, 'png'];
 }
 
 function walk(dir, out = []) {
@@ -74,19 +92,26 @@ let after = 0;
 await Promise.all(
   files.map(async (file) => {
     const rel = relative(assetsDir, file).split(sep).join('/');
-    const maxEdge = maxEdgeFor(rel);
+    const [, maxEdge, format] = laneFor(rel);
     // read first: sharp cannot safely write back to the file it is reading
     const input = readFileSync(file);
     before += input.length;
-    const out = await sharp(input)
+    const pipeline = sharp(input)
       // `inside` preserves aspect ratio, and withoutEnlargement leaves any
       // already-small asset alone rather than upscaling it
-      .resize(maxEdge, maxEdge, { fit: 'inside', withoutEnlargement: true })
-      // these are flat illustration-style renders, so a 256-colour palette is
-      // invisible at the sizes they are drawn and roughly quarters the file
-      .png({ palette: true, quality: 90, effort: 7 })
-      .toBuffer();
-    writeFileSync(file, out);
+      .resize(maxEdge, maxEdge, { fit: 'inside', withoutEnlargement: true });
+    const out = await (format === 'webp'
+      ? pipeline.webp({ quality: 82, alphaQuality: 92, effort: 5 })
+      : pipeline.png({ palette: true, quality: 90, effort: 7})
+    ).toBuffer();
+    if (format === 'webp') {
+      // the .png masters stay the source of truth; only the shipped copy is
+      // re-containered, and assetUrl() knows which lanes to ask for
+      writeFileSync(file.replace(/\.png$/i, '.webp'), out);
+      unlinkSync(file);
+    } else {
+      writeFileSync(file, out);
+    }
     after += out.length;
   }),
 );

@@ -5,8 +5,20 @@
 
 const cache = new Map<string, HTMLImageElement>();
 
+/**
+ * Lanes the build re-encodes to WebP, because they are photographic and a
+ * 256-colour palette bands them badly. Keep in sync with LANES in
+ * scripts/optimizeAssets.mjs. Dev serves the untouched .png masters, so the
+ * swap only applies to production builds.
+ */
+const WEBP_LANES = ['cars/', 'portraits/', 'tracks/props/', 'tracks/tiles/', 'tracks/backdrops/', 'cinematic/'];
+
 export function assetUrl(rel: string): string {
-  return `${import.meta.env.BASE_URL}assets/${rel}`;
+  const name =
+    import.meta.env.PROD && rel.endsWith('.png') && WEBP_LANES.some((l) => rel.startsWith(l))
+      ? rel.replace(/\.png$/, '.webp')
+      : rel;
+  return `${import.meta.env.BASE_URL}assets/${name}`;
 }
 
 /** returns the image element (may still be loading); null once known-missing */

@@ -8,6 +8,11 @@ function container(): HTMLElement {
   if (!el) {
     el = document.createElement('div');
     el.id = 'toasts';
+    // An achievement unlock is exactly the kind of thing a screen reader
+    // should announce, and the container had no live region — the toast
+    // appeared, sat for four seconds and left without ever being read out.
+    el.setAttribute('role', 'status');
+    el.setAttribute('aria-live', 'polite');
     document.body.appendChild(el);
   }
   return el;

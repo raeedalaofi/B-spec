@@ -1,0 +1,59 @@
+/* Self-hosted type.
+ *
+ * The game shipped on system fonts — 'Segoe UI' on Windows, 'Helvetica Neue'
+ * on macOS, Arial on Linux — so the "motorsport broadcast" look was three
+ * different looks depending on who opened it. Worse, --font-timing resolved to
+ * Consolas / Menlo / DejaVu Sans Mono, three faces with three sets of metrics,
+ * which meant the lap-delta column in the timing tower lined up on one OS and
+ * drifted on the others.
+ *
+ * Barlow Condensed is the broadcast voice: narrow, high x-height, holds up in
+ * all-caps at 10px with wide tracking. Roboto Mono carries the timing figures,
+ * where equal-width digits are the whole point.
+ *
+ * The files live under src/ so Vite fingerprints them and rewrites these URLs
+ * against the configured base — the build targets GitHub Pages with
+ * `base: './'`, where an absolute /fonts/ path would 404. Subset to Latin:
+ * 88 KB for all five faces, no third-party request at runtime.
+ * See ./fonts/LICENSE.md.
+ */
+
+@font-face {
+  font-family: 'Barlow Condensed';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('./fonts/BarlowCondensed-500.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Barlow Condensed';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('./fonts/BarlowCondensed-600.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Barlow Condensed';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('./fonts/BarlowCondensed-700.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Roboto Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('./fonts/RobotoMono-400.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Roboto Mono';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('./fonts/RobotoMono-500.woff2') format('woff2');
+}

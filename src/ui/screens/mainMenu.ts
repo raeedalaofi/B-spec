@@ -1,6 +1,7 @@
 import { createNewGame } from '../../state/gameState';
 import { deleteSave, hasSave, loadGame } from '../../state/save';
 import { assetUrl } from '../assets';
+import { alertDialog, confirmDialog } from '../dialog';
 import type { AppContext } from '../screenManager';
 
 export function mainMenuScreen(ctx: AppContext): void {
@@ -28,10 +29,10 @@ export function mainMenuScreen(ctx: AppContext): void {
     <div class="menu-footnote">You are the race director, not the driver. Read the race, call the strategy, take your driver through a career.</div>`;
   ctx.root.appendChild(wrap);
 
-  wrap.querySelector('#mm-continue')?.addEventListener('click', () => {
+  wrap.querySelector('#mm-continue')?.addEventListener('click', async () => {
     const gs = loadGame();
     if (!gs) {
-      alert('Save data could not be read. Starting fresh.');
+      await alertDialog('Save data could not be read', 'Starting a fresh career.');
       deleteSave();
       ctx.go('main-menu');
       return;
@@ -40,8 +41,16 @@ export function mainMenuScreen(ctx: AppContext): void {
     ctx.go('home');
   });
 
-  wrap.querySelector('#mm-new')!.addEventListener('click', () => {
-    if (canContinue && !confirm('Start a new career? Your existing save will be overwritten.')) {
+  wrap.querySelector('#mm-new')!.addEventListener('click', async () => {
+    if (
+      canContinue &&
+      !(await confirmDialog({
+        title: 'Start a new career?',
+        body: 'Your existing save will be overwritten. This cannot be undone.',
+        confirmLabel: 'Overwrite',
+        danger: true,
+      }))
+    ) {
       return;
     }
     const name = (wrap.querySelector('#mm-name') as HTMLInputElement).value.trim() || 'A. Driver';

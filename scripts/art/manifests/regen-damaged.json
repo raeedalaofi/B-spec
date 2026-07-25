@@ -1,0 +1,93 @@
+{
+  "note": "Stage 2: damaged race sprites, derived from each car OWN top-down output so the swap at 65% tire wear does not jump to a different angle. Requires regen-views.json to have run first — runManifest uses concurrent workers, so this cannot be one manifest.",
+  "entries": [
+    {
+      "id": "car-damaged-kestrel",
+      "out": "art-review/views/kestrel-damaged.png",
+      "modelSlot": "kontext",
+      "referenceFile": "art-review/views/kestrel-topdown.png",
+      "aspectRatio": "1:1",
+      "alpha": "remove-bg",
+      "candidates": 1,
+      "rotate": 0,
+      "prompt": "Keep this exact same top-down view of the same car in the same orientation and framing. Add race damage: a crumpled and scraped front bumper, dented and creased front wing panels, scuffed paint along both flanks, and a light coating of dust and rubber marbles over the bodywork. Do not change the camera angle, the car shape or the paint colour. Photorealistic, plain light gray background, no text."
+    },
+    {
+      "id": "car-damaged-vulpe",
+      "out": "art-review/views/vulpe-damaged.png",
+      "modelSlot": "kontext",
+      "referenceFile": "art-review/views/vulpe-topdown.png",
+      "aspectRatio": "1:1",
+      "alpha": "remove-bg",
+      "candidates": 1,
+      "rotate": 0,
+      "prompt": "Keep this exact same top-down view of the same car in the same orientation and framing. Add race damage: a crumpled and scraped front bumper, dented and creased front wing panels, scuffed paint along both flanks, and a light coating of dust and rubber marbles over the bodywork. Do not change the camera angle, the car shape or the paint colour. Photorealistic, plain light gray background, no text."
+    },
+    {
+      "id": "car-damaged-taro",
+      "out": "art-review/views/taro-damaged.png",
+      "modelSlot": "kontext",
+      "referenceFile": "art-review/views/taro-topdown.png",
+      "aspectRatio": "1:1",
+      "alpha": "remove-bg",
+      "candidates": 1,
+      "rotate": 0,
+      "prompt": "Keep this exact same top-down view of the same car in the same orientation and framing. Add race damage: a crumpled and scraped front bumper, dented and creased front wing panels, scuffed paint along both flanks, and a light coating of dust and rubber marbles over the bodywork. Do not change the camera angle, the car shape or the paint colour. Photorealistic, plain light gray background, no text."
+    },
+    {
+      "id": "car-damaged-falcon",
+      "out": "art-review/views/falcon-damaged.png",
+      "modelSlot": "kontext",
+      "referenceFile": "art-review/views/falcon-topdown.png",
+      "aspectRatio": "1:1",
+      "alpha": "remove-bg",
+      "candidates": 1,
+      "rotate": 0,
+      "prompt": "Keep this exact same top-down view of the same car in the same orientation and framing. Add race damage: a crumpled and scraped front bumper, dented and creased front wing panels, scuffed paint along both flanks, and a light coating of dust and rubber marbles over the bodywork. Do not change the camera angle, the car shape or the paint colour. Photorealistic, plain light gray background, no text."
+    },
+    {
+      "id": "car-damaged-serval",
+      "out": "art-review/views/serval-damaged.png",
+      "modelSlot": "kontext",
+      "referenceFile": "art-review/views/serval-topdown.png",
+      "aspectRatio": "1:1",
+      "alpha": "remove-bg",
+      "candidates": 1,
+      "rotate": 0,
+      "prompt": "Keep this exact same top-down view of the same car in the same orientation and framing. Add race damage: a crumpled and scraped front bumper, dented and creased front wing panels, scuffed paint along both flanks, and a light coating of dust and rubber marbles over the bodywork. Do not change the camera angle, the car shape or the paint colour. Photorealistic, plain light gray background, no text."
+    },
+    {
+      "id": "car-damaged-kite",
+      "out": "art-review/views/kite-damaged.png",
+      "modelSlot": "kontext",
+      "referenceFile": "art-review/views/kite-topdown.png",
+      "aspectRatio": "1:1",
+      "alpha": "remove-bg",
+      "candidates": 1,
+      "rotate": 0,
+      "prompt": "Keep this exact same top-down view of the same car in the same orientation and framing. Add race damage: a crumpled and scraped front bumper, dented and creased front wing panels, scuffed paint along both flanks, and a light coating of dust and rubber marbles over the bodywork. Do not change the camera angle, the car shape or the paint colour. Photorealistic, plain light gray background, no text."
+    },
+    {
+      "id": "car-damaged-phantom",
+      "out": "art-review/views/phantom-damaged.png",
+      "modelSlot": "kontext",
+      "referenceFile": "art-review/views/phantom-topdown.png",
+      "aspectRatio": "1:1",
+      "alpha": "remove-bg",
+      "candidates": 1,
+      "rotate": 0,
+      "prompt": "Keep this exact same top-down view of the same car in the same orientation and framing. Add race damage: a crumpled and scraped front bumper, dented and creased front wing panels, scuffed paint along both flanks, and a light coating of dust and rubber marbles over the bodywork. Do not change the camera angle, the car shape or the paint colour. Photorealistic, plain light gray background, no text."
+    },
+    {
+      "id": "car-damaged-arrow",
+      "out": "art-review/views/arrow-damaged.png",
+      "modelSlot": "kontext",
+      "referenceFile": "art-review/views/arrow-topdown.png",
+      "aspectRatio": "1:1",
+      "alpha": "remove-bg",
+      "candidates": 1,
+      "rotate": 0,
+      "prompt": "Keep this exact same top-down view of the same car in the same orientation and framing. Add race damage: a crumpled and scraped front bumper, dented and creased front wing panels, scuffed paint along both flanks, and a light coating of dust and rubber marbles over the bodywork. Do not change the camera angle, the car shape or the paint colour. Photorealistic, plain light gray background, no text."
+    }
+  ]
+}

@@ -35,6 +35,15 @@ export function registerScreen(id: ScreenId, fn: ScreenFn): void {
   registry.set(id, fn);
 }
 
+/**
+ * Every navigation used to be a hard cut — innerHTML cleared, new screen
+ * painted, no beat in between. A short fade is the cheapest thing that makes
+ * an interface feel considered rather than assembled, and it costs one class.
+ *
+ * The screen is built synchronously either way; only the opacity is animated,
+ * so nothing here can delay input or leave a half-built screen on display.
+ * Reduced-motion users get the old instant swap, via the CSS.
+ */
 export function goTo(ctx: AppContext, id: ScreenId, params?: unknown): void {
   const fn = registry.get(id);
   if (!fn) throw new Error(`unknown screen '${id}'`);
@@ -44,4 +53,10 @@ export function goTo(ctx: AppContext, id: ScreenId, params?: unknown): void {
   ctx.root.scrollTop = 0;
   const result = fn(ctx, params);
   if (typeof result === 'function') cleanup = result;
+
+  ctx.root.classList.remove('screen-enter');
+  // force a reflow so the class removal takes effect before it is re-added,
+  // otherwise repeat navigations to the same screen never re-trigger
+  void ctx.root.offsetWidth;
+  ctx.root.classList.add('screen-enter');
 }

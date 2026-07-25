@@ -134,6 +134,11 @@ function runSetup(ctx: AppContext, setup: RaceSetup, restored?: RaceState): () =
         gs.settings.audio = on;
         ctx.save();
       },
+      defaultSpeed: gs.settings.defaultSpeed,
+      onSpeedChange: (mult) => {
+        gs.settings.defaultSpeed = mult;
+        ctx.save();
+      },
       coachSeen: gs.coachSeen,
       onCoachSeen: () => ctx.save(),
       resume: { trackDef: setup.trackDef, params: setup.params },

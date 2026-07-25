@@ -1,22 +1,9 @@
 /* B-Spec — motorsport-broadcast look: deep navy, thin gold rules,
    condensed uppercase labels, monospace timing figures. */
 
-:root {
-  --bg-0: #060a12;
-  --bg-1: #0b1322;
-  --bg-2: #101c30;
-  --panel: rgba(8, 14, 26, 0.88);
-  --panel-line: rgba(201, 165, 74, 0.55);
-  --gold: #c9a54a;
-  --gold-bright: #ffd75e;
-  --text: #e8ecf4;
-  --text-dim: #93a0b4;
-  --good: #58d68a;
-  --bad: #e06c5c;
-  --accent: #4f8edc;
-  --font-ui: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
-  --font-timing: 'Consolas', 'Menlo', 'DejaVu Sans Mono', monospace;
-}
+/* Colour, type, spacing and motion tokens now live in tokens.css, which is
+   imported ahead of this file. They are shared with the art pipeline — see
+   scripts/art/palette.mjs and docs/ART_BIBLE.md. */
 
 * {
   margin: 0;
@@ -38,6 +25,22 @@ body {
 
 #app {
   height: 100%;
+}
+
+/* screen-to-screen fade — see goTo() in screenManager.ts */
+@keyframes screen-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.screen-enter {
+  animation: screen-in var(--dur) var(--ease-out);
 }
 
 button {
@@ -163,8 +166,21 @@ button {
   background: rgba(201, 165, 74, 0.16);
 }
 
+/* The tower is rebuilt from innerHTML on every update, so a transition would
+   never run — the element it started on is already gone. An animation fires
+   fresh on each newly-created row instead, which is exactly the behaviour a
+   one-shot flash wants. */
+@keyframes tower-flash {
+  from {
+    background: rgba(88, 214, 138, 0.32);
+  }
+  to {
+    background: transparent;
+  }
+}
+
 .tower-row.flash {
-  background: rgba(88, 214, 138, 0.25);
+  animation: tower-flash 0.6s var(--ease-out);
 }
 
 .tower-pos {
@@ -212,11 +228,28 @@ button {
 
 /* --------------------------------------------------------- condition panel */
 
-.condition-panel {
+/* The right-hand rail: driver condition on top, rival intel beneath it. They
+   stack in normal flow so the intel can never be overlapped by a tall
+   condition panel — which is what happened when each was positioned
+   absolutely and the intel's offset was a hardcoded 300px. */
+.hud-rail {
   position: absolute;
   top: 64px;
   right: 14px;
   width: 210px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+  max-height: calc(100% - 200px);
+  pointer-events: none;
+}
+
+.hud-rail > * {
+  pointer-events: auto;
+}
+
+.condition-panel {
+  width: 100%;
   background: var(--panel);
   border-top: 2px solid var(--panel-line);
   border-radius: 0 0 6px 6px;
@@ -441,7 +474,11 @@ button {
   gap: 3px;
   overflow: hidden;
   pointer-events: none;
-  mask-image: linear-gradient(to top, black 70%, transparent);
+  /* The log holds more than fits, so the oldest entry is always mid-clip. The
+     fade has to be fully transparent before it reaches that cut or you see a
+     sliced-off row with a hard edge — 70% left the top row half-visible. */
+  mask-image: linear-gradient(to top, black 46%, transparent 88%);
+  -webkit-mask-image: linear-gradient(to top, black 46%, transparent 88%);
 }
 
 .message-log .msg {
@@ -575,6 +612,22 @@ button {
   border-color: var(--gold);
   color: #10131a;
   font-weight: 700;
+}
+
+/* Used by home.ts and preRace.ts since they were written, never defined —
+   those buttons have been silently rendering as plain .btn. A ghost button is
+   the quieter option next to a primary: no fill, no border until you reach
+   for it. */
+.btn.ghost {
+  background: transparent;
+  border-color: transparent;
+  color: var(--text-dim);
+}
+
+.btn.ghost:hover,
+.btn.ghost:focus-visible {
+  border-color: var(--hairline);
+  color: var(--text);
 }
 
 .btn.primary:hover {
@@ -1284,6 +1337,17 @@ button {
   color: var(--good);
 }
 
+/* tuning.ts marks the rows a part actually changes. The class was emitted but
+   never styled, so every spec looked equally affected and the one number the
+   purchase moves was no easier to find than the seven it doesn't. */
+.spec-row.changed {
+  background: rgba(201, 165, 74, 0.08);
+  box-shadow: inset 2px 0 0 var(--gold);
+  padding-left: 8px;
+  margin-left: -8px;
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+}
+
 .tuned-tag {
   font-size: 9px;
   letter-spacing: 0.14em;
@@ -1564,6 +1628,17 @@ select.text-input {
   width: min(300px, 46vw);
   height: auto;
   filter: drop-shadow(0 6px 24px rgba(0, 0, 0, 0.6));
+}
+
+/* Condition-panel glyphs. Sized to the cap height of the 10px label beside
+   them and pushed slightly optically low so they sit on the same baseline. */
+.stat-icon {
+  width: 11px;
+  height: 11px;
+  object-fit: contain;
+  vertical-align: -1px;
+  margin-right: 5px;
+  opacity: 0.85;
 }
 
 .flag-img {
@@ -1897,24 +1972,30 @@ select.text-input {
 }
 
 .flag-state.caution {
-  color: #10131a;
-  background: #e8c65a;
-  padding: 1px 8px;
-  border-radius: 3px;
+  display: inline-flex;
+  align-items: center;
+  color: var(--on-gold);
+  background: var(--warn);
+  padding: 1px 8px 1px 4px;
+  border-radius: var(--radius-sm);
   font-weight: 700;
   animation: pulse 0.9s infinite alternate;
+}
+
+/* the caution badge is 10px type, so the flag beside it has to be tiny —
+   the 30px .inline size is for the results header */
+.flag-state.caution .flag-img.inline {
+  width: 14px;
+  margin-right: 4px;
 }
 
 /* -- rival intel --------------------------------------------------------- */
 
 .intel-panel {
-  position: absolute;
-  top: 300px;
-  right: 14px;
-  width: 210px;
+  width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--sp-3);
   pointer-events: none;
 }
 
@@ -2442,12 +2523,93 @@ select.text-input {
   }
 }
 
-@media (prefers-contrast: more) {
-  :root {
-    --panel: rgba(4, 8, 16, 0.97);
-    --text-dim: #b9c4d4;
-    --panel-line: #e8c65a;
-  }
+/* the prefers-contrast overrides moved to tokens.css, next to the values they
+   override, so there is one place to look when a colour needs changing */
+
+/* ------------------------------------------------------------- modals ---
+   The game's own confirm dialog. See dialog.ts — the three destructive
+   actions used to go through window.confirm, which cannot be styled and
+   blocks the simulation loop. */
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: grid;
+  place-items: center;
+  background: rgba(3, 6, 12, 0.72);
+  backdrop-filter: blur(3px);
+  animation: screen-in var(--dur-fast) var(--ease-out);
+}
+
+.modal-card {
+  width: min(400px, calc(100vw - 32px));
+  background: var(--panel-raised);
+  border: 1px solid var(--hairline);
+  border-top: 2px solid var(--panel-line);
+  border-radius: var(--radius);
+  padding: var(--sp-6);
+}
+
+.modal-card h2 {
+  font-size: var(--fs-title);
+  letter-spacing: var(--ls-title);
+  text-transform: uppercase;
+  margin-bottom: var(--sp-4);
+}
+
+.modal-card p {
+  color: var(--text-dim);
+  font-size: var(--fs-body);
+  line-height: 1.5;
+  margin-bottom: var(--sp-6);
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--sp-4);
+}
+
+.btn.danger {
+  background: var(--bad);
+  border-color: var(--bad);
+  color: var(--on-gold);
+  font-weight: 700;
+}
+
+.btn.danger:hover {
+  filter: brightness(1.12);
+}
+
+/* ------------------------------------------------------------ pause ---- */
+
+.pause-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 40;
+  display: grid;
+  place-items: center;
+  background: rgba(6, 10, 18, 0.58);
+  backdrop-filter: blur(2px);
+  animation: screen-in var(--dur-fast) var(--ease-out);
+}
+
+.pause-overlay b {
+  font-size: var(--fs-display);
+  letter-spacing: var(--ls-wide);
+  text-transform: uppercase;
+  color: var(--gold-bright);
+}
+
+.pause-overlay span {
+  display: block;
+  margin-top: var(--sp-4);
+  text-align: center;
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--text-dim);
 }
 
 .sr-only {
@@ -2474,11 +2636,7 @@ select.text-input {
   .order-btn small {
     display: none;
   }
-  .intel-panel {
-    top: 286px;
-    width: 186px;
-  }
-  .condition-panel {
+  .hud-rail {
     width: 186px;
   }
 }
@@ -2520,11 +2678,14 @@ select.text-input {
 }
 
 @media (max-width: 640px) {
-  .condition-panel {
+  .hud-rail {
     top: auto;
     bottom: 128px;
     right: 8px;
     width: 150px;
+    max-height: none;
+  }
+  .condition-panel {
     padding: 8px;
   }
   .timing-tower {
@@ -2669,9 +2830,11 @@ select.text-input {
     display: none;
   }
 
-  .condition-panel {
+  .hud-rail {
     bottom: 152px;
     width: 138px;
+  }
+  .condition-panel {
     padding: 6px 8px;
     font-size: 11px;
   }

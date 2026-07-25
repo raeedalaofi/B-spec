@@ -16,6 +16,7 @@ import type {
 } from '../sim/types';
 import { DRIVER_ORDERS, TIRE_COMPOUNDS } from '../sim/types';
 import { imgTag } from './assets';
+import { confirmDialog } from './dialog';
 import type { CoachTip } from './coaching';
 import { buildReel, type Highlight } from './highlights';
 import { messageFor } from './messages';
@@ -30,9 +31,24 @@ export interface HudCallbacks {
   onRetire(): void;
   audioOn: boolean;
   onAudioToggle(on: boolean): void;
+  /** which speed button starts active — GameState.settings.defaultSpeed */
+  defaultSpeed?: 1 | 2 | 4;
 }
 
 const MAX_MESSAGES = 7;
+
+/**
+ * A small glyph beside a condition-panel label.
+ *
+ * 25 of these were generated, sat in public/assets/ui unreferenced, and the
+ * HUD used bare text where a purpose-drawn icon already existed. They are
+ * decorative — the label beside each one carries the meaning — so they get an
+ * empty alt and are hidden from assistive tech rather than duplicating the
+ * word that follows them.
+ */
+function statIcon(name: string): string {
+  return imgTag(`ui/icon-${name}.png`, 'stat-icon');
+}
 
 function fmtLap(t: number | null): string {
   if (t === null) return '--:--.---';
@@ -72,6 +88,8 @@ export class RaceHud {
   private currentOrder: DriverOrder = 'push';
   private lastCountdownShown = -1;
   private paused = false;
+  /** previous tower index per car, so a gained place can be flashed */
+  private lastPos = new Map<string, number>();
 
   constructor(root: HTMLElement, title: string, subtitle: string, cb: HudCallbacks) {
     this.root = root;
@@ -109,7 +127,11 @@ export class RaceHud {
       const b = document.createElement('button');
       b.textContent = `x${mult}`;
       b.setAttribute('aria-label', `Run at ${mult} times speed`);
-      if (mult === 1) b.classList.add('active');
+      // settings.defaultSpeed has been in GameState, and migrated, since the
+      // save format was written — and never read anywhere. The HUD hardcoded
+      // x1 as active, so a player who runs every race at x4 re-selected it
+      // every single time.
+      if (mult === (this.cb.defaultSpeed ?? 1)) b.classList.add('active');
       b.addEventListener('click', () => {
         this.speedBtns.forEach((x) => x.classList.remove('active'));
         b.classList.add('active');
@@ -134,10 +156,14 @@ export class RaceHud {
     retire.textContent = '✕';
     retire.title = 'Retire from the race';
     retire.setAttribute('aria-label', 'Retire from the race');
-    retire.addEventListener('click', () => {
-      if (confirm('Retire from this race? No prizes or points will be awarded.')) {
-        this.cb.onRetire();
-      }
+    retire.addEventListener('click', async () => {
+      const ok = await confirmDialog({
+        title: 'Retire from the race?',
+        body: 'No prize money and no B-Spec points will be awarded.',
+        confirmLabel: 'Retire',
+        danger: true,
+      });
+      if (ok) this.cb.onRetire();
     });
     speeds.appendChild(retire);
 
@@ -146,13 +172,20 @@ export class RaceHud {
     this.tower.setAttribute('aria-label', 'Timing tower');
     this.root.appendChild(this.tower);
 
+    // One right-hand rail rather than two absolutely-positioned panels. The
+    // intel panel used to be pinned at a hardcoded top:300px, which meant a
+    // tall condition panel (position, car, tires, fuel, fatigue, damage, last
+    // and best lap) simply grew underneath it and the two overlapped.
+    const rail = document.createElement('div');
+    rail.className = 'hud-rail';
     this.cond = document.createElement('div');
     this.cond.className = 'condition-panel';
-    this.root.appendChild(this.cond);
+    rail.appendChild(this.cond);
 
     this.intel = document.createElement('div');
     this.intel.className = 'intel-panel';
-    this.root.appendChild(this.intel);
+    rail.appendChild(this.intel);
+    this.root.appendChild(rail);
 
     this.root.appendChild(this.buildCommandBar());
 
@@ -260,6 +293,27 @@ export class RaceHud {
     this.pauseBtn.textContent = this.paused ? '▶' : '❚❚';
     this.pauseBtn.classList.toggle('active', this.paused);
     this.cb.onPause(this.paused);
+    this.renderPauseVeil();
+  }
+
+  /**
+   * Pausing used to do nothing visible — the simulation stopped and the screen
+   * simply froze, which is indistinguishable from the game having hung. The
+   * veil is suppressed while a dialog is open, since the pit dialog pauses the
+   * race itself and does not need a second scrim behind it.
+   */
+  private renderPauseVeil(): void {
+    const existing = this.root.querySelector('.pause-overlay');
+    if (!this.paused || this.overlay) {
+      existing?.remove();
+      return;
+    }
+    if (existing) return;
+    const veil = document.createElement('div');
+    veil.className = 'pause-overlay';
+    veil.innerHTML = '<div><b>Paused</b><span>Space or ❚❚ to resume</span></div>';
+    veil.addEventListener('click', () => this.togglePause());
+    this.root.appendChild(veil);
   }
 
   /**
@@ -370,8 +424,10 @@ export class RaceHud {
 
     this.lapCounter.innerHTML = `<span>LAP</span> ${Math.min(leader?.lap || 1, state.lapsTotal)}<span>/${state.lapsTotal}</span>`;
     this.flag.className = `flag-state ${state.caution ? 'caution' : ''}`;
-    this.flag.textContent = state.caution
-      ? `SAFETY CAR · ${state.caution.lapsLeft} lap(s)`
+    // the sim has had cautions from the start and never showed a flag for
+    // them; the yellow was generated, came back olive, and was never wired up
+    this.flag.innerHTML = state.caution
+      ? `${imgTag('fx/flag-yellow.svg', 'flag-img inline')}SAFETY CAR · ${state.caution.lapsLeft} lap(s)`
       : '';
 
     this.tower.innerHTML = order.map((car, i) => this.towerRow(state, car, i, leader)).join('');
@@ -428,7 +484,16 @@ export class RaceHud {
               : '';
     const comp = COMPOUNDS[car.compound];
     const wearPct = Math.round((1 - car.tireWear) * 100);
-    return `<div class="tower-row${car.isPlayer ? ' player' : ''}${car.retired ? ' out' : ''}">
+    // A green flash on the row that just gained a place. styles.css has had
+    // .tower-row.flash since the tower was written and nothing ever added the
+    // class, so the one moment the tower exists to report — a change of order
+    // — passed by as silently as a lap where nothing happened.
+    const was = this.lastPos.get(car.carId);
+    const gained = was !== undefined && i < was;
+    this.lastPos.set(car.carId, i);
+    return `<div class="tower-row${car.isPlayer ? ' player' : ''}${car.retired ? ' out' : ''}${
+      gained ? ' flash' : ''
+    }">
       <span class="tower-pos">${i + 1}</span>
       <span class="tower-chip" style="background:${car.spec.color}"></span>
       <span class="tower-name">${car.driverName} ${status}<small>${fmtLap(car.lastLapS)}</small></span>
@@ -453,16 +518,16 @@ export class RaceHud {
     this.cond.innerHTML = `
       <div class="cond-pos"><b>P${pos}</b><span class="cond-driver">${player.driverName}</span></div>
       <div class="cond-car">${player.spec.name}</div>
-      <div class="cond-row"><span class="label">Tires <i class="tire-${player.compound}">${comp.short}</i></span><span class="val">${Math.round(tire * 100)}%</span></div>
+      <div class="cond-row"><span class="label">${statIcon('tires')}Tires <i class="tire-${player.compound}">${comp.short}</i></span><span class="val">${Math.round(tire * 100)}%</span></div>
       <div class="bar"><i class="${barClass(tire)}" style="width:${Math.max(0, tire * 100)}%"></i></div>
       <div class="cond-note ${tireLaps < lapsLeft ? 'warn' : ''}">${tireLaps >= 99 ? 'plenty left' : `~${tireLaps} lap(s) of life · ${lapsLeft} to go`}</div>
-      <div class="cond-row"><span class="label">Fuel</span><span class="val">${player.fuelL.toFixed(1)} L</span></div>
+      <div class="cond-row"><span class="label">${statIcon('fuel')}Fuel</span><span class="val">${player.fuelL.toFixed(1)} L</span></div>
       <div class="bar"><i class="${barClass(fuelPct)}" style="width:${Math.max(0, fuelPct * 100)}%"></i></div>
       <div class="cond-note ${fuelLaps < lapsLeft ? 'warn' : ''}">${fuelLaps >= 99 ? 'plenty left' : `~${fuelLaps} lap(s) of fuel`}</div>
-      <div class="cond-row"><span class="label">Fatigue</span><span class="val">${Math.round(player.fatigue * 100)}%</span></div>
+      <div class="cond-row"><span class="label">${statIcon('fatigue')}Fatigue</span><span class="val">${Math.round(player.fatigue * 100)}%</span></div>
       <div class="bar"><i class="${player.fatigue > 0.7 ? 'crit' : ''}" style="width:${Math.max(2, (1 - player.fatigue) * 100)}%"></i></div>
-      ${player.damage > 0.05 ? `<div class="cond-row"><span class="label">Damage</span><span class="val bad">${Math.round(player.damage * 100)}%</span></div>` : ''}
-      <div class="cond-lastlap"><span class="label">Last lap</span><span>${fmtLap(player.lastLapS)}</span></div>
+      ${player.damage > 0.05 ? `<div class="cond-row"><span class="label">${statIcon('warning')}Damage</span><span class="val bad">${Math.round(player.damage * 100)}%</span></div>` : ''}
+      <div class="cond-lastlap"><span class="label">${statIcon('stopwatch')}Last lap</span><span>${fmtLap(player.lastLapS)}</span></div>
       <div class="cond-lastlap"><span class="label">Best</span><span>${fmtLap(player.bestLapS)}</span></div>`;
   }
 
@@ -566,7 +631,7 @@ export class RaceHud {
       this.lastCountdownShown = -2;
       this.showOverlay(`
         <div class="countdown-stack">
-          ${imgTag('fx/flag-green.png', 'flag-img')}
+          ${imgTag('fx/flag-green.svg', 'flag-img')}
           <div class="countdown-num green">GO!</div>
         </div>`);
       const el = this.overlay;
@@ -635,7 +700,7 @@ export class RaceHud {
       : '';
     this.showOverlay(`
       <div class="results-card">
-        <h2>${imgTag('fx/flag-checkered.png', 'flag-img inline')}Race Result</h2>
+        <h2>${imgTag('fx/flag-checkered.svg', 'flag-img inline')}Race Result</h2>
         <div class="results-body">
           <table class="results-table">
             <thead><tr><th>P</th><th>Driver</th><th>Car</th><th>Gap</th><th>Best</th></tr></thead>

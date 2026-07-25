@@ -1,6 +1,7 @@
 import { CARS } from '../../data/cars';
 import { activeParts, tunedSpec } from '../../data/parts';
 import { imgTag } from '../assets';
+import { confirmDialog } from '../dialog';
 import { fmtCr, menuShell } from '../menuCommon';
 import type { AppContext } from '../screenManager';
 
@@ -59,12 +60,18 @@ export function garageScreen(ctx: AppContext): void {
     btn.addEventListener('click', () => ctx.go('tuning', { carId: btn.dataset.tune })),
   );
   content.querySelectorAll<HTMLButtonElement>('[data-sell]').forEach((btn) =>
-    btn.addEventListener('click', () => {
+    btn.addEventListener('click', async () => {
       const id = btn.dataset.sell!;
       const car = CARS[id];
       const hasParts = (gs.tuning[id] ?? []).length > 0;
       const warn = hasParts ? ' Installed tuning parts will be lost.' : '';
-      if (!confirm(`Sell the ${car.name} for ${fmtCr(Math.round(car.priceCr * 0.6))}?${warn}`)) return;
+      const ok = await confirmDialog({
+        title: `Sell the ${car.name}?`,
+        body: `You will receive ${fmtCr(Math.round(car.priceCr * 0.6))}.${warn}`,
+        confirmLabel: 'Sell',
+        danger: true,
+      });
+      if (!ok) return;
       gs.ownedCarIds = gs.ownedCarIds.filter((c) => c !== id);
       delete gs.tuning[id];
       gs.credits += Math.round(car.priceCr * 0.6);
