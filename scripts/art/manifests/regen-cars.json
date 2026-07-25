@@ -1,0 +1,87 @@
+{
+  "note": "Corrected car prompts. See docs/CAR_LIKENESS.md for why the originals failed. Run with scripts/art/scenario.mjs once Scenario credentials are configured, then re-run `npm run qa:art` and the likeness review in that document before committing any output.",
+  "supersedes": "car-studio-* and car-topdown-* entries in p0.json",
+  "sharedNegative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, cel shaded, low-poly, blurry, oversaturated, deformed, extra wheels, brand logo, manufacturer badge, sponsor logos, emblem, grille badge, bonnet badge, wheel centre cap logo, license plate, Nissan, Skyline, GT-R, Porsche, Mazda, Miata, Toyota, Honda, Subaru, BMW, Ford, real production car, existing car model, replica",
+  "entries": [
+    {
+      "id": "car-studio-kestrel",
+      "out": "public/assets/cars/kestrel-studio.png",
+      "modelSlot": "photo",
+      "width": 1408,
+      "height": 896,
+      "alpha": "remove-bg",
+      "prompt": "professional game asset, clean automotive studio render, fictional compact three-door hatchback, tall glasshouse and short bonnet, upright A-pillar, narrow track, small 14 inch five-spoke steel-look wheels, plain smooth bumpers with no lower splitter, single round headlamp per side set into a slim body-colour grille, medium steel blue #4f8edc paint, no emblem anywhere on the car, three-quarter front studio shot, soft key light with subtle gold rim light, plain light gray studio background",
+      "formNotes": "Class C economy hatch. Must read as slow and honest: tall, narrow, small wheels. Deliberately NOT a hot hatch."
+    },
+    {
+      "id": "car-studio-vulpe",
+      "out": "public/assets/cars/vulpe-studio.png",
+      "modelSlot": "photo",
+      "width": 1408,
+      "height": 896,
+      "alpha": "remove-bg",
+      "prompt": "professional game asset, clean automotive studio render, fictional sporting three-door hatchback, wide squared-off wheel arches, deep front air dam with three rectangular intakes, twin rectangular headlamps per side, roof spoiler, 15 inch multi-spoke alloy wheels, bright rally red #d84a3a paint, no emblem anywhere on the car, three-quarter front studio shot, soft key light with subtle gold rim light, plain light gray studio background",
+      "formNotes": "Class C hot hatch. Squared arches and rectangular lamps push it away from the round-lamp Peugeot/Ford archetypes."
+    },
+    {
+      "id": "car-studio-taro",
+      "out": "public/assets/cars/taro-studio.png",
+      "modelSlot": "photo",
+      "width": 1408,
+      "height": 896,
+      "alpha": "remove-bg",
+      "prompt": "professional game asset, clean automotive studio render, fictional two-door notchback coupe, long bonnet and short deck, pop-up-style flush rectangular headlamps, thin chrome-free window frames, small boot lip spoiler, 16 inch seven-spoke alloy wheels, warm champagne gold #e8b93c paint, no emblem anywhere on the car, three-quarter front studio shot, soft key light with subtle gold rim light, plain light gray studio background",
+      "formNotes": "Class C coupe. Notchback with a long bonnet — must not share the four-door sedan silhouette used by falcon."
+    },
+    {
+      "id": "car-studio-falcon",
+      "out": "public/assets/cars/falcon-studio.png",
+      "modelSlot": "photo",
+      "width": 1408,
+      "height": 896,
+      "alpha": "remove-bg",
+      "prompt": "professional game asset, clean automotive studio render, fictional four-door sports saloon, three-box proportions with a long cabin and upright rear screen, slim horizontal headlamps either side of a narrow rectangular grille, subtle boot-lid lip spoiler rather than a wing, 17 inch ten-spoke alloy wheels, deep royal blue #3f74e8 paint, no emblem anywhere on the car, three-quarter front studio shot, soft key light with subtle gold rim light, plain light gray studio background",
+      "formNotes": "Class B saloon. 'Sports saloon with three-box proportions' replaces '2000s Japanese turbocharged sports sedan with rear wing', which mapped straight onto the Skyline. Lip spoiler, not a wing."
+    },
+    {
+      "id": "car-studio-serval",
+      "out": "public/assets/cars/serval-studio.png",
+      "modelSlot": "photo",
+      "width": 1408,
+      "height": 896,
+      "alpha": "remove-bg",
+      "prompt": "professional game asset, clean automotive studio render, fictional compact two-seat roadster, soft top folded down, long bonnet with a raised centre spine, wide flared rear haunches, slim horizontal headlamps, small vertical grille opening, 16 inch mesh alloy wheels, racing green #48b06a paint, no emblem anywhere on the car, three-quarter front studio shot, soft key light with subtle gold rim light, plain light gray studio background",
+      "formNotes": "Class B roadster. Bonnet spine and flared haunches steer away from the round-lamp MX-5 form the original produced."
+    },
+    {
+      "id": "car-studio-kite",
+      "out": "public/assets/cars/kite-studio.png",
+      "modelSlot": "photo",
+      "width": 1408,
+      "height": 896,
+      "alpha": "remove-bg",
+      "prompt": "professional game asset, clean automotive studio render, fictional all-wheel-drive rally homologation hatchback, blistered arches over all four corners, large bonnet vent, deep front bumper with wide central intake, tall twin-plane roof wing, 17 inch white five-spoke rally wheels, vivid violet #8455c8 paint, no emblem anywhere on the car, three-quarter front studio shot, soft key light with subtle gold rim light, plain light gray studio background",
+      "formNotes": "Class B. The original prompt inherited 'GT-Four' from the car's in-game name, which is a Celica trim designation; the rewrite describes the form instead. Hatchback body distinguishes it from falcon and taro."
+    },
+    {
+      "id": "car-studio-phantom",
+      "out": "public/assets/cars/phantom-studio.png",
+      "modelSlot": "photo",
+      "width": 1408,
+      "height": 896,
+      "alpha": "remove-bg",
+      "prompt": "professional game asset, clean automotive studio render, fictional mid-engine grand touring race car, cab-forward silhouette with a long rear deck, wide low nose with two large brake ducts, side air intakes ahead of the rear arches, swan-neck rear wing, centre-lock 18 inch alloy wheels, gloss black #20242c paint, no emblem anywhere on the car, no sponsor livery, three-quarter front studio shot, soft key light with subtle gold rim light, plain light gray studio background",
+      "formNotes": "Class A. 'GT500' named a real JGTC class; replaced with mid-engine GT description. Mid-engine layout separates it from the front-engine roster."
+    },
+    {
+      "id": "car-studio-arrow",
+      "out": "public/assets/cars/arrow-studio.png",
+      "modelSlot": "photo",
+      "width": 1408,
+      "height": 896,
+      "alpha": "remove-bg",
+      "prompt": "professional game asset, clean automotive studio render, fictional closed-cockpit endurance prototype, very low canopy set well forward, full-width front splitter, teardrop cockpit fairing, enclosed front wheel arches with louvres, tall single-plane rear wing on twin end plates, pearl white and silver #e2e6ee paint, no emblem anywhere on the car, no sponsor livery, three-quarter front studio shot, soft key light with subtle gold rim light, plain light gray studio background",
+      "formNotes": "Class A prototype. The original produced a near-exact Porsche 911 GT1. Teardrop fairing and louvred arches are the differentiators; this one needs the closest likeness review of the eight."
+    }
+  ]
+}
