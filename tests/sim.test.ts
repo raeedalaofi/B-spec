@@ -6,7 +6,7 @@ import { tireFactor } from '../src/sim/pace';
 import { compileTrack, posAt } from '../src/sim/trackCompiler';
 import type { Command, DriverStats, RaceEvent, RaceState, Track } from '../src/sim/types';
 
-const STATS: DriverStats = { pace: 50, consistency: 50, battle: 50, smoothness: 50, stamina: 50 };
+const STATS: DriverStats = { pace: 50, consistency: 50, battle: 50, smoothness: 50, stamina: 50, aggression: 50 };
 
 function singleCarRace(track: Track, carId: string, laps: number, seed: number, pace: 1 | 2 | 3 | 4 | 5 = 3): RaceState {
   return createRace({

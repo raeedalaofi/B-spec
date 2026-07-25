@@ -2,7 +2,7 @@
 
 import type { DriverStats } from '../sim/types';
 
-export const SCHEMA_VERSION = 3;
+export const SCHEMA_VERSION = 4;
 
 export interface EventOutcome {
   position: number;
@@ -77,7 +77,14 @@ export function createNewGame(driverName: string): GameState {
       level: 1,
       bspecPoints: 0,
       totalPoints: 0,
-      stats: { pace: 42, consistency: 38, battle: 35, smoothness: 40, stamina: 45 },
+      stats: {
+        pace: 42,
+        consistency: 38,
+        battle: 35,
+        smoothness: 40,
+        stamina: 45,
+        aggression: 45,
+      },
     },
     ownedCarIds: [],
     activeCarId: '',

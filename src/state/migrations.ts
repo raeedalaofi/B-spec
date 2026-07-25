@@ -24,6 +24,21 @@ export const MIGRATIONS: Migration[] = [
     trialMedals: old.trialMedals ?? {},
     standaloneResults: old.standaloneResults ?? {},
   }),
+  // v3 → v4: the aggression driver stat, and per-car strategy presets
+  (old) => {
+    const driver = (old.driver ?? {}) as Record<string, unknown>;
+    const stats = (driver.stats ?? {}) as Record<string, number>;
+    return {
+      ...old,
+      driver: {
+        ...driver,
+        // seed aggression from existing racecraft so migrated drivers feel
+        // continuous rather than reset to a default
+        stats: { ...stats, aggression: stats.aggression ?? stats.battle ?? 45 },
+      },
+      strategies: old.strategies ?? {},
+    };
+  },
 ];
 
 export function migrate(raw: Record<string, unknown>, targetVersion: number): GameState {

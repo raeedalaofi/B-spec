@@ -43,11 +43,14 @@ export function pointsToNextLevel(level: number): number {
 function growthWeights(level: number): Array<[keyof DriverStats, number]> {
   const t = Math.min(1, level / 20);
   return [
-    ['pace', 0.32 - 0.12 * t],
-    ['consistency', 0.28 - 0.06 * t],
-    ['battle', 0.14 + 0.14 * t],
-    ['smoothness', 0.14 + 0.06 * t],
-    ['stamina', 0.12 - 0.02 * t],
+    ['pace', 0.3 - 0.12 * t],
+    ['consistency', 0.24 - 0.05 * t],
+    ['battle', 0.13 + 0.12 * t],
+    ['smoothness', 0.13 + 0.05 * t],
+    ['stamina', 0.11 - 0.02 * t],
+    // aggression grows last: a young driver learns speed, then racecraft,
+    // then finally when it is worth the risk
+    ['aggression', 0.09 + 0.02 * t],
   ];
 }
 

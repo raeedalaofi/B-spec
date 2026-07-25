@@ -29,6 +29,13 @@ export interface DriverStats {
   battle: number;
   smoothness: number;
   stamina: number;
+  /**
+   * Appetite for risk. Separate from `battle` on purpose: `battle` is how
+   * good a driver is wheel-to-wheel, `aggression` is how often they try.
+   * A high-battle/low-aggression driver rarely lunges but almost always
+   * makes it stick; the reverse produces spectacular, error-prone racing.
+   */
+  aggression: number;
 }
 
 export interface DriverSpec {

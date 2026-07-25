@@ -21,7 +21,7 @@ function field(playerCar = 'vulpe', aiCar = 'vulpe', playerPace: 1 | 2 | 3 | 4 |
     carId: 'player',
     spec: CARS[playerCar],
     driverName: 'YOU',
-    stats: { pace: 50, consistency: 50, battle: 50, smoothness: 50, stamina: 50 },
+    stats: { pace: 50, consistency: 50, battle: 50, smoothness: 50, stamina: 50, aggression: 50 },
     isPlayer: true,
     paceCmd: playerPace,
   });

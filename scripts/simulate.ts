@@ -1,19 +1,40 @@
 // Headless race harness. Runs the pure sim from Node for development,
 // verification and balancing.
 //
-// Single car:  npx tsx scripts/simulate.ts single [track] [car] [laps] [pace] [seed]
-// Full race:   npx tsx scripts/simulate.ts race [track] [laps] [seed]
-// Batch:       npx tsx scripts/simulate.ts batch [track] [laps] [nSeeds]
+// Inspection
+//   npx tsx scripts/simulate.ts single [track] [car] [laps] [pace] [seed]
+//   npx tsx scripts/simulate.ts race   [track] [laps] [seed]
+//   npx tsx scripts/simulate.ts batch  [track] [laps] [nSeeds] [playerPace]
+//
+// Measurement (the balancing loop — see src/sim/metrics.ts for the targets)
+//   npx tsx scripts/simulate.ts quality [nSeeds]      race-quality dashboard
+//   npx tsx scripts/simulate.ts curve   [nSeeds]      career difficulty bands
+//   npx tsx scripts/simulate.ts economy               can the path self-fund?
+//   npx tsx scripts/simulate.ts agency  [nSeeds]      does play skill matter?
+//   npx tsx scripts/simulate.ts trials                license achievability
 
-import { buildResult, createRace, raceOrder, tick, TICK_S } from '../src/sim/engine';
+import { buildResult, createRace, tick } from '../src/sim/engine';
+import { measureRace, QUALITY_TARGETS, type RaceMetrics } from '../src/sim/metrics';
 import { compileTrack } from '../src/sim/trackCompiler';
 import { CARS } from '../src/data/cars';
 import { TRACK_DEFS } from '../src/data/tracks';
 import { AI_DRIVERS, AI_BY_ID } from '../src/data/aidrivers';
-import { CHAMPIONSHIPS } from '../src/data/championships';
+import { CHAMPIONSHIPS, CHAMPIONSHIP_BY_ID } from '../src/data/championships';
+import { bandFor, CAREER_PATH } from '../src/data/careerPath';
 import { LICENSE_TRIALS } from '../src/data/licenses';
+import { PARTS, partPrice } from '../src/data/parts';
+import { STARTING_CREDITS } from '../src/state/gameState';
 import { evaluateTrial, trialTrackDef } from '../src/state/trials';
-import type { Command, DriverStats, RaceEntry, RaceEvent, RaceState, Track } from '../src/sim/types';
+import {
+  championshipRace,
+  competentPolicy,
+  evenRace,
+  passivePolicy,
+  REFERENCE_TRACKS,
+  stats,
+  track as compiledTrack,
+} from './fields';
+import type { RaceEvent, RaceState, Track } from '../src/sim/types';
 
 const args = process.argv.slice(2);
 const mode = args[0] ?? 'single';
@@ -27,6 +48,15 @@ function getTrack(id: string): Track {
 function fmt(t: number): string {
   const m = Math.floor(t / 60);
   return `${m}:${(t - m * 60).toFixed(3).padStart(6, '0')}`;
+}
+
+function money(n: number): string {
+  return `${Math.round(n).toLocaleString('en-US')} Cr.`;
+}
+
+/** ✓ / ✗ against an inclusive band, for the measurement dashboards */
+function band(value: number, min: number, max: number): string {
+  return value >= min && value <= max ? '[32m✓[0m' : '[31m✗[0m';
 }
 
 function printTrack(track: Track): void {
@@ -45,45 +75,20 @@ function printTrack(track: Track): void {
 }
 
 function runRace(state: RaceState, onEvent?: (e: RaceEvent, s: RaceState) => void): void {
-  const maxTicks = 3 * 60 * 60 * 10; // 3 hours of sim time, hard stop
+  const maxTicks = 3 * 60 * 60 * 10;
   let ticks = 0;
   while (state.phase !== 'finished' && ticks++ < maxTicks) {
     for (const e of tick(state, [])) onEvent?.(e, state);
   }
 }
 
-function demoEntries(
-  trackForField: 'even' | 'mixed',
-  seedOffset: number,
-  playerPace: 1 | 2 | 3 | 4 | 5 = 3,
-): RaceEntry[] {
-  // 8-car field: player mid-grid in a vulpe, AI in class C machinery
-  const carPool = ['kestrel', 'vulpe', 'taro', 'kestrel', 'vulpe', 'taro', 'kestrel'];
-  const entries: RaceEntry[] = [];
-  const rookies = AI_DRIVERS.slice(0, 7); // one skill tier, fair comparison
-  for (let i = 0; i < 7; i++) {
-    const drv = rookies[(i + seedOffset) % rookies.length];
-    entries.push({
-      carId: `ai-${drv.id}`,
-      spec: CARS[trackForField === 'even' ? 'vulpe' : carPool[i]],
-      driverName: drv.name,
-      stats: drv.stats,
-      isPlayer: false,
-    });
-  }
-  entries.splice(4, 0, {
-    carId: 'player',
-    spec: CARS.vulpe,
-    driverName: 'YOU',
-    stats: { pace: 50, consistency: 50, battle: 50, smoothness: 50, stamina: 50 },
-    isPlayer: true,
-    paceCmd: playerPace,
-  });
-  return entries;
-}
+const avg = (xs: number[]): number => xs.reduce((a, b) => a + b, 0) / Math.max(1, xs.length);
+
+// ---------------------------------------------------------------------------
 
 if (mode === 'single') {
-  const [, trackId = 'greenpark', carId = 'vulpe', lapsArg = '8', paceArg = '3', seedArg = '42'] = args;
+  const [, trackId = 'greenpark', carId = 'vulpe', lapsArg = '8', paceArg = '3', seedArg = '42'] =
+    args;
   const track = getTrack(trackId);
   printTrack(track);
   const spec = CARS[carId];
@@ -98,7 +103,7 @@ if (mode === 'single') {
         carId: 'p1',
         spec,
         driverName: 'Test Driver',
-        stats: { pace: 50, consistency: 50, battle: 50, smoothness: 50, stamina: 50 },
+        stats: stats(50, 50, 50, 50, 50),
         isPlayer: true,
         paceCmd: pace,
       },
@@ -120,25 +125,31 @@ if (mode === 'single') {
   const [, trackId = 'greenpark', lapsArg = '8', seedArg = '42'] = args;
   const track = getTrack(trackId);
   printTrack(track);
-  const state = createRace({
-    track,
-    lapsTotal: parseInt(lapsArg, 10),
-    seed: parseInt(seedArg, 10),
-    entries: demoEntries('even', parseInt(seedArg, 10) % 7),
-  });
+  const seed = parseInt(seedArg, 10);
+  const state = evenRace(trackId, parseInt(lapsArg, 10), seed);
   const name = (id: string): string =>
     state.cars.find((c) => c.carId === id)?.driverName ?? id;
   runRace(state, (e, s) => {
     const t = fmt(s.raceTime);
     switch (e.type) {
       case 'OVERTAKE':
-        console.log(`${t}  ${name(e.carId)} passes ${name(e.passedId)} for P${e.forPosition} (${e.zoneName})`);
+        console.log(
+          `${t}  ${name(e.carId)} passes ${name(e.passedId)} for P${e.forPosition} (${e.zoneName})`,
+        );
         break;
       case 'OVERTAKE_ATTEMPT_FAILED':
         console.log(`${t}  ${name(e.carId)} lunges at ${name(e.defenderId)} — no way through`);
         break;
+      case 'SIDE_BY_SIDE':
+        console.log(`${t}  ${name(e.carId)} draws alongside ${name(e.defenderId)} (${e.zoneName})`);
+        break;
       case 'MISTAKE':
-        console.log(`${t}  ${name(e.carId)} ${e.severity === 'spin' ? 'SPINS' : `${e.severity} mistake`} at ${e.cornerName}`);
+        console.log(
+          `${t}  ${name(e.carId)} ${e.severity === 'spin' ? 'SPINS' : `${e.severity} mistake`} at ${e.cornerName}`,
+        );
+        break;
+      case 'RETIREMENT':
+        console.log(`${t}  ${name(e.carId)} RETIRES (${e.reason})`);
         break;
       case 'PIT_IN':
         console.log(`${t}  ${name(e.carId)} pits`);
@@ -166,148 +177,213 @@ if (mode === 'single') {
   }
 } else if (mode === 'batch') {
   const [, trackId = 'greenpark', lapsArg = '6', nArg = '30', playerPaceArg = '3'] = args;
-  const track = getTrack(trackId);
   const n = parseInt(nArg, 10);
+  const laps = parseInt(lapsArg, 10);
   const playerPace = Math.max(1, Math.min(5, parseInt(playerPaceArg, 10))) as 1 | 2 | 3 | 4 | 5;
-  let totalPasses = 0;
-  let minPasses = Infinity;
-  let maxPasses = 0;
   const winners = new Map<string, number>();
+  const runs: RaceMetrics[] = [];
   let playerSum = 0;
   for (let seed = 1; seed <= n; seed++) {
-    const state = createRace({
-      track,
-      lapsTotal: parseInt(lapsArg, 10),
-      seed: seed * 7919,
-      entries: demoEntries('even', seed % 7, playerPace),
-    });
-    let passes = 0;
-    runRace(state, (e) => {
-      if (e.type === 'OVERTAKE') passes++;
-    });
-    totalPasses += passes;
-    minPasses = Math.min(minPasses, passes);
-    maxPasses = Math.max(maxPasses, passes);
-    const result = buildResult(state);
-    const w = result.rows[0];
+    const m = measureRace(evenRace(trackId, laps, seed * 7919, playerPace));
+    runs.push(m);
+    const w = m.result.rows[0];
     winners.set(w.driverName, (winners.get(w.driverName) ?? 0) + 1);
-    playerSum += result.rows.find((r) => r.isPlayer)!.position;
-    void TICK_S;
+    playerSum += m.result.rows.find((r) => r.isPlayer)!.position;
   }
-  console.log(`${n} races on ${track.def.name}:`);
-  console.log(`passes/race: avg ${(totalPasses / n).toFixed(1)} min ${minPasses} max ${maxPasses}`);
+  console.log(`${n} races on ${compiledTrack(trackId).def.name} (${laps} laps):`);
+  console.log(
+    `passes/race: avg ${avg(runs.map((r) => r.passes)).toFixed(1)} ` +
+      `min ${Math.min(...runs.map((r) => r.passes))} max ${Math.max(...runs.map((r) => r.passes))}`,
+  );
   console.log(`player avg position: ${(playerSum / n).toFixed(2)} (equal cars, 50-stat driver, grid P5)`);
   console.log(`winners: ${[...winners.entries()].map(([k, v]) => `${k}:${v}`).join(' ')}`);
-  void raceOrder;
-} else if (mode === 'career') {
-  // Expected-player-path sweep: for each championship event, run N seeded
-  // races with the intended car, tier-appropriate driver stats and an
-  // actively-managed command policy. Flags events outside the target
-  // win-rate band.
-  const n = parseInt(args[1] ?? '40', 10);
-  const tiers: Record<
-    string,
-    { carId: string; stats: DriverStats; perEvent?: Record<string, string> }
-  > = {
-    'sunday-cup': {
-      carId: 'vulpe',
-      stats: { pace: 42, consistency: 38, battle: 35, smoothness: 40, stamina: 45 },
-    },
-    clubman: {
-      carId: 'kite',
-      stats: { pace: 58, consistency: 52, battle: 46, smoothness: 50, stamina: 50 },
-    },
-    national: {
-      carId: 'phantom',
-      perEvent: { 'nc-3': 'arrow', 'nc-4': 'arrow', 'nc-5': 'arrow' },
-      stats: { pace: 71, consistency: 65, battle: 58, smoothness: 58, stamina: 55 },
-    },
-  };
-
-  for (const champ of CHAMPIONSHIPS) {
-    const tier = tiers[champ.id];
-    if (!tier) continue; // generated championships aren't part of the core path
-    console.log(`\n=== ${champ.name} (player: ${CARS[tier.carId].name}) ===`);
-    for (const event of champ.events) {
-      const playerCarId = tier.perEvent?.[event.id] ?? tier.carId;
-      const track = getTrack(event.trackId);
-      let winSum = 0;
+} else if (mode === 'quality') {
+  // The race-quality dashboard. Every number here has a target band in
+  // QUALITY_TARGETS; CI fails on the same thresholds via tests/quality.test.ts.
+  const n = parseInt(args[1] ?? '8', 10);
+  const laps: Record<string, number> = { greenpark: 6, oval: 10, aria: 8, kaiserwald: 3 };
+  console.log(`Race quality — ${n} seeds per track, 8 identical cars, one skill tier\n`);
+  console.log(
+    'track        train%  bigTrain%  maxQueue  passes  failed  convert%  lapSpread  lateOT  leadChg',
+  );
+  const all: RaceMetrics[] = [];
+  for (const trackId of REFERENCE_TRACKS) {
+    const runs: RaceMetrics[] = [];
+    for (let seed = 1; seed <= n; seed++) {
+      runs.push(measureRace(evenRace(trackId, laps[trackId] ?? 6, seed * 7919)));
+    }
+    all.push(...runs);
+    const a = (f: (m: RaceMetrics) => number): number => avg(runs.map(f));
+    console.log(
+      `${trackId.padEnd(12)} ` +
+        `${a((r) => r.trainPct).toFixed(1).padStart(5)}${band(a((r) => r.trainPct), 0, QUALITY_TARGETS.maxTrainPct)} ` +
+        `${a((r) => r.bigTrainPct).toFixed(1).padStart(8)}  ` +
+        `${a((r) => r.longestTrain).toFixed(1).padStart(7)} ` +
+        `${a((r) => r.passes).toFixed(1).padStart(7)} ` +
+        `${a((r) => r.failedAttempts).toFixed(1).padStart(7)} ` +
+        `${a((r) => r.conversionPct).toFixed(1).padStart(8)}${band(a((r) => r.conversionPct), QUALITY_TARGETS.minConversionPct, QUALITY_TARGETS.maxConversionPct)} ` +
+        `${a((r) => r.bestLapSpreadS).toFixed(2).padStart(9)}${band(a((r) => r.bestLapSpreadS), 0, QUALITY_TARGETS.maxBestLapSpreadS)} ` +
+        `${a((r) => r.lateOvertakes).toFixed(1).padStart(6)} ` +
+        `${a((r) => r.leadChanges).toFixed(1).padStart(7)}`,
+    );
+  }
+  const g = (f: (m: RaceMetrics) => number): number => avg(all.map(f));
+  console.log(
+    `\noverall: train ${g((r) => r.trainPct).toFixed(1)}% (target <${QUALITY_TARGETS.maxTrainPct}%) · ` +
+      `convert ${g((r) => r.conversionPct).toFixed(1)}% (target ${QUALITY_TARGETS.minConversionPct}-${QUALITY_TARGETS.maxConversionPct}%) · ` +
+      `lap spread ${g((r) => r.bestLapSpreadS).toFixed(2)}s (target <${QUALITY_TARGETS.maxBestLapSpreadS}s)`,
+  );
+} else if (mode === 'curve') {
+  // Career difficulty sweep against the intended player path. Every event
+  // should land inside the band declared in src/data/careerPath.ts.
+  const n = parseInt(args[1] ?? '30', 10);
+  const csv = args.includes('--csv');
+  if (csv) console.log('championship,event,car,winPct,podiumPct,avgPos,bandMin,bandMax,inBand');
+  let outOfBand = 0;
+  for (const tier of CAREER_PATH) {
+    const champ = CHAMPIONSHIP_BY_ID[tier.championshipId];
+    if (!csv) console.log(`\n=== ${champ.name} (player: ${CARS[tier.carId].name}) ===`);
+    champ.events.forEach((event, idx) => {
+      const carId = tier.perEvent?.[event.id] ?? tier.carId;
+      const target = bandFor(tier, idx, champ.events.length);
+      let wins = 0;
+      let podiums = 0;
       let posSum = 0;
-      let podiumSum = 0;
       for (let seed = 1; seed <= n; seed++) {
-        const entries: RaceEntry[] = champ.aiDriverIds.map((driverId, i) => ({
-          carId: `ai-${driverId}`,
-          spec: CARS[event.aiCarIds[i]],
-          driverName: AI_BY_ID[driverId].name,
-          stats: AI_BY_ID[driverId].stats,
-          isPlayer: false,
-        }));
-        entries.push({
-          carId: 'player',
-          spec: CARS[playerCarId],
-          driverName: 'YOU',
-          stats: tier.stats,
-          isPlayer: true,
-          paceCmd: 4,
-        });
-        const state = createRace({
-          track,
-          lapsTotal: event.laps,
-          seed: seed * 60013 + event.id.length,
-          entries,
-        });
-        // active management policy at 1 Hz
-        let pitCalled = false;
-        let guard = 0;
-        while (state.phase !== 'finished' && guard++ < 200000) {
-          const cmds: Command[] = [];
-          if (state.tickCount % 10 === 0) {
-            const me = state.cars.find((c) => c.isPlayer)!;
-            const lapsRemaining = state.lapsTotal - me.lap + 1;
-            if (!pitCalled && !me.pit && me.tireWear > 0.8 && lapsRemaining > 2) {
-              cmds.push({ type: 'PIT', carId: 'player', tires: true, refuel: true });
-              pitCalled = true;
-            }
-            const wantPace = me.tireWear > 0.92 ? 2 : 4;
-            if (me.paceCmd !== wantPace)
-              cmds.push({ type: 'SET_PACE', carId: 'player', level: wantPace as 2 | 4 });
-            const wantOt = me.battle !== null;
-            if (me.overtakeMode !== wantOt)
-              cmds.push({ type: 'OVERTAKE_MODE', carId: 'player', on: wantOt });
-            if (me.pit && !me.pit.tires) pitCalled = false;
-          }
-          tick(state, cmds);
-        }
-        const pos = buildResult(state).rows.find((r) => r.isPlayer)!.position;
+        const state = championshipRace(
+          event.trackId,
+          event.laps,
+          seed * 60013 + event.id.length,
+          champ.aiDriverIds,
+          event.aiCarIds,
+          carId,
+          tier.stats,
+        );
+        const m = measureRace(state, competentPolicy());
+        const pos = m.result.rows.find((r) => r.isPlayer)!.position;
         posSum += pos;
-        if (pos === 1) winSum++;
-        if (pos <= 3) podiumSum++;
+        if (pos === 1) wins++;
+        if (pos <= 3) podiums++;
       }
-      const winPct = Math.round((winSum / n) * 100);
-      const podPct = Math.round((podiumSum / n) * 100);
-      const flag = winPct < 15 ? '  ⚠ TOO HARD' : winPct > 95 ? '  ⚠ TOO EASY' : '';
+      const winPct = Math.round((wins / n) * 100);
+      const podPct = Math.round((podiums / n) * 100);
+      const ok = winPct >= target.min && winPct <= target.max;
+      if (!ok) outOfBand++;
+      if (csv) {
+        console.log(
+          `${champ.id},${event.id},${carId},${winPct},${podPct},${(posSum / n).toFixed(2)},${target.min},${target.max},${ok}`,
+        );
+      } else {
+        console.log(
+          `${event.id.padEnd(6)} ${event.name.padEnd(26)} [${carId.padEnd(7)}] ` +
+            `win ${String(winPct).padStart(3)}%  podium ${String(podPct).padStart(3)}%  ` +
+            `avg P${(posSum / n).toFixed(2)}  target ${target.min}-${target.max}% ` +
+            `${band(winPct, target.min, target.max)}`,
+        );
+      }
+    });
+  }
+  if (!csv) {
+    console.log(
+      outOfBand === 0
+        ? '\nAll core events inside their target bands.'
+        : `\n${outOfBand} event(s) outside their target band.`,
+    );
+  }
+} else if (mode === 'agency') {
+  // Does skilled play actually pay? Runs the same races under a passive
+  // policy and the competent policy. If the gap is small, the strategy layer
+  // is decoration and the player has no game.
+  const n = parseInt(args[1] ?? '20', 10);
+  console.log(`Player agency — ${n} seeds per event, passive vs competent policy\n`);
+  console.log('championship  event   passive avgP  competent avgP   delta');
+  const deltas: number[] = [];
+  for (const tier of CAREER_PATH) {
+    const champ = CHAMPIONSHIP_BY_ID[tier.championshipId];
+    for (const event of champ.events) {
+      const carId = tier.perEvent?.[event.id] ?? tier.carId;
+      const run = (policy: () => (s: RaceState) => ReturnType<typeof competentPolicy>) => {
+        let sum = 0;
+        for (let seed = 1; seed <= n; seed++) {
+          const state = championshipRace(
+            event.trackId,
+            event.laps,
+            seed * 60013 + event.id.length,
+            champ.aiDriverIds,
+            event.aiCarIds,
+            carId,
+            tier.stats,
+          );
+          sum += measureRace(state, policy() as never).result.rows.find((r) => r.isPlayer)!.position;
+        }
+        return sum / n;
+      };
+      const passive = run(passivePolicy as never);
+      const competent = run(competentPolicy as never);
+      const delta = passive - competent;
+      deltas.push(delta);
       console.log(
-        `${event.id.padEnd(6)} ${event.name.padEnd(26)} [${playerCarId.padEnd(7)}] win ${String(winPct).padStart(3)}%  podium ${String(podPct).padStart(3)}%  avg P${(posSum / n).toFixed(2)}${flag}`,
+        `${champ.id.padEnd(13)} ${event.id.padEnd(7)} ${passive.toFixed(2).padStart(11)} ` +
+          `${competent.toFixed(2).padStart(14)} ${delta >= 0 ? '+' : ''}${delta.toFixed(2).padStart(7)}`,
       );
     }
   }
-}
+  const mean = avg(deltas);
+  console.log(
+    `\nmean positions gained by playing well: ${mean.toFixed(2)} ` +
+      `${mean >= 1.0 ? '[32m✓ decisions matter[0m' : '[31m✗ the strategy layer is decoration[0m'}`,
+  );
+} else if (mode === 'economy') {
+  // Can the intended path fund itself? Walks the core ladder buying the car
+  // each tier expects, paying for tuning, and banking prize money at the
+  // measured finishing positions.
+  console.log('Career economy — intended path, prizes at the target finishing rate\n');
+  let credits = STARTING_CREDITS;
+  console.log(`start                                     ${money(credits).padStart(14)}`);
+  let ok = true;
+  for (const tier of CAREER_PATH) {
+    const champ = CHAMPIONSHIP_BY_ID[tier.championshipId];
+    const car = CARS[tier.carId];
+    if (credits < car.priceCr) {
+      ok = false;
+      console.log(
+        `[31m  cannot afford ${car.name} (${money(car.priceCr)}), have ${money(credits)}[0m`,
+      );
+    }
+    credits -= car.priceCr;
+    console.log(`buy ${car.name.padEnd(24)} -${money(car.priceCr).padStart(13)}  → ${money(credits)}`);
 
-// eslint-disable-next-line no-constant-condition
-if (mode === 'trials') {
-  // License-trial achievability check: run every trial with the standard
-  // actively-managed policy and tier-appropriate driver stats. A healthy
-  // trial is gold-able with strong play and at least bronze with this bot.
-  const tierStats: Record<string, DriverStats> = {
-    b: { pace: 42, consistency: 38, battle: 35, smoothness: 40, stamina: 45 },
-    a: { pace: 52, consistency: 48, battle: 44, smoothness: 46, stamina: 48 },
-    ic: { pace: 60, consistency: 56, battle: 50, smoothness: 52, stamina: 52 },
-    ia: { pace: 70, consistency: 64, battle: 58, smoothness: 58, stamina: 55 },
-    s: { pace: 80, consistency: 74, battle: 68, smoothness: 64, stamina: 60 },
+    // a reasonable player buys the first stage in each category
+    const tuning = PARTS.filter((p) => p.stage === 1).reduce(
+      (sum, p) => sum + partPrice(car, p),
+      0,
+    );
+    credits -= tuning;
+    console.log(`  stage-1 tuning            -${money(tuning).padStart(13)}  → ${money(credits)}`);
+
+    // assume the player finishes inside their band: model as P2 average
+    const perRace = champ.prize[1];
+    const earned = perRace * champ.events.length + champ.titleBonus * 0.5;
+    credits += earned;
+    console.log(
+      `  ${champ.name.padEnd(24)} +${money(earned).padStart(13)}  → ${money(credits)}`,
+    );
+    if (credits < 0) ok = false;
+  }
+  console.log(
+    `\n${ok ? '[32m✓ the core ladder self-funds[0m' : '[31m✗ the player must grind to progress[0m'}`,
+  );
+} else if (mode === 'trials') {
+  const tierStats: Record<string, ReturnType<typeof stats>> = {
+    b: stats(42, 38, 35, 40, 45, 45),
+    a: stats(52, 48, 44, 46, 48, 50),
+    ic: stats(60, 56, 50, 52, 52, 54),
+    ia: stats(70, 64, 58, 58, 55, 58),
+    s: stats(80, 74, 68, 64, 60, 64),
   };
   for (const trial of LICENSE_TRIALS) {
     const track = compileTrack(trialTrackDef(trial));
-    const entries: RaceEntry[] = trial.ai.map(({ driverId, carId }, i) => ({
+    const entries = trial.ai.map(({ driverId, carId }, i) => ({
       carId: `ai-${driverId}-${i}`,
       spec: CARS[carId],
       driverName: AI_BY_ID[driverId].name,
@@ -320,30 +396,25 @@ if (mode === 'trials') {
       driverName: 'BOT',
       stats: tierStats[trial.licenseId ?? 'b'],
       isPlayer: true,
-      paceCmd: 4,
     });
     const state = createRace({ track, lapsTotal: trial.laps, seed: trial.seed, entries });
-    let pitCalled = false;
-    let guard = 0;
-    while (state.phase !== 'finished' && guard++ < 400000) {
-      const cmds: Command[] = [];
-      if (state.tickCount % 10 === 0) {
-        const me = state.cars.find((c) => c.isPlayer)!;
-        const lapsRemaining = state.lapsTotal - me.lap + 1;
-        if (!pitCalled && !me.pit && me.tireWear > 0.8 && lapsRemaining > 2) {
-          cmds.push({ type: 'PIT', carId: 'player', tires: true, refuel: true });
-          pitCalled = true;
-        }
-        const wantPace = me.tireWear > 0.92 ? 2 : 4;
-        if (me.paceCmd !== wantPace) cmds.push({ type: 'SET_PACE', carId: 'player', level: wantPace as 2 | 4 });
-        const wantOt = me.battle !== null;
-        if (me.overtakeMode !== wantOt) cmds.push({ type: 'OVERTAKE_MODE', carId: 'player', on: wantOt });
-      }
-      tick(state, cmds);
-    }
-    const grade = evaluateTrial(trial, buildResult(state), state);
+    const m = measureRace(state, competentPolicy());
+    const grade = evaluateTrial(trial, m.result, state);
     console.log(
       `${trial.id.padEnd(5)} ${trial.name.padEnd(22)} ${String(grade.medal ?? 'FAIL').padEnd(6)} ${grade.detail}`,
     );
   }
+} else if (mode === 'drivers') {
+  console.log('AI roster\n');
+  for (const d of AI_DRIVERS) {
+    const s = d.stats;
+    console.log(
+      `${d.id.padEnd(11)} ${d.name.padEnd(14)} ${d.trait.padEnd(11)} ` +
+        `pace ${s.pace} cons ${s.consistency} battle ${s.battle} ` +
+        `smooth ${s.smoothness} stam ${s.stamina} aggr ${s.aggression}`,
+    );
+  }
+} else {
+  console.log(`unknown mode '${mode}'. See the header of this file for usage.`);
+  void CHAMPIONSHIPS;
 }
