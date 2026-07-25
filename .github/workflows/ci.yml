@@ -37,6 +37,12 @@ jobs:
         # hundred full races and are the slowest thing here by far
         run: npx vitest run
 
+      - name: Art QA
+        # the art bible had a QA checklist from day one and nothing ever ran
+        # it, which is how 41 assets shipped in a hue the palette does not
+        # contain. see docs/ART_BIBLE.md §4
+        run: npm run qa:art
+
       - name: Build
         run: npm run build
 

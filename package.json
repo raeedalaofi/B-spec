@@ -8,6 +8,8 @@
     "build": "tsc && vite build && node scripts/optimizeAssets.mjs",
     "preview": "vite preview",
     "test": "vitest run",
+    "qa:art": "node scripts/art/qaAssets.mjs",
+    "art:recolour": "node scripts/art/recolour.mjs",
     "sim": "tsx scripts/simulate.ts",
     "build:raw": "tsc && vite build",
     "store": "npm run build && node scripts/storeArt.mjs store && node scripts/storeShots.mjs store && node scripts/packRelease.mjs"

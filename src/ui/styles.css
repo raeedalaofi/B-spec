@@ -1,22 +1,9 @@
 /* B-Spec — motorsport-broadcast look: deep navy, thin gold rules,
    condensed uppercase labels, monospace timing figures. */
 
-:root {
-  --bg-0: #060a12;
-  --bg-1: #0b1322;
-  --bg-2: #101c30;
-  --panel: rgba(8, 14, 26, 0.88);
-  --panel-line: rgba(201, 165, 74, 0.55);
-  --gold: #c9a54a;
-  --gold-bright: #ffd75e;
-  --text: #e8ecf4;
-  --text-dim: #93a0b4;
-  --good: #58d68a;
-  --bad: #e06c5c;
-  --accent: #4f8edc;
-  --font-ui: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
-  --font-timing: 'Consolas', 'Menlo', 'DejaVu Sans Mono', monospace;
-}
+/* Colour, type, spacing and motion tokens now live in tokens.css, which is
+   imported ahead of this file. They are shared with the art pipeline — see
+   scripts/art/palette.mjs and docs/ART_BIBLE.md. */
 
 * {
   margin: 0;
@@ -2442,13 +2429,8 @@ select.text-input {
   }
 }
 
-@media (prefers-contrast: more) {
-  :root {
-    --panel: rgba(4, 8, 16, 0.97);
-    --text-dim: #b9c4d4;
-    --panel-line: #e8c65a;
-  }
-}
+/* the prefers-contrast overrides moved to tokens.css, next to the values they
+   override, so there is one place to look when a colour needs changing */
 
 .sr-only {
   position: absolute;

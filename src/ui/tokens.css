@@ -1,0 +1,96 @@
+/* B-Spec design tokens — the single source of truth for colour, type and space.
+ *
+ * These used to live as a 15-line :root block in styles.css, with everything
+ * else hardcoded: ~21 ad-hoc font sizes, spacing literals from 2px to 34px,
+ * tire-compound colours inline, "#10131a" repeated ten times as the on-gold
+ * text colour, and a dozen more in the canvas renderer. That drift is how the
+ * art ended up in a palette the UI never used.
+ *
+ * The colour values here are the same set enforced by scripts/art/qaAssets.mjs
+ * and documented in docs/ART_BIBLE.md. Change one, change all three.
+ */
+
+:root {
+  /* ------------------------------------------------------------- surfaces */
+  --bg-0: #060a12;
+  --bg-1: #0b1322;
+  --bg-2: #101c30;
+  --bg-3: #1b2c48;
+  --panel: rgba(8, 14, 26, 0.88);
+  --panel-raised: rgba(16, 28, 48, 0.92);
+  --panel-line: rgba(201, 165, 74, 0.55);
+  --hairline: rgba(255, 255, 255, 0.1);
+
+  /* ---------------------------------------------------------------- brand */
+  --gold: #c9a54a;
+  --gold-bright: #ffd75e;
+  --gold-deep: #8a6e2a;
+  /* text that sits on top of a gold fill — was inlined as #10131a everywhere */
+  --on-gold: #10131a;
+
+  /* ----------------------------------------------------------------- text */
+  --text: #e8ecf4;
+  --text-dim: #93a0b4;
+  --steel: #5b6472;
+
+  /* ------------------------------------------------------------- semantic */
+  --good: #58d68a;
+  --bad: #e06c5c;
+  --accent: #4f8edc;
+  --warn: #e8c65a;
+
+  /* tire compounds — these carry a letter as well as a colour, so they stay
+     readable without hue (see the colourblind note in styles.css) */
+  --tire-soft: #e05a5a;
+  --tire-medium: #e8c65a;
+  --tire-hard: #dfe4ec;
+
+  /* ------------------------------------------------------------ typography */
+  --font-ui: 'Barlow Condensed', 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+  --font-timing: 'Roboto Mono', 'Consolas', 'Menlo', 'DejaVu Sans Mono', monospace;
+
+  /* A broadcast graphics package has very few sizes and leans on weight and
+     letter-spacing instead. These replace the 21 one-off px values. */
+  --fs-micro: 9px;
+  --fs-label: 10px;
+  --fs-small: 11.5px;
+  --fs-body: 13px;
+  --fs-lead: 15px;
+  --fs-title: 20px;
+  --fs-display: 34px;
+  --fs-hero: 72px;
+
+  --ls-label: 0.18em;
+  --ls-title: 0.08em;
+  --ls-wide: 0.32em;
+
+  /* ---------------------------------------------------------------- space */
+  --sp-1: 2px;
+  --sp-2: 4px;
+  --sp-3: 6px;
+  --sp-4: 10px;
+  --sp-5: 14px;
+  --sp-6: 20px;
+  --sp-7: 28px;
+
+  --radius-sm: 3px;
+  --radius: 6px;
+  --radius-lg: 10px;
+
+  /* --------------------------------------------------------------- motion */
+  --dur-fast: 120ms;
+  --dur: 180ms;
+  --dur-slow: 320ms;
+  --ease-out: cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+/* The high-contrast override lives here too, so every consumer of the tokens
+   picks it up without each component re-declaring it. */
+@media (prefers-contrast: more) {
+  :root {
+    --panel: rgba(4, 8, 16, 0.97);
+    --text-dim: #b9c4d4;
+    --panel-line: #e8c65a;
+    --hairline: rgba(255, 255, 255, 0.24);
+  }
+}

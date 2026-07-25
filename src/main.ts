@@ -1,5 +1,7 @@
 // Entry point: boot the career.
 
+import './ui/fonts.css';
+import './ui/tokens.css';
 import './ui/styles.css';
 import { loadGame, saveGame } from './state/save';
 import type { GameState } from './state/gameState';
