@@ -4,7 +4,9 @@ Everything needed to create the project page, checked against itch.io's
 [content creator quality guidelines](https://itch.io/docs/creators/quality-guidelines).
 
 Run `npm run store` to regenerate the cover, the screenshots and the upload
-zip. Everything lands in `store/` (git-ignored — it is all derived).
+zip. It builds, serves the build itself and plays through a career to take
+the shots, so it works from a clean shell with nothing else running.
+Everything lands in `store/` (git-ignored — it is all derived).
 
 ---
 
@@ -12,7 +14,7 @@ zip. Everything lands in `store/` (git-ignored — it is all derived).
 
 | | |
 |---|---|
-| File | `store/bspec-html5.zip` (~12 MB, 251 files) |
+| File | `store/bspec-html5.zip` (~6.6 MB, 251 files) |
 | Kind of project | **HTML** |
 | “This file will be played in the browser” | **✓ tick this** |
 | Embed size | **1280 × 720** |

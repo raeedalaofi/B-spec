@@ -10,11 +10,15 @@
 // The masters in public/assets are untouched — they stay the source of truth,
 // and re-running the build regenerates the shipped set from them.
 //
+// Uses sharp rather than shelling out to Pillow: this is on the default build
+// path, so it has to work from a clean `npm ci` on any machine without
+// anybody having to know that a Python package is secretly required.
+//
 //   node scripts/optimizeAssets.mjs [distDir]
 
-import { execFileSync } from 'node:child_process';
-import { existsSync, readdirSync, statSync } from 'node:fs';
-import { join, relative } from 'node:path';
+import { existsSync, readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
+import { join, relative, sep } from 'node:path';
+import sharp from 'sharp';
 
 /**
  * Longest edge to ship, per asset folder. Each is roughly twice the largest
@@ -30,7 +34,7 @@ const MAX_EDGE = [
   ['fx/', 224],
   // trackside scenery, ~70 device px at the closest shot
   ['tracks/props/', 160],
-  // tiled patterns — repeat, so they never need to be large
+  // tiled patterns — they repeat, so they never need to be large
   ['tracks/tiles/', 256],
   // a full-width banner, 130px tall
   ['tracks/backdrops/', 1280],
@@ -59,54 +63,36 @@ function walk(dir, out = []) {
 const distDir = process.argv[2] ?? 'dist';
 const assetsDir = join(distDir, 'assets');
 if (!existsSync(assetsDir)) {
-  console.error(`no assets to optimise at ${assetsDir}`);
+  console.log(`no assets to optimise at ${assetsDir}`);
   process.exit(0);
 }
 
 const files = walk(assetsDir);
-const plan = files.map((file) => ({
-  file,
-  maxEdge: maxEdgeFor(relative(assetsDir, file).split('\\').join('/')),
-}));
+let before = 0;
+let after = 0;
 
-// Pillow does the work; keeping it in one python call avoids paying process
-// startup 240 times.
-const script = `
-import json, os, sys
-from PIL import Image
+await Promise.all(
+  files.map(async (file) => {
+    const rel = relative(assetsDir, file).split(sep).join('/');
+    const maxEdge = maxEdgeFor(rel);
+    // read first: sharp cannot safely write back to the file it is reading
+    const input = readFileSync(file);
+    before += input.length;
+    const out = await sharp(input)
+      // `inside` preserves aspect ratio, and withoutEnlargement leaves any
+      // already-small asset alone rather than upscaling it
+      .resize(maxEdge, maxEdge, { fit: 'inside', withoutEnlargement: true })
+      // these are flat illustration-style renders, so a 256-colour palette is
+      // invisible at the sizes they are drawn and roughly quarters the file
+      .png({ palette: true, quality: 90, effort: 7 })
+      .toBuffer();
+    writeFileSync(file, out);
+    after += out.length;
+  }),
+);
 
-plan = json.load(sys.stdin)
-before = after = 0
-for item in plan:
-    path, max_edge = item["file"], item["maxEdge"]
-    before += os.path.getsize(path)
-    im = Image.open(path)
-    if max(im.size) > max_edge:
-        scale = max_edge / max(im.size)
-        im = im.resize(
-            (max(1, round(im.size[0] * scale)), max(1, round(im.size[1] * scale))),
-            Image.LANCZOS,
-        )
-    if im.mode == "RGBA":
-        # quantise with the alpha channel preserved; these are flat
-        # illustration-style renders, so a 256-colour palette is invisible
-        # at the sizes they are drawn and roughly quarters the file
-        im = im.quantize(colors=255, method=Image.FASTOCTREE)
-    elif im.mode not in ("P", "L"):
-        im = im.convert("RGB")
-    im.save(path, "PNG", optimize=True)
-    after += os.path.getsize(path)
-print(json.dumps({"count": len(plan), "before": before, "after": after}))
-`;
-
-const result = execFileSync('python3', ['-c', script], {
-  input: JSON.stringify(plan),
-  encoding: 'utf8',
-  maxBuffer: 64 * 1024 * 1024,
-});
-const { count, before, after } = JSON.parse(result.trim().split('\n').pop());
 const mb = (n) => `${(n / 1e6).toFixed(1)} MB`;
 console.log(
-  `optimised ${count} assets: ${mb(before)} → ${mb(after)} ` +
+  `optimised ${files.length} assets: ${mb(before)} → ${mb(after)} ` +
     `(${(100 * (1 - after / before)).toFixed(1)}% smaller)`,
 );
