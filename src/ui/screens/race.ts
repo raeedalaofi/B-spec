@@ -4,7 +4,9 @@
 
 import { RaceRenderer, type InterpState } from '../../render/raceRenderer';
 import { buildResult, createRace, tick, TICK_S } from '../../sim/engine';
+import { biomeOf } from '../../data/tracks';
 import type {
+  CarRaceState,
   Command,
   RaceConfig,
   RaceEvent,
@@ -14,7 +16,7 @@ import type {
 import { RaceHud } from '../raceHud';
 import { highlightFor, type Highlight } from '../highlights';
 import { nextRadioPrompt, type RadioPrompt } from '../radio';
-import { SOUND } from '../sound';
+import { SOUND, type AudioScene } from '../sound';
 
 export interface RaceScreenOptions {
   config: RaceConfig;
@@ -104,11 +106,46 @@ export function mountRaceScreen(root: HTMLElement, opts: RaceScreenOptions): () 
     if (h) highlights.push(h);
   };
 
+  /**
+   * Translates the race into something the mixer can use: where the nearby
+   * cars are relative to the player, how hard the player is working, and how
+   * tense the moment is. Keeping this here rather than in the audio module
+   * means the mixer never has to know what a RaceState is.
+   */
+  const buildScene = (s: RaceState, me: CarRaceState): AudioScene => {
+    const L = s.track.lengthM;
+    const rivals = s.cars
+      .filter((c) => c !== me && !c.finished && !c.pit)
+      .map((c) => {
+        const ahead = (c.s - me.s + L) % L;
+        const distM = ahead <= L / 2 ? ahead : ahead - L;
+        return { distM, speedFrac: c.speed / c.spec.topSpeedMs, lateral: c.lateral };
+      });
+    // tension: wheel-to-wheel is the peak, being closed down is most of it
+    const tension =
+      me.battle?.phase === 'COMMITTED' || me.defence === 'cover'
+        ? 1
+        : me.battle?.phase === 'FOLLOWING' || me.underAttack
+          ? 0.6
+          : 0;
+    // cornering load, read off how far below the car's own top speed it is
+    // while still on the power
+    const cornering = Math.max(0, Math.min(1, 1.35 - me.speed / (me.profileMax || 1)));
+    return {
+      playerSpeedFrac: me.speed / me.spec.topSpeedMs,
+      rivals,
+      tension,
+      cornering,
+      underCaution: s.caution !== null,
+      finished: s.phase === 'finished',
+    };
+  };
+
   const playSoundFor = (e: RaceEvent): void => {
     switch (e.type) {
       case 'GREEN_FLAG':
         SOUND.greenFlag();
-        SOUND.startEngine();
+        SOUND.startEngine(biomeOf(opts.config.track.def.id));
         break;
       case 'OVERTAKE':
         if (e.carId === playerId) SOUND.goodSting();
@@ -233,9 +270,7 @@ export function mountRaceScreen(root: HTMLElement, opts: RaceScreenOptions): () 
         hudClock = 0;
         hud.update(state);
         const me = state.cars.find((c) => c.carId === playerId);
-        if (me && state.phase === 'racing') {
-          SOUND.setEngineSpeed(me.speed / me.spec.topSpeedMs, state.caution !== null);
-        }
+        if (me && state.phase === 'racing') SOUND.updateScene(buildScene(state, me));
       }
       if (hud.updateCountdown(state)) SOUND.countdownTick();
     }
