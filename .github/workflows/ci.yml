@@ -46,6 +46,16 @@ jobs:
       - name: Build
         run: npm run build
 
+      - name: UI checks
+        # tests/ covers the sim, the content and the balance; nothing covered
+        # the interface until this. needs a browser, unlike everything above
+        env:
+          PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: '0'
+        run: |
+          npx playwright install --with-deps chromium
+          CHROME_PATH="$(node -e "console.log(require('playwright').chromium.executablePath())")" \
+            npm run qa:ui
+
       - name: Check the shipped build stays small
         # a browser game people wait to download is a browser game people
         # close; this caught the build at 251 MB once already
