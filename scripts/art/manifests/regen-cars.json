@@ -1,6 +1,7 @@
 {
-  "note": "Corrected car prompts. See docs/CAR_LIKENESS.md. Output goes to art-review/ NOT public/assets — candidates must pass the likeness review before any of them becomes a master. Run: npm run art:regen-cars",
-  "supersedes": "car-studio-* and car-topdown-* entries in p0.json",
+  "note": "Corrected car prompts. Output goes to art-review/ NOT public/assets — candidates must pass the likeness review in docs/CAR_LIKENESS.md before any becomes a master. Run: npm run art:regen-cars",
+  "supersedes": "car-studio-* entries in p0.json",
+  "recipe": "No upper grille opening + one unusual proportion pairing. Validated against two alternatives: naming invented design features (a hexagonal grille split by a vertical bar) produced a badged BMW, because those features ARE a real marque signature. Removing the grille removes both the signature and the surface a badge sits on.",
   "entries": [
     {
       "id": "car-studio-kestrel",
@@ -9,10 +10,10 @@
       "width": 1408,
       "height": 896,
       "alpha": "remove-bg",
-      "candidates": 8,
-      "prompt": "professional game asset, clean automotive studio render, fictional compact three-door hatchback, tall glasshouse and short bonnet, upright A-pillar, narrow track, small 14 inch five-spoke steel-look wheels, plain smooth bumpers with no lower splitter, single round headlamp per side set into a slim body-colour grille, medium steel blue #4f8edc paint, no emblem anywhere on the car, three-quarter front studio shot, soft key light with subtle gold rim light, plain light gray studio background",
-      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, cel shaded, low-poly, blurry, oversaturated, deformed, extra wheels, brand logo, manufacturer badge, sponsor logos, emblem, grille badge, bonnet badge, wheel centre cap logo, license plate, Nissan, Skyline, GT-R, Porsche, Mazda, Miata, Toyota, Honda, Subaru, BMW, Ford, real production car, existing car model, replica",
-      "formNotes": "Class C economy hatch. Must read as slow and honest: tall, narrow, small wheels. Deliberately NOT a hot hatch."
+      "candidates": 2,
+      "prompt": "professional game asset, clean automotive studio render, fictional compact three-door economy hatchback, tall narrow glasshouse over a very short bonnet, upright A-pillar, slim full-width lower intake with no upper grille opening at all, small round headlamps set low in the bumper, plain unflared arches, narrow 14 inch five-spoke steel-look wheels, #4f8edc paint, completely smooth panels with no emblem, badge, lettering or ornament of any kind, three-quarter front studio shot, soft key light with subtle gold rim light, plain light gray studio background",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, cel shaded, low-poly, blurry, oversaturated, deformed, extra wheels, brand logo, manufacturer badge, sponsor logos, emblem, grille badge, bonnet badge, hood ornament, wheel centre cap logo, license plate, chrome grille surround, Jaguar, BMW, Audi, Nissan, Skyline, GT-R, Porsche, Mazda, Lexus, Toyota, Honda, Subaru, Ford, real production car, existing car model, replica",
+      "formNotes": "Class C economy hatch — tall, narrow, small wheels; must read slow and honest"
     },
     {
       "id": "car-studio-vulpe",
@@ -21,10 +22,10 @@
       "width": 1408,
       "height": 896,
       "alpha": "remove-bg",
-      "candidates": 8,
-      "prompt": "professional game asset, clean automotive studio render, fictional sporting three-door hatchback, wide squared-off wheel arches, deep front air dam with three rectangular intakes, twin rectangular headlamps per side, roof spoiler, 15 inch multi-spoke alloy wheels, bright rally red #d84a3a paint, no emblem anywhere on the car, three-quarter front studio shot, soft key light with subtle gold rim light, plain light gray studio background",
-      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, cel shaded, low-poly, blurry, oversaturated, deformed, extra wheels, brand logo, manufacturer badge, sponsor logos, emblem, grille badge, bonnet badge, wheel centre cap logo, license plate, Nissan, Skyline, GT-R, Porsche, Mazda, Miata, Toyota, Honda, Subaru, BMW, Ford, real production car, existing car model, replica",
-      "formNotes": "Class C hot hatch. Squared arches and rectangular lamps push it away from the round-lamp Peugeot/Ford archetypes."
+      "candidates": 2,
+      "prompt": "professional game asset, clean automotive studio render, fictional sporting three-door hatchback, squared-off blistered arches on a narrow body, deep full-width lower intake divided into three rectangular slots with no upper grille opening, narrow horizontal slot headlamps, tall roof spoiler, 15 inch multi-spoke alloy wheels, #d84a3a paint, completely smooth panels with no emblem, badge, lettering or ornament of any kind, three-quarter front studio shot, soft key light with subtle gold rim light, plain light gray studio background",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, cel shaded, low-poly, blurry, oversaturated, deformed, extra wheels, brand logo, manufacturer badge, sponsor logos, emblem, grille badge, bonnet badge, hood ornament, wheel centre cap logo, license plate, chrome grille surround, Jaguar, BMW, Audi, Nissan, Skyline, GT-R, Porsche, Mazda, Lexus, Toyota, Honda, Subaru, Ford, real production car, existing car model, replica",
+      "formNotes": "Class C hot hatch — squared arches and slot lamps"
     },
     {
       "id": "car-studio-taro",
@@ -33,10 +34,10 @@
       "width": 1408,
       "height": 896,
       "alpha": "remove-bg",
-      "candidates": 8,
-      "prompt": "professional game asset, clean automotive studio render, fictional two-door notchback coupe, long bonnet and short deck, pop-up-style flush rectangular headlamps, thin chrome-free window frames, small boot lip spoiler, 16 inch seven-spoke alloy wheels, warm champagne gold #e8b93c paint, no emblem anywhere on the car, three-quarter front studio shot, soft key light with subtle gold rim light, plain light gray studio background",
-      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, cel shaded, low-poly, blurry, oversaturated, deformed, extra wheels, brand logo, manufacturer badge, sponsor logos, emblem, grille badge, bonnet badge, wheel centre cap logo, license plate, Nissan, Skyline, GT-R, Porsche, Mazda, Miata, Toyota, Honda, Subaru, BMW, Ford, real production car, existing car model, replica",
-      "formNotes": "Class C coupe. Notchback with a long bonnet — must not share the four-door sedan silhouette used by falcon."
+      "candidates": 2,
+      "prompt": "professional game asset, clean automotive studio render, fictional two-door notchback coupe, very long bonnet and short high deck, flush rectangular headlamps recessed into the wing tops, a single full-width lower intake and a completely blank body-colour nose panel above it, thin frameless side glass, small boot lip spoiler, 16 inch seven-spoke alloy wheels, #e8b93c paint, completely smooth panels with no emblem, badge, lettering or ornament of any kind, three-quarter front studio shot, soft key light with subtle gold rim light, plain light gray studio background",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, cel shaded, low-poly, blurry, oversaturated, deformed, extra wheels, brand logo, manufacturer badge, sponsor logos, emblem, grille badge, bonnet badge, hood ornament, wheel centre cap logo, license plate, chrome grille surround, Jaguar, BMW, Audi, Nissan, Skyline, GT-R, Porsche, Mazda, Lexus, Toyota, Honda, Subaru, Ford, real production car, existing car model, replica",
+      "formNotes": "Class C coupe — long bonnet notchback, distinct from the saloon"
     },
     {
       "id": "car-studio-falcon",
@@ -45,10 +46,10 @@
       "width": 1408,
       "height": 896,
       "alpha": "remove-bg",
-      "candidates": 8,
-      "prompt": "professional game asset, clean automotive studio render, fictional four-door sports saloon, three-box proportions with a long cabin and upright rear screen, slim horizontal headlamps either side of a narrow rectangular grille, subtle boot-lid lip spoiler rather than a wing, 17 inch ten-spoke alloy wheels, deep royal blue #3f74e8 paint, no emblem anywhere on the car, three-quarter front studio shot, soft key light with subtle gold rim light, plain light gray studio background",
-      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, cel shaded, low-poly, blurry, oversaturated, deformed, extra wheels, brand logo, manufacturer badge, sponsor logos, emblem, grille badge, bonnet badge, wheel centre cap logo, license plate, Nissan, Skyline, GT-R, Porsche, Mazda, Miata, Toyota, Honda, Subaru, BMW, Ford, real production car, existing car model, replica",
-      "formNotes": "Class B saloon. 'Sports saloon with three-box proportions' replaces '2000s Japanese turbocharged sports sedan with rear wing', which mapped straight onto the Skyline. Lip spoiler, not a wing."
+      "candidates": 2,
+      "prompt": "professional game asset, clean automotive studio render, fictional four-door sports saloon, very long bonnet paired with a short cab-rearward glasshouse, narrow vertical slot headlamps stacked two per side, a full-width lower intake with no upper grille opening at all, flat slab flanks with a single hard crease, boxy squared wheel arches, 17 inch ten-spoke alloy wheels, #3f74e8 paint, completely smooth panels with no emblem, badge, lettering or ornament of any kind, three-quarter front studio shot, soft key light with subtle gold rim light, plain light gray studio background",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, cel shaded, low-poly, blurry, oversaturated, deformed, extra wheels, brand logo, manufacturer badge, sponsor logos, emblem, grille badge, bonnet badge, hood ornament, wheel centre cap logo, license plate, chrome grille surround, Jaguar, BMW, Audi, Nissan, Skyline, GT-R, Porsche, Mazda, Lexus, Toyota, Honda, Subaru, Ford, real production car, existing car model, replica",
+      "formNotes": "Class B saloon — this exact wording produced the clean test result"
     },
     {
       "id": "car-studio-serval",
@@ -57,10 +58,10 @@
       "width": 1408,
       "height": 896,
       "alpha": "remove-bg",
-      "candidates": 8,
-      "prompt": "professional game asset, clean automotive studio render, fictional compact two-seat roadster, soft top folded down, long bonnet with a raised centre spine, wide flared rear haunches, slim horizontal headlamps, small vertical grille opening, 16 inch mesh alloy wheels, racing green #48b06a paint, no emblem anywhere on the car, three-quarter front studio shot, soft key light with subtle gold rim light, plain light gray studio background",
-      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, cel shaded, low-poly, blurry, oversaturated, deformed, extra wheels, brand logo, manufacturer badge, sponsor logos, emblem, grille badge, bonnet badge, wheel centre cap logo, license plate, Nissan, Skyline, GT-R, Porsche, Mazda, Miata, Toyota, Honda, Subaru, BMW, Ford, real production car, existing car model, replica",
-      "formNotes": "Class B roadster. Bonnet spine and flared haunches steer away from the round-lamp MX-5 form the original produced."
+      "candidates": 2,
+      "prompt": "professional game asset, clean automotive studio render, fictional compact two-seat roadster, soft top folded flat, long bonnet with a raised centre spine running to a blank body-colour nose, wide flared rear haunches over a narrow cabin, slim horizontal lamps at the leading edge of the wings, small oval lower intake only, 16 inch mesh alloy wheels, #48b06a paint, completely smooth panels with no emblem, badge, lettering or ornament of any kind, three-quarter front studio shot, soft key light with subtle gold rim light, plain light gray studio background",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, cel shaded, low-poly, blurry, oversaturated, deformed, extra wheels, brand logo, manufacturer badge, sponsor logos, emblem, grille badge, bonnet badge, hood ornament, wheel centre cap logo, license plate, chrome grille surround, Jaguar, BMW, Audi, Nissan, Skyline, GT-R, Porsche, Mazda, Lexus, Toyota, Honda, Subaru, Ford, real production car, existing car model, replica",
+      "formNotes": "Class B roadster — spine and haunches, no front grille"
     },
     {
       "id": "car-studio-kite",
@@ -69,10 +70,10 @@
       "width": 1408,
       "height": 896,
       "alpha": "remove-bg",
-      "candidates": 8,
-      "prompt": "professional game asset, clean automotive studio render, fictional all-wheel-drive rally homologation hatchback, blistered arches over all four corners, large bonnet vent, deep front bumper with wide central intake, tall twin-plane roof wing, 17 inch white five-spoke rally wheels, vivid violet #8455c8 paint, no emblem anywhere on the car, three-quarter front studio shot, soft key light with subtle gold rim light, plain light gray studio background",
-      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, cel shaded, low-poly, blurry, oversaturated, deformed, extra wheels, brand logo, manufacturer badge, sponsor logos, emblem, grille badge, bonnet badge, wheel centre cap logo, license plate, Nissan, Skyline, GT-R, Porsche, Mazda, Miata, Toyota, Honda, Subaru, BMW, Ford, real production car, existing car model, replica",
-      "formNotes": "Class B. The original prompt inherited 'GT-Four' from the car's in-game name, which is a Celica trim designation; the rewrite describes the form instead. Hatchback body distinguishes it from falcon and taro."
+      "candidates": 2,
+      "prompt": "professional game asset, clean automotive studio render, fictional all-wheel-drive rally homologation hatchback, heavily blistered arches over all four corners, large rectangular bonnet vent, deep full-width lower intake with no upper grille opening, four small square driving lamps in a row across the bumper, tall twin-plane roof wing, 17 inch white five-spoke rally wheels, #8455c8 paint, completely smooth panels with no emblem, badge, lettering or ornament of any kind, three-quarter front studio shot, soft key light with subtle gold rim light, plain light gray studio background",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, cel shaded, low-poly, blurry, oversaturated, deformed, extra wheels, brand logo, manufacturer badge, sponsor logos, emblem, grille badge, bonnet badge, hood ornament, wheel centre cap logo, license plate, chrome grille surround, Jaguar, BMW, Audi, Nissan, Skyline, GT-R, Porsche, Mazda, Lexus, Toyota, Honda, Subaru, Ford, real production car, existing car model, replica",
+      "formNotes": "Class B rally homologation — driving lamps instead of a grille"
     },
     {
       "id": "car-studio-phantom",
@@ -81,10 +82,10 @@
       "width": 1408,
       "height": 896,
       "alpha": "remove-bg",
-      "candidates": 8,
-      "prompt": "professional game asset, clean automotive studio render, fictional mid-engine grand touring race car, cab-forward silhouette with a long rear deck, wide low nose with two large brake ducts, side air intakes ahead of the rear arches, swan-neck rear wing, centre-lock 18 inch alloy wheels, gloss black #20242c paint, no emblem anywhere on the car, no sponsor livery, three-quarter front studio shot, soft key light with subtle gold rim light, plain light gray studio background",
-      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, cel shaded, low-poly, blurry, oversaturated, deformed, extra wheels, brand logo, manufacturer badge, sponsor logos, emblem, grille badge, bonnet badge, wheel centre cap logo, license plate, Nissan, Skyline, GT-R, Porsche, Mazda, Miata, Toyota, Honda, Subaru, BMW, Ford, real production car, existing car model, replica",
-      "formNotes": "Class A. 'GT500' named a real JGTC class; replaced with mid-engine GT description. Mid-engine layout separates it from the front-engine roster."
+      "candidates": 2,
+      "prompt": "professional game asset, clean automotive studio render, fictional mid-engine grand touring race car, cab-forward canopy with a long rear deck, very low blank wedge nose with two large brake ducts and no grille, deep side air intakes ahead of the rear arches, swan-neck rear wing, centre-lock 18 inch alloy wheels, no sponsor livery, #20242c paint, completely smooth panels with no emblem, badge, lettering or ornament of any kind, three-quarter front studio shot, soft key light with subtle gold rim light, plain light gray studio background",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, cel shaded, low-poly, blurry, oversaturated, deformed, extra wheels, brand logo, manufacturer badge, sponsor logos, emblem, grille badge, bonnet badge, hood ornament, wheel centre cap logo, license plate, chrome grille surround, Jaguar, BMW, Audi, Nissan, Skyline, GT-R, Porsche, Mazda, Lexus, Toyota, Honda, Subaru, Ford, real production car, existing car model, replica",
+      "formNotes": "Class A mid-engine GT — mid-engine layout separates it from the roster"
     },
     {
       "id": "car-studio-arrow",
@@ -93,11 +94,10 @@
       "width": 1408,
       "height": 896,
       "alpha": "remove-bg",
-      "candidates": 8,
-      "prompt": "professional game asset, clean automotive studio render, fictional closed-cockpit endurance prototype, very low canopy set well forward, full-width front splitter, teardrop cockpit fairing, enclosed front wheel arches with louvres, tall single-plane rear wing on twin end plates, pearl white and silver #e2e6ee paint, no emblem anywhere on the car, no sponsor livery, three-quarter front studio shot, soft key light with subtle gold rim light, plain light gray studio background",
-      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, cel shaded, low-poly, blurry, oversaturated, deformed, extra wheels, brand logo, manufacturer badge, sponsor logos, emblem, grille badge, bonnet badge, wheel centre cap logo, license plate, Nissan, Skyline, GT-R, Porsche, Mazda, Miata, Toyota, Honda, Subaru, BMW, Ford, real production car, existing car model, replica",
-      "formNotes": "Class A prototype. The original produced a near-exact Porsche 911 GT1. Teardrop fairing and louvred arches are the differentiators; this one needs the closest likeness review of the eight."
+      "candidates": 2,
+      "prompt": "professional game asset, clean automotive studio render, fictional closed-cockpit endurance prototype, very low teardrop canopy set well forward, full-width front splitter under a completely blank nose, enclosed front wheel arches with horizontal louvres, narrow slit air exits on the bonnet, tall single-plane rear wing on twin end plates, no sponsor livery, #e2e6ee paint, completely smooth panels with no emblem, badge, lettering or ornament of any kind, three-quarter front studio shot, soft key light with subtle gold rim light, plain light gray studio background",
+      "negative": "text, watermark, logo, letters, numbers, signature, frame, border, cartoon, anime, cel shaded, low-poly, blurry, oversaturated, deformed, extra wheels, brand logo, manufacturer badge, sponsor logos, emblem, grille badge, bonnet badge, hood ornament, wheel centre cap logo, license plate, chrome grille surround, Jaguar, BMW, Audi, Nissan, Skyline, GT-R, Porsche, Mazda, Lexus, Toyota, Honda, Subaru, Ford, real production car, existing car model, replica",
+      "formNotes": "Class A prototype — needs the closest likeness review of the eight"
     }
-  ],
-  "candidatesPerCar": 8
+  ]
 }

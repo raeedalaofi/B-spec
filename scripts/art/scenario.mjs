@@ -62,9 +62,27 @@ async function api(pathname, options = {}) {
   return json;
 }
 
+/**
+ * All public platform models, following pagination.
+ *
+ * This used to fetch a single pageSize=100 page and return it. There are 607
+ * models, so `models <filter>` reported anything past the first page as
+ * absent — including every model this pipeline actually uses. A lookup that
+ * answers "not found" when the answer is "found on page 4" is worse than no
+ * lookup at all.
+ */
 export async function listModels() {
-  const out = await api('/models?privacy=public&pageSize=100');
-  return out.models ?? [];
+  const all = [];
+  let cursor = null;
+  for (let page = 0; page < 25; page++) {
+    const q = `/models?privacy=public&pageSize=100${cursor ? `&paginationToken=${encodeURIComponent(cursor)}` : ''}`;
+    const out = await api(q);
+    const models = out.models ?? [];
+    all.push(...models);
+    cursor = out.nextPaginationToken ?? out.paginationToken ?? null;
+    if (!cursor || !models.length) break;
+  }
+  return all;
 }
 
 async function waitJob(jobId) {
@@ -141,26 +159,35 @@ async function logAccepted(row) {
 
 async function runEntry(entry, candidates) {
   const modelId = MODELS[entry.modelSlot] ?? entry.modelSlot;
-  const assets = await generate(modelId, {
-    prompt: entry.prompt,
-    negativePrompt: entry.negative ?? GLOBAL_NEGATIVE,
-    width: entry.width,
-    height: entry.height,
-    numSamples: entry.candidates ?? candidates,
-    ...(entry.seed !== undefined ? { seed: entry.seed } : {}),
-    ...(entry.extra ?? {}),
-  });
-  for (let i = 0; i < assets.length; i++) {
-    let assetId = assets[i];
-    if (entry.alpha === 'remove-bg') {
-      try {
-        assetId = await removeBackground(assetId);
-      } catch (e) {
-        console.error(`  ${entry.id}: bg-removal failed (candidate ${i}): ${String(e).slice(0, 140)}`);
+  const want = entry.candidates ?? candidates;
+  // `numSamples` is accepted and then ignored by the FLUX editing model — it
+  // returns exactly one asset however many you ask for, so asking for eight
+  // candidates silently produced one. Candidates are separate calls, which
+  // also makes the cost per candidate visible rather than hidden in a
+  // parameter the API quietly drops.
+  let written = 0;
+  for (let i = 0; i < want; i++) {
+    const assets = await generate(modelId, {
+      prompt: entry.prompt,
+      negativePrompt: entry.negative ?? GLOBAL_NEGATIVE,
+      width: entry.width,
+      height: entry.height,
+      ...(entry.seed !== undefined ? { seed: entry.seed + i } : {}),
+      ...(entry.extra ?? {}),
+    });
+    for (const asset of assets) {
+      let assetId = asset;
+      if (entry.alpha === 'remove-bg') {
+        try {
+          assetId = await removeBackground(assetId);
+        } catch (e) {
+          console.error(`  ${entry.id}: bg-removal failed (candidate ${i}): ${String(e).slice(0, 140)}`);
+        }
       }
+      const file = written === 0 ? entry.out : entry.out.replace('.png', `.alt${written}.png`);
+      await download(assetId, file);
+      written++;
     }
-    const file = i === 0 ? entry.out : entry.out.replace('.png', `.alt${i}.png`);
-    await download(assetId, file);
   }
   await logAccepted({ id: entry.id, model: modelId, prompt: entry.prompt });
 }
