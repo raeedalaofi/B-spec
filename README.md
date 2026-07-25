@@ -1,6 +1,6 @@
 # B-Spec — Race Director
 
-A browser racing-management game in the spirit of **Gran Turismo 4's B-Spec
+A browser racing-management game in the spirit of the classic **B-Spec
 mode**. You don't drive — you direct. Watch your AI driver from the pit wall,
 issue tactical commands, manage tires and fuel, and build a career from a
 compact hatchback to flagship machinery.

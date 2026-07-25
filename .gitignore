@@ -22,3 +22,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# store build artefacts (regenerate with `npm run store`)
+store/
