@@ -44,11 +44,11 @@ flag above is the only platform signal it should carry.
 | Field | Value |
 |---|---|
 | Title | `B-Spec — Race Director` |
-| Short description | `You don't drive. You decide. A racing-management sim: read the race from the pit wall, call the strategy, and take your driver through a career.` |
+| Short description | `You don't drive. You decide. A free racing-management sim: read the race from the pit wall, call the strategy, and take your driver through a career.` |
 | Classification | Game |
 | Kind of project | HTML |
 | Release status | Released |
-| Pricing | *(your call — see §7)* |
+| Pricing | **Donate** — free to play, with a donation option (see §7) |
 | Genre | **Racing** *(one only; management/simulation go in tags)* |
 | Tags | `management`, `simulation`, `strategy`, `motorsport`, `top-down`, `singleplayer-campaign`, `no-install` |
 | Average session | A few minutes *(a sprint is ~5 min; endurance events run longer)* |
@@ -94,8 +94,10 @@ Two things worth saying plainly:
 - **Do not skip this to avoid the AI-Assisted browse page.** Being delisted
   entirely is a far worse outcome than appearing there, and the rights
   position around generated art is exactly why they enforce it.
-- **Check Scenario's licence terms for commercial use** before charging for
-  the game. That is between you and Scenario; itch.io's disclosure rule does
+- **Check Scenario's licence terms for commercial use before you enable
+  donations.** Free-with-donations is far less exposed than selling the game,
+  but donations are still money, so "it's free" does not fully answer the
+  question. That is between you and Scenario; itch.io's disclosure rule does
   not settle it.
 
 There is also a guideline against *“excessive amounts of automatically
@@ -150,6 +152,12 @@ Paste this into the description editor.
 >   race actually went
 > - Runs in the browser. No install, no account, no ads. Your career saves
 >   locally, and a race you close mid-way is waiting when you come back.
+>
+> ---
+>
+> **Free to play.** The whole game, all of it, no paywall and nothing held
+> back. If you get a good few hours out of it and want to throw something in
+> the jar, the support button is up there — but the game doesn't ask twice.
 >
 > ---
 >
@@ -208,6 +216,7 @@ covers does not apply.
 | No misleading content | ✓ description matches what ships |
 | No impersonation | ✓ **see below** |
 | No paid contests / gambling / pyramid schemes | ✓ none |
+| Sales guidelines | ✓ n/a — free with donations, so there is no price to misrepresent |
 | No reskins / many pages for minor changes | ✓ |
 | No excessive auto-generated content | ✓ §3 |
 | **Accurately tag generative AI** | **✓ §3 — the critical one** |
@@ -231,20 +240,54 @@ is honoured, which disables them entirely.
 
 ---
 
-## 7. Pricing
+## 7. Pricing — free, with a donation option
 
-Not a compliance matter, but the guidelines are strict about sales:
+On the project's edit page, under **Pricing**, choose **Donate**.
 
-- **Don't leave it permanently on sale.** A sale is meant to be an event.
-  Perpetual discounts misrepresent the price and are illegal in a number of
-  countries.
-- **Don't raise the base price then "discount" back to it.** Same reason.
-- **Don't run sales constantly.** Each one is worth less.
+There are three options and only one of them is right here:
 
-For a first browser release, "Free" or "Free, with a donation option" avoids
-all of this and gets far more plays. If you do charge, be aware the AI
-disclosure in §3 sits on a paid page, which is where the rights question
-around generated art actually matters.
+| Option | What it does |
+|---|---|
+| `$X or more` | Paid. Puts a paywall in front of the game. |
+| `No payments` | Free — and **removes the donation option entirely**. |
+| **`Donate`** | **Free to play, with a “Support this game” button.** This is the one. |
+
+Set a **suggested donation** of around **$3**. It is a default in the box, not
+a demand — people can type anything, including nothing. Low suggestions
+convert better than ambitious ones on a first release.
+
+**You need a payment method on your account before donations can reach you.**
+Account settings → Payment methods, and connect Stripe or PayPal. Without
+it the support button either won't appear or won't be able to take anything.
+Worth doing before you publish rather than after.
+
+Nothing else about the page changes: the game still runs in the browser on a
+click, with no paywall, no account and no gate.
+
+### What this choice buys you
+
+- **The sales guidelines stop applying.** Everything itch.io is strict about
+  under Sales — perpetual discounts, raising a base price then "discounting"
+  back to it, running sales too often — is about a priced product. There is
+  no base price to misrepresent, so that entire category of risk is gone.
+- **Far more plays.** A free browser game is one click. A paid one is a
+  decision, and a first release from an unknown account rarely wins it.
+- **Reviews and ratings**, which a paywall on an unknown project mostly
+  prevents you from ever collecting.
+
+### One thing to keep in mind
+
+Donations are still money, so the rights position around the generated
+artwork (§3) is not entirely academic — it is just far less exposed than
+selling the game outright would be. Check Scenario's licence terms covering
+commercial use before you enable donations. That is between you and
+Scenario; itch.io's disclosure requirement does not settle it.
+
+### If you later want to charge
+
+Don't create a second page for the paid version — the guidelines explicitly
+forbid re-creating a page, and it would strand everyone who followed or
+collected the original. Change the pricing on this page instead.
 
 ---
 
