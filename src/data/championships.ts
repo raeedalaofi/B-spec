@@ -12,6 +12,13 @@ export interface EventDef {
   laps: number;
   /** car ids for the 7 AI entries, in grid order */
   aiCarIds: string[];
+  /**
+   * Overrides the championship's rival development for this round. Teams
+   * bring upgrades as a season goes on, so a championship can ramp: the
+   * opener is the softest field the player will meet and the finale the
+   * hardest, without touching a single driver stat.
+   */
+  aiParts?: string[];
 }
 
 export interface ChampionshipDef {
@@ -36,6 +43,15 @@ export interface ChampionshipDef {
   category?: 'core' | 'onemake' | 'grandtour';
   /** one-make cups: the player must race this exact car */
   requiredCarId?: string;
+  /**
+   * How developed the rival cars are. Without this the player simply buys
+   * their way past every difficulty curve in the game: a stage-2 build is
+   * worth far more than any driver stat, so a field of stock cars stops
+   * being opposition the moment the garage opens. Rivals are kept a little
+   * behind the player's expected build, so upgrading still feels like
+   * progress — it just does not end the contest.
+   */
+  aiParts?: string[];
 }
 
 /** championship points per finishing position */
@@ -54,7 +70,7 @@ export const CHAMPIONSHIPS: ChampionshipDef[] = [
         name: 'Green Park Sprint',
         trackId: 'greenpark',
         laps: 5,
-        aiCarIds: ['vulpe', 'kestrel', 'vulpe', 'kestrel', 'kestrel', 'kestrel', 'vulpe'],
+        aiCarIds: ['kestrel', 'kestrel', 'vulpe', 'kestrel', 'kestrel', 'kestrel', 'vulpe'],
       },
       {
         id: 'sc-2',
@@ -68,13 +84,14 @@ export const CHAMPIONSHIPS: ChampionshipDef[] = [
         name: 'Green Park Grand Final',
         trackId: 'greenpark',
         laps: 8,
-        aiCarIds: ['taro', 'vulpe', 'vulpe', 'kestrel', 'kestrel', 'vulpe', 'vulpe'],
+        aiCarIds: ['vulpe', 'vulpe', 'vulpe', 'kestrel', 'vulpe', 'vulpe', 'vulpe'],
       },
     ],
-    prize: [4000, 2800, 2000, 1500, 1100, 800, 600, 400],
-    titleBonus: 8000,
+    prize: [11000, 7700, 5600, 4200, 3100, 2300, 1700, 1200],
+    titleBonus: 30000,
     unlockAfter: null,
     category: 'core',
+    aiParts: [],
   },
   {
     id: 'clubman',
@@ -88,7 +105,7 @@ export const CHAMPIONSHIPS: ChampionshipDef[] = [
         name: 'Copperline Challenge',
         trackId: 'copperline',
         laps: 7,
-        aiCarIds: ['falcon', 'falcon', 'falcon', 'falcon', 'serval', 'falcon', 'falcon'],
+        aiCarIds: ['falcon', 'serval', 'falcon', 'serval', 'serval', 'falcon', 'falcon'],
       },
       {
         id: 'cm-2',
@@ -102,7 +119,7 @@ export const CHAMPIONSHIPS: ChampionshipDef[] = [
         name: 'Green Park Clubman GP',
         trackId: 'greenpark',
         laps: 10,
-        aiCarIds: ['serval', 'serval', 'falcon', 'serval', 'falcon', 'falcon', 'serval'],
+        aiCarIds: ['serval', 'falcon', 'falcon', 'serval', 'falcon', 'falcon', 'falcon'],
       },
       {
         id: 'cm-4',
@@ -112,11 +129,12 @@ export const CHAMPIONSHIPS: ChampionshipDef[] = [
         aiCarIds: ['kite', 'serval', 'serval', 'falcon', 'serval', 'falcon', 'falcon'],
       },
     ],
-    prize: [7000, 4900, 3600, 2700, 2000, 1500, 1100, 800],
-    titleBonus: 15000,
+    prize: [30000, 21000, 15600, 11700, 8600, 6400, 4700, 3400],
+    titleBonus: 75000,
     unlockAfter: 'sunday-cup',
     licenseReq: 'b',
     category: 'core',
+    aiParts: ['power-1', 'tires-1'],
   },
   {
     id: 'national',
@@ -131,6 +149,7 @@ export const CHAMPIONSHIPS: ChampionshipDef[] = [
         trackId: 'aria',
         laps: 11,
         aiCarIds: ['phantom', 'phantom', 'phantom', 'phantom', 'phantom', 'phantom', 'phantom'],
+        aiParts: ['power-2', 'tires-2'],
       },
       {
         id: 'nc-2',
@@ -138,13 +157,15 @@ export const CHAMPIONSHIPS: ChampionshipDef[] = [
         trackId: 'copperline',
         laps: 11,
         aiCarIds: ['phantom', 'phantom', 'phantom', 'phantom', 'phantom', 'phantom', 'phantom'],
+        aiParts: ['power-3', 'tires-2', 'weight-2', 'aero-1', 'gearbox-1'],
       },
       {
         id: 'nc-3',
         name: 'Green Park Invitational',
         trackId: 'greenpark',
         laps: 13,
-        aiCarIds: ['arrow', 'phantom', 'arrow', 'phantom', 'arrow', 'phantom', 'phantom'],
+        aiCarIds: ['arrow', 'arrow', 'arrow', 'phantom', 'arrow', 'phantom', 'arrow'],
+        aiParts: ['power-2', 'tires-2', 'weight-2', 'aero-1'],
       },
       {
         id: 'nc-4',
@@ -152,20 +173,24 @@ export const CHAMPIONSHIPS: ChampionshipDef[] = [
         trackId: 'oval',
         laps: 20,
         aiCarIds: ['arrow', 'phantom', 'arrow', 'arrow', 'phantom', 'phantom', 'phantom'],
+        aiParts: ['power-2', 'tires-2', 'weight-1', 'aero-1'],
       },
       {
         id: 'nc-5',
         name: 'Aria Grand Final',
         trackId: 'aria',
         laps: 16,
-        aiCarIds: ['arrow', 'arrow', 'phantom', 'arrow', 'arrow', 'phantom', 'arrow'],
+        aiCarIds: ['arrow', 'arrow', 'phantom', 'arrow', 'phantom', 'phantom', 'arrow'],
+        // by the finale the rivals have very nearly matched the player's build
+        aiParts: ['power-2', 'tires-2', 'weight-1', 'aero-1'],
       },
     ],
-    prize: [16000, 11000, 8000, 6000, 4500, 3400, 2500, 1800],
-    titleBonus: 45000,
+    prize: [48000, 33000, 24000, 18000, 13500, 10200, 7500, 5400],
+    titleBonus: 140000,
     unlockAfter: 'clubman',
     licenseReq: 'ia',
     category: 'core',
+    aiParts: ['power-2', 'tires-2', 'weight-1', 'aero-1'],
   },
 ];
 
@@ -220,6 +245,8 @@ function onemakeCups(): ChampionshipDef[] {
       licenseReq,
       category: 'onemake' as const,
       requiredCarId: car.id,
+      // one-make fields run to a spec, so everyone is developed alike
+      aiParts: car.class === 'C' ? [] : car.class === 'B' ? ['power-1', 'tires-1'] : ['power-2', 'tires-2', 'weight-1'],
     };
   });
 }
@@ -311,6 +338,7 @@ function grandTours(): ChampionshipDef[] {
       licenseReq: spec.cls === 'B' ? ('a' as const) : ('ia' as const),
       ppMax: spec.ppMax,
       category: 'grandtour' as const,
+      aiParts: spec.cls === 'B' ? ['power-1', 'tires-1', 'weight-1'] : ['power-2', 'tires-2', 'weight-1', 'aero-1'],
     };
   });
 }

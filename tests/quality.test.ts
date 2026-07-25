@@ -8,16 +8,21 @@
 
 import { describe, expect, it } from 'vitest';
 import { measureRace, QUALITY_TARGETS, type RaceMetrics } from '../src/sim/metrics';
-import { bandFor, CAREER_PATH } from '../src/data/careerPath';
+import {
+  bandFor,
+  CAREER_PATH,
+  licenceIncomeUpTo,
+  statsForEvent,
+} from '../src/data/careerPath';
 import { CHAMPIONSHIP_BY_ID } from '../src/data/championships';
 import { CARS } from '../src/data/cars';
-import { PARTS, partPrice } from '../src/data/parts';
+import { buildCost } from '../src/data/parts';
 import { STARTING_CREDITS } from '../src/state/gameState';
 import {
   championshipRace,
   competentPolicy,
   evenRace,
-  passivePolicy,
+  POLICIES,
 } from '../scripts/fields';
 
 const LAPS: Record<string, number> = { greenpark: 6, oval: 10, aria: 8, kaiserwald: 5 };
@@ -82,7 +87,7 @@ describe('career difficulty curve', () => {
     const champ = CHAMPIONSHIP_BY_ID[tier.championshipId];
 
     describe(champ.name, () => {
-      const winRates = champ.events.map((event) => {
+      const winRates = champ.events.map((event, idx) => {
         const carId = tier.perEvent?.[event.id] ?? tier.carId;
         let wins = 0;
         for (let seed = 1; seed <= N; seed++) {
@@ -93,7 +98,9 @@ describe('career difficulty curve', () => {
             champ.aiDriverIds,
             event.aiCarIds,
             carId,
-            tier.stats,
+            statsForEvent(tier, idx, champ.events.length),
+            tier.parts,
+            event.aiParts ?? champ.aiParts ?? [],
           );
           const m = measureRace(state, competentPolicy());
           if (m.result.rows.find((r) => r.isPlayer)!.position === 1) wins++;
@@ -121,44 +128,79 @@ describe('career difficulty curve', () => {
 });
 
 describe('player agency', () => {
-  it('rewards playing well over leaving it on defaults', () => {
-    // If a passive player scores the same as an engaged one, the strategy
-    // layer is decoration. This is the test that keeps the game a game.
-    const tier = CAREER_PATH[1];
+  // If every way of playing scores the same, the strategy layer is
+  // decoration. These two tests are what keep it honest: deciding well has
+  // to pay, and there must be no single approach that is always right.
+  const N = 8;
+
+  const scoresFor = (eventIndex: number, tierIndex: number): number[] => {
+    const tier = CAREER_PATH[tierIndex];
     const champ = CHAMPIONSHIP_BY_ID[tier.championshipId];
-    const event = champ.events[0];
-    const run = (policy: () => Parameters<typeof measureRace>[1]): number => {
+    const event = champ.events[eventIndex];
+    const idx = eventIndex;
+    const carId = tier.perEvent?.[event.id] ?? tier.carId;
+    return POLICIES.map((policy) => {
       let sum = 0;
-      for (let seed = 1; seed <= 10; seed++) {
+      for (let seed = 1; seed <= N; seed++) {
         const state = championshipRace(
           event.trackId,
           event.laps,
-          seed * 60013,
+          seed * 60013 + event.id.length,
           champ.aiDriverIds,
           event.aiCarIds,
-          tier.carId,
-          tier.stats,
+          carId,
+          statsForEvent(tier, idx, champ.events.length),
+          tier.parts,
+          event.aiParts ?? champ.aiParts ?? [],
         );
-        sum += measureRace(state, policy()).result.rows.find((r) => r.isPlayer)!.position;
+        sum += measureRace(state, policy.make()).result.rows.find((r) => r.isPlayer)!.position;
       }
-      return sum / 10;
-    };
-    const passive = run(passivePolicy as never);
-    const competent = run(competentPolicy as never);
-    expect(passive - competent).toBeGreaterThan(0.5);
+      return sum / N;
+    });
+  };
+
+  it('rewards picking the right approach over leaving the car alone', () => {
+    // the championship finale is the race where strategy should matter most
+    const tier = CAREER_PATH[2];
+    const champ = CHAMPIONSHIP_BY_ID[tier.championshipId];
+    const scores = scoresFor(champ.events.length - 1, 2);
+    const passive = scores[0];
+    const best = Math.min(...scores);
+    expect(passive - best).toBeGreaterThan(0.75);
+  });
+
+  it('has no single approach that wins every kind of race', () => {
+    // a short sprint and a long race should reward different plans
+    const sprintScores = scoresFor(0, 0);
+    const sprintBest = POLICIES[sprintScores.indexOf(Math.min(...sprintScores))].name;
+    const longScores = scoresFor(CHAMPIONSHIP_BY_ID[CAREER_PATH[2].championshipId].events.length - 1, 2);
+    const longBest = POLICIES[longScores.indexOf(Math.min(...longScores))].name;
+    expect(sprintBest).not.toBe(longBest);
   });
 });
 
 describe('career economy', () => {
   it('self-funds the core ladder without grinding', () => {
+    // Arriving at a championship should mean arriving able to race it —
+    // car and the build the difficulty sweep assumes — out of what the
+    // previous tier and its licence trials actually paid.
     let credits = STARTING_CREDITS;
+    let licencesHeld: string[] = [];
     for (const tier of CAREER_PATH) {
       const champ = CHAMPIONSHIP_BY_ID[tier.championshipId];
       const car = CARS[tier.carId];
-      expect(credits, `cannot afford ${car.name} on arrival`).toBeGreaterThanOrEqual(car.priceCr);
-      credits -= car.priceCr;
-      credits -= PARTS.filter((p) => p.stage === 1).reduce((s, p) => s + partPrice(car, p), 0);
-      expect(credits, `${champ.name}: tuning bankrupts the player`).toBeGreaterThanOrEqual(0);
+      if (champ.licenseReq && !licencesHeld.includes(champ.licenseReq)) {
+        const held = licencesHeld.length
+          ? licenceIncomeUpTo(licencesHeld[licencesHeld.length - 1] as never)
+          : 0;
+        credits += licenceIncomeUpTo(champ.licenseReq) - held;
+        licencesHeld = [...licencesHeld, champ.licenseReq];
+      }
+      const needed = car.priceCr + buildCost(car, tier.parts);
+      expect(credits, `cannot afford ${car.name} and its build on arrival`).toBeGreaterThanOrEqual(
+        needed,
+      );
+      credits -= needed;
       credits += champ.prize[1] * champ.events.length + champ.titleBonus * 0.5;
     }
   });

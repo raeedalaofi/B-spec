@@ -118,10 +118,43 @@ export interface Track {
 
 export type PaceLevel = 1 | 2 | 3 | 4 | 5;
 
+/**
+ * Tire compounds are the spine of race strategy: softs are quicker but will
+ * not last, hards go the distance but cost time every lap. Without a real
+ * choice here a pit stop is only ever "my tires died", never a decision.
+ */
+export type TireCompound = 'soft' | 'medium' | 'hard';
+
+export const TIRE_COMPOUNDS: TireCompound[] = ['soft', 'medium', 'hard'];
+
+/**
+ * What the player actually tells their driver. This replaces a bare 1-5 pace
+ * dial because a dial has one obviously correct setting — turn it up — while
+ * an order is a trade: attacking burns the tires you will want later, saving
+ * fuel costs you the position you are defending.
+ */
+export type DriverOrder =
+  | 'attack'
+  | 'push'
+  | 'hold'
+  | 'conserve'
+  | 'save-fuel'
+  | 'let-by';
+
+export const DRIVER_ORDERS: DriverOrder[] = [
+  'attack',
+  'push',
+  'hold',
+  'conserve',
+  'save-fuel',
+  'let-by',
+];
+
 export type Command =
   | { type: 'SET_PACE'; carId: string; level: PaceLevel }
+  | { type: 'SET_ORDER'; carId: string; order: DriverOrder }
   | { type: 'OVERTAKE_MODE'; carId: string; on: boolean }
-  | { type: 'PIT'; carId: string; tires: boolean; refuel: boolean };
+  | { type: 'PIT'; carId: string; tires: TireCompound | null; refuel: boolean; fuelTargetL?: number };
 
 /**
  * COMMITTED is the heart of the racing model: the attacker has pulled out of
@@ -160,8 +193,11 @@ export type DefenceMode = 'none' | 'cover' | 'concede';
 
 export interface PitState {
   phase: 'requested' | 'in-lane';
-  tires: boolean;
+  /** compound to fit, or null to stay on the current set */
+  tires: TireCompound | null;
   refuel: boolean;
+  /** litres to fill to; defaults to a full tank */
+  fuelTargetL?: number;
   /** total seconds for entry→exit traversal (lane loss + stationary) */
   totalS: number;
   /** remaining seconds in lane */
@@ -208,7 +244,10 @@ export interface CarRaceState {
 
   paceCmd: PaceLevel;
   overtakeMode: boolean;
+  /** the standing instruction this car is driving to */
+  order: DriverOrder;
 
+  compound: TireCompound;
   tireWear: number;
   fuelL: number;
   fatigue: number;
@@ -279,6 +318,14 @@ export interface RaceEntry {
   stats: DriverStats;
   isPlayer: boolean;
   paceCmd?: PaceLevel;
+  /** starting compound; defaults to medium */
+  compound?: TireCompound;
+  /**
+   * Litres in the tank at the start. Running light is quicker but buys a
+   * stop — the first strategic decision of the race, made before it starts.
+   */
+  startFuelL?: number;
+  order?: DriverOrder;
 }
 
 /**

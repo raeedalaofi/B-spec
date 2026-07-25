@@ -1,8 +1,13 @@
-// Bridges the career to the race screen. Handles three modes:
+// Bridges the career to the race screen. Handles five modes:
 //  - championship events (standings, prizes, titles)
+//  - standalone catalog events (trophies, endurance, rally, super league)
 //  - Invitational Series events (endless endgame: prizes + points)
+//  - license trials and driving missions (loaner cars, medals)
 //  - Free Race exhibitions (no rewards)
-// The player's car always races with its installed tuning parts.
+//
+// Every mode goes through the same two steps: commit to a strategy, then
+// race. Routing them through one place is what keeps the pre-race decision
+// from having to be re-implemented per event type.
 
 import { AI_BY_ID } from '../../data/aidrivers';
 import { CARS } from '../../data/cars';
@@ -12,8 +17,10 @@ import { generateInvitational } from '../../data/invitationals';
 import { LICENSE_BY_ID, TRIAL_BY_ID } from '../../data/licenses';
 import { MISSION_BY_ID } from '../../data/missions';
 import { tunedSpec } from '../../data/parts';
+import { COMPOUNDS, type RaceStrategy } from '../../data/strategy';
 import { getTrackDef, TRACK_DEFS } from '../../data/tracks';
 import { evaluateAchievements } from '../../state/achievements';
+import { rememberStrategy, strategyFor } from '../../state/gameState';
 import {
   applyInvitationalResult,
   applyRaceResult,
@@ -22,7 +29,8 @@ import {
 import { applyTrialMedal, evaluateTrial, trialTrackDef } from '../../state/trials';
 import { hashSeed } from '../../sim/rng';
 import { compileTrack } from '../../sim/trackCompiler';
-import type { RaceEntry } from '../../sim/types';
+import type { CarSpec, RaceConfig, RaceEntry, RaceResult, RaceState, Track } from '../../sim/types';
+import { mountPreRace } from '../preRace';
 import type { AppContext } from '../screenManager';
 import { showAchievementToasts } from '../toasts';
 import { mountRaceScreen } from './race';
@@ -42,14 +50,105 @@ export type CareerRaceParams =
   | { trial: string }
   | { standalone: string };
 
-function aiEntries(driverIds: string[], carIds: string[]): RaceEntry[] {
+function aiEntries(driverIds: string[], carIds: string[], parts: string[] = []): RaceEntry[] {
   return driverIds.map((driverId, i) => ({
     carId: `ai-${driverId}`,
-    spec: CARS[carIds[i]],
+    spec: tunedSpec(CARS[carIds[i]], parts),
     driverName: AI_BY_ID[driverId].name,
     stats: AI_BY_ID[driverId].stats,
     isPlayer: false,
   }));
+}
+
+/** the wear this car will actually see per lap, for the stint estimate */
+function wearPerLapFor(track: Track, spec: CarSpec, smoothness: number): number {
+  return (
+    track.def.tireWearBase *
+    spec.tireWearMult *
+    (1.25 - 0.5 * (smoothness / 100))
+  );
+}
+
+interface RaceSetup {
+  track: Track;
+  laps: number;
+  title: string;
+  subtitle: string;
+  entries: RaceEntry[];
+  playerSpec: CarSpec;
+  /** carId the remembered strategy is filed under */
+  strategyKey: string;
+  seed: number;
+  onFinished(result: RaceResult, state: RaceState): void;
+  onBack(): void;
+}
+
+/**
+ * Shows the strategy panel, then hands the committed plan to the race. The
+ * chosen compound and fuel load are applied to the player's entry here, so
+ * the simulation never has to know a strategy screen exists.
+ */
+function runSetup(ctx: AppContext, setup: RaceSetup): () => void {
+  const gs = ctx.gs!;
+  let dispose: (() => void) | null = null;
+
+  const start = (strategy: RaceStrategy): void => {
+    rememberStrategy(gs, setup.strategyKey, strategy);
+    ctx.save();
+    const entries = setup.entries.map((e) =>
+      e.isPlayer
+        ? {
+            ...e,
+            compound: strategy.compound,
+            startFuelL: e.spec.fuelTankL * strategy.fuelFrac,
+            order: strategy.order,
+          }
+        : e,
+    );
+    const config: RaceConfig = {
+      track: setup.track,
+      lapsTotal: setup.laps,
+      seed: setup.seed,
+      entries,
+    };
+    dispose?.();
+    dispose = mountRaceScreen(ctx.root, {
+      config,
+      title: setup.title,
+      subtitle: setup.subtitle,
+      audio: gs.settings.audio,
+      onAudioToggle: (on) => {
+        gs.settings.audio = on;
+        ctx.save();
+      },
+      onFinished: setup.onFinished,
+      onRetire: setup.onBack,
+    });
+  };
+
+  dispose = mountPreRace(ctx.root, {
+    title: setup.title,
+    subtitle: setup.subtitle,
+    track: setup.track,
+    laps: setup.laps,
+    car: setup.playerSpec,
+    wearPerLapBase: wearPerLapFor(setup.track, setup.playerSpec, gs.driver.stats.smoothness),
+    fuelPerLapBase: setup.track.def.fuelBase * setup.playerSpec.fuelMult,
+    initial: clampStrategy(strategyFor(gs, setup.strategyKey)),
+    onStart: start,
+    onBack: setup.onBack,
+  });
+
+  return () => dispose?.();
+}
+
+/** guards against a remembered strategy referencing something that moved */
+function clampStrategy(s: RaceStrategy): RaceStrategy {
+  return {
+    compound: COMPOUNDS[s.compound] ? s.compound : 'medium',
+    fuelFrac: Math.max(0.35, Math.min(1, s.fuelFrac)),
+    order: s.order ?? 'push',
+  };
 }
 
 export function careerRaceScreen(ctx: AppContext, params?: unknown): (() => void) | void {
@@ -65,31 +164,23 @@ export function careerRaceScreen(ctx: AppContext, params?: unknown): (() => void
     paceCmd: 3,
   });
 
-  const common = {
-    audio: gs.settings.audio,
-    onAudioToggle: (on: boolean) => {
-      gs.settings.audio = on;
-      ctx.save();
-    },
-  };
-
   if ('championshipId' in p) {
     const champ = CHAMPIONSHIP_BY_ID[p.championshipId];
     const event = champ.events.find((e) => e.id === p.eventId)!;
     const track = compileTrack(TRACK_DEFS[event.trackId]);
-    const entries = aiEntries(champ.aiDriverIds, event.aiCarIds);
+    const entries = aiEntries(champ.aiDriverIds, event.aiCarIds, event.aiParts ?? champ.aiParts);
     const gridSlot = entries.length + 1;
-    entries.push(playerEntry(gs.activeCarId));
-    return mountRaceScreen(ctx.root, {
-      ...common,
-      config: {
-        track,
-        lapsTotal: event.laps,
-        seed: hashSeed(`${event.id}-${gs.totals.races}-${gs.createdAt}-${Date.now()}`),
-        entries,
-      },
+    const me = playerEntry(gs.activeCarId);
+    entries.push(me);
+    return runSetup(ctx, {
+      track,
+      laps: event.laps,
       title: champ.name,
       subtitle: `${event.name} — ${track.def.name} · ${event.laps} laps`,
+      entries,
+      playerSpec: me.spec,
+      strategyKey: gs.activeCarId,
+      seed: hashSeed(`${event.id}-${gs.totals.races}-${gs.createdAt}-${Date.now()}`),
       onFinished: (result) => {
         const rewards = applyRaceResult(gs, champ, event.id, result, gridSlot);
         const unlocked = evaluateAchievements(gs, { type: 'race', result, rewards, gridSlot });
@@ -97,7 +188,7 @@ export function careerRaceScreen(ctx: AppContext, params?: unknown): (() => void
         showAchievementToasts(unlocked);
         ctx.go('results', { championshipId: champ.id, result, rewards });
       },
-      onRetire: () => ctx.go('events', { championshipId: champ.id }),
+      onBack: () => ctx.go('events', { championshipId: champ.id }),
     });
   }
 
@@ -106,17 +197,17 @@ export function careerRaceScreen(ctx: AppContext, params?: unknown): (() => void
     const track = compileTrack(TRACK_DEFS[inv.trackId]);
     const entries = aiEntries(inv.aiDriverIds, inv.aiCarIds);
     const gridSlot = entries.length + 1;
-    entries.push(playerEntry(gs.activeCarId));
-    return mountRaceScreen(ctx.root, {
-      ...common,
-      config: {
-        track,
-        lapsTotal: inv.laps,
-        seed: hashSeed(`inv-${inv.n}-${gs.totals.races}-${Date.now()}`),
-        entries,
-      },
+    const me = playerEntry(gs.activeCarId);
+    entries.push(me);
+    return runSetup(ctx, {
+      track,
+      laps: inv.laps,
       title: 'Invitational Series',
       subtitle: `${inv.name} — ${track.def.name} · ${inv.laps} laps`,
+      entries,
+      playerSpec: me.spec,
+      strategyKey: gs.activeCarId,
+      seed: hashSeed(`inv-${inv.n}-${gs.totals.races}-${Date.now()}`),
       onFinished: (result) => {
         const rewards = applyInvitationalResult(gs, inv, result, gridSlot);
         const unlocked = evaluateAchievements(gs, {
@@ -130,7 +221,7 @@ export function careerRaceScreen(ctx: AppContext, params?: unknown): (() => void
         showAchievementToasts(unlocked);
         ctx.go('results', { invitational: true, result, rewards });
       },
-      onRetire: () => ctx.go('events'),
+      onBack: () => ctx.go('events'),
     });
   }
 
@@ -147,17 +238,17 @@ export function careerRaceScreen(ctx: AppContext, params?: unknown): (() => void
     const track = compileTrack(def);
     const entries = aiEntries(event.aiDriverIds, event.aiCarIds);
     const gridSlot = entries.length + 1;
-    entries.push(playerEntry(gs.activeCarId));
-    return mountRaceScreen(ctx.root, {
-      ...common,
-      config: {
-        track,
-        lapsTotal: event.laps,
-        seed: hashSeed(`${event.id}-${gs.totals.races}-${Date.now()}`),
-        entries,
-      },
+    const me = playerEntry(gs.activeCarId);
+    entries.push(me);
+    return runSetup(ctx, {
+      track,
+      laps: event.laps,
       title: event.name,
       subtitle: `${track.def.name} · ${event.laps} laps`,
+      entries,
+      playerSpec: me.spec,
+      strategyKey: gs.activeCarId,
+      seed: hashSeed(`${event.id}-${gs.totals.races}-${Date.now()}`),
       onFinished: (result) => {
         const rewards = applyStandaloneResult(gs, event, result, gridSlot);
         const unlocked = evaluateAchievements(gs, { type: 'race', result, rewards, gridSlot });
@@ -165,7 +256,7 @@ export function careerRaceScreen(ctx: AppContext, params?: unknown): (() => void
         showAchievementToasts(unlocked);
         ctx.go('results', { standaloneCategory: event.category, result, rewards });
       },
-      onRetire: () => ctx.go('catalog', { category: event.category }),
+      onBack: () => ctx.go('catalog', { category: event.category }),
     });
   }
 
@@ -179,25 +270,30 @@ export function careerRaceScreen(ctx: AppContext, params?: unknown): (() => void
       stats: AI_BY_ID[driverId].stats,
       isPlayer: false,
     }));
-    // loaner car, stock spec — only the driver and the commands are yours
-    entries.push({
+    // loaner car, stock spec — only the driver, the plan and the commands are yours
+    const me: RaceEntry = {
       carId: 'player',
       spec: CARS[trial.carId],
       driverName: gs.driver.name,
       stats: { ...gs.driver.stats },
       isPlayer: true,
       paceCmd: 3,
-    });
+    };
+    entries.push(me);
     const license = trial.licenseId ? LICENSE_BY_ID[trial.licenseId] : null;
     const goBack = (flash?: unknown): void => {
       if (license) ctx.go('licenses', flash ? { flash } : undefined);
       else ctx.go('catalog', { category: 'missions', ...(flash ? { flash } : {}) });
     };
-    return mountRaceScreen(ctx.root, {
-      ...common,
-      config: { track, lapsTotal: trial.laps, seed: trial.seed, entries },
+    return runSetup(ctx, {
+      track,
+      laps: trial.laps,
       title: license ? `${license.short} License — ${trial.name}` : `Mission — ${trial.name}`,
       subtitle: `${track.def.name} · ${trial.laps} laps`,
+      entries,
+      playerSpec: me.spec,
+      strategyKey: `trial-${trial.id}`,
+      seed: trial.seed,
       onFinished: (result, state) => {
         const grade = evaluateTrial(trial, result, state);
         const earned = applyTrialMedal(gs, trial, grade.medal);
@@ -210,7 +306,7 @@ export function careerRaceScreen(ctx: AppContext, params?: unknown): (() => void
           detail: grade.detail + (earned > 0 ? ` (+${earned.toLocaleString('en-US')} Cr.)` : ''),
         });
       },
-      onRetire: () => goBack(),
+      onBack: () => goBack(),
     });
   }
 
@@ -226,18 +322,18 @@ export function careerRaceScreen(ctx: AppContext, params?: unknown): (() => void
     .map((c) => c.id);
   const carIds = Array.from({ length: 7 }, (_, i) => classCars[i % classCars.length]);
   const entries = aiEntries(roster, carIds);
-  entries.push(playerEntry(cfg.carId));
-  return mountRaceScreen(ctx.root, {
-    ...common,
-    config: {
-      track,
-      lapsTotal: cfg.laps,
-      seed: hashSeed(`free-${Date.now()}`),
-      entries,
-    },
+  const me = playerEntry(cfg.carId);
+  entries.push(me);
+  return runSetup(ctx, {
+    track,
+    laps: cfg.laps,
     title: 'Free Race',
     subtitle: `Exhibition — ${track.def.name} · ${cfg.laps} laps · no rewards`,
+    entries,
+    playerSpec: me.spec,
+    strategyKey: cfg.carId,
+    seed: hashSeed(`free-${Date.now()}`),
     onFinished: () => ctx.go('free-race'),
-    onRetire: () => ctx.go('free-race'),
+    onBack: () => ctx.go('free-race'),
   });
 }

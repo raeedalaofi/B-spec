@@ -3,6 +3,7 @@
 // RNG carried in RaceState, commands applied at tick boundaries.
 
 import { BAL } from '../data/balance';
+import { ORDERS } from '../data/strategy';
 import { updateAI } from './ai';
 import { enforceGaps, updateBattles } from './battle';
 import { rngNext } from './rng';
@@ -51,10 +52,14 @@ export function createRace(cfg: RaceConfig): RaceState {
       // grid slots alternate across the road, as a real standing start does
       lateral: i % 2 === 0 ? 0.4 : -0.4,
       lateralTarget: 0,
-      paceCmd: entry.paceCmd ?? 3,
-      overtakeMode: false,
+      // pace follows the order unless a caller pins it explicitly — the two
+      // must never disagree, or half the model reads one and half the other
+      paceCmd: entry.paceCmd ?? ORDERS[entry.order ?? 'push'].pace,
+      overtakeMode: ORDERS[entry.order ?? 'push'].overtake,
+      order: entry.order ?? 'push',
+      compound: entry.compound ?? 'medium',
       tireWear: 0,
-      fuelL: entry.spec.fuelTankL,
+      fuelL: Math.max(1, Math.min(entry.startFuelL ?? entry.spec.fuelTankL, entry.spec.fuelTankL)),
       fatigue: 0,
       morale: 1,
       damage: 0,
@@ -275,6 +280,13 @@ function applyCommands(state: RaceState, commands: Command[]): void {
       case 'SET_PACE':
         car.paceCmd = cmd.level;
         break;
+      case 'SET_ORDER': {
+        car.order = cmd.order;
+        const spec = ORDERS[cmd.order];
+        car.paceCmd = spec.pace;
+        car.overtakeMode = spec.overtake;
+        break;
+      }
       case 'OVERTAKE_MODE':
         car.overtakeMode = cmd.on;
         break;
@@ -284,6 +296,7 @@ function applyCommands(state: RaceState, commands: Command[]): void {
             phase: 'requested',
             tires: cmd.tires,
             refuel: cmd.refuel,
+            fuelTargetL: cmd.fuelTargetL,
             totalS: 0,
             timer: 0,
             entryS: 0,
@@ -316,8 +329,13 @@ function moveCar(
     const ds = pitSpeed * dt;
     advance(state, car, ds, events);
     if (pit.timer <= 0) {
-      if (pit.tires) car.tireWear = 0;
-      if (pit.refuel) car.fuelL = car.spec.fuelTankL;
+      if (pit.tires) {
+        car.tireWear = 0;
+        car.compound = pit.tires;
+      }
+      if (pit.refuel) {
+        car.fuelL = Math.min(pit.fuelTargetL ?? car.spec.fuelTankL, car.spec.fuelTankL);
+      }
       car.pitCount++;
       events.push({ type: 'PIT_OUT', carId: car.carId, stopTimeS: pit.totalS });
       car.pit = null;

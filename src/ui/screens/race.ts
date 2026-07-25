@@ -4,8 +4,15 @@
 
 import { RaceRenderer, type InterpState } from '../../render/raceRenderer';
 import { buildResult, createRace, tick, TICK_S } from '../../sim/engine';
-import type { Command, RaceConfig, RaceEvent, RaceResult, RaceState } from '../../sim/types';
+import type {
+  Command,
+  RaceConfig,
+  RaceEvent,
+  RaceResult,
+  RaceState,
+} from '../../sim/types';
 import { RaceHud } from '../raceHud';
+import { nextRadioPrompt, type RadioPrompt } from '../radio';
 import { SOUND } from '../sound';
 
 export interface RaceScreenOptions {
@@ -38,12 +45,14 @@ export function mountRaceScreen(root: HTMLElement, opts: RaceScreenOptions): () 
   SOUND.setEnabled(opts.audio ?? true);
 
   let speedMult = 1;
+  let paused = false;
   const pending: Command[] = [];
   const hud = new RaceHud(screen, opts.title, opts.subtitle, {
-    onPace: (level) => pending.push({ type: 'SET_PACE', carId: playerId, level }),
-    onOvertake: (on) => pending.push({ type: 'OVERTAKE_MODE', carId: playerId, on }),
-    onPit: () => pending.push({ type: 'PIT', carId: playerId, tires: true, refuel: true }),
+    onOrder: (order) => pending.push({ type: 'SET_ORDER', carId: playerId, order }),
+    onPit: (tires, refuel, fuelTargetL) =>
+      pending.push({ type: 'PIT', carId: playerId, tires, refuel, fuelTargetL }),
     onSpeed: (mult) => (speedMult = mult),
+    onPause: (on) => (paused = on),
     onRetire: () => opts.onRetire?.(),
     audioOn: opts.audio ?? true,
     onAudioToggle: (on) => {
@@ -51,6 +60,38 @@ export function mountRaceScreen(root: HTMLElement, opts: RaceScreenOptions): () 
       opts.onAudioToggle?.(on);
     },
   });
+
+  // -- team radio -----------------------------------------------------------
+  // A call is offered, counts down, and if the player says nothing the driver
+  // takes the default. It never pauses the race: the clock keeps running,
+  // which is what makes hesitating cost something.
+  const askedRadio = new Set<string>();
+  let radio: { prompt: RadioPrompt; remainingS: number } | null = null;
+
+  const answerRadio = (index: number): void => {
+    if (!radio) return;
+    const player = state.cars.find((c) => c.carId === playerId);
+    if (player) pending.push(...radio.prompt.options[index].commands(playerId, player));
+    radio = null;
+    hud.clearRadio();
+  };
+
+  const updateRadio = (dt: number): void => {
+    if (radio) {
+      radio.remainingS -= dt;
+      hud.tickRadio(radio.remainingS / radio.prompt.timeoutS);
+      if (radio.remainingS <= 0) answerRadio(radio.prompt.defaultIndex);
+      return;
+    }
+    const player = state.cars.find((c) => c.carId === playerId);
+    if (!player) return;
+    const prompt = nextRadioPrompt(state, player, askedRadio);
+    if (!prompt) return;
+    askedRadio.add(prompt.id);
+    radio = { prompt, remainingS: prompt.timeoutS };
+    SOUND.radioIn();
+    hud.showRadio(prompt, answerRadio);
+  };
 
   const playSoundFor = (e: RaceEvent): void => {
     switch (e.type) {
@@ -62,8 +103,17 @@ export function mountRaceScreen(root: HTMLElement, opts: RaceScreenOptions): () 
         if (e.carId === playerId) SOUND.goodSting();
         else if (e.passedId === playerId) SOUND.badSting();
         break;
+      case 'SIDE_BY_SIDE':
+        if (e.carId === playerId || e.defenderId === playerId) SOUND.tension();
+        break;
+      case 'CONTACT':
+        if (e.carId === playerId || e.otherId === playerId) SOUND.impact(e.severity === 'heavy');
+        break;
       case 'MISTAKE':
         if (e.carId === playerId) SOUND.badSting();
+        break;
+      case 'CAUTION_START':
+        SOUND.caution();
         break;
       case 'PIT_IN':
         if (e.carId === playerId) SOUND.pitChime();
@@ -73,6 +123,9 @@ export function mountRaceScreen(root: HTMLElement, opts: RaceScreenOptions): () 
           if (e.position <= 3) SOUND.fanfare();
           SOUND.stopEngine();
         }
+        break;
+      case 'RETIREMENT':
+        if (e.carId === playerId) SOUND.stopEngine();
         break;
     }
   };
@@ -84,6 +137,11 @@ export function mountRaceScreen(root: HTMLElement, opts: RaceScreenOptions): () 
       case 'MISTAKE': {
         const c = carOf(e.carId);
         if (c) renderer.burst(c, e.severity === 'spin' ? 'smoke' : 'dust');
+        break;
+      }
+      case 'CONTACT': {
+        const c = carOf(e.carId);
+        if (c) renderer.burst(c, 'spark');
         break;
       }
       case 'OVERTAKE': {
@@ -103,7 +161,13 @@ export function mountRaceScreen(root: HTMLElement, opts: RaceScreenOptions): () 
 
   const onKey = (e: KeyboardEvent): void => {
     if (e.target instanceof HTMLInputElement) return;
-    hud.handleKey(e.key);
+    // while a radio call is live the arrow keys answer it
+    if (radio && (e.key === 'ArrowLeft' || e.key === 'ArrowRight')) {
+      answerRadio(e.key === 'ArrowLeft' ? 0 : 1);
+      e.preventDefault();
+      return;
+    }
+    if (hud.handleKey(e.key)) e.preventDefault();
   };
   window.addEventListener('keydown', onKey);
 
@@ -133,7 +197,8 @@ export function mountRaceScreen(root: HTMLElement, opts: RaceScreenOptions): () 
     const dt = Math.min((now - last) / 1000, 0.25);
     last = now;
 
-    if (!document.hidden && state.phase !== 'finished') {
+    const running = !document.hidden && !paused && state.phase !== 'finished';
+    if (running) {
       acc += dt * speedMult;
       let ticks = 0;
       while (acc >= TICK_S && ticks < MAX_TICKS_PER_FRAME) {
@@ -149,22 +214,25 @@ export function mountRaceScreen(root: HTMLElement, opts: RaceScreenOptions): () 
         ticks++;
       }
       if (ticks === MAX_TICKS_PER_FRAME) acc = 0; // shed backlog, keep frame rate
+      // the radio counts down in race time, so a call is as urgent at x4 as x1
+      updateRadio(dt * speedMult);
       hudClock += dt;
       if (hudClock >= 0.25) {
         hudClock = 0;
         hud.update(state);
         const me = state.cars.find((c) => c.carId === playerId);
         if (me && state.phase === 'racing') {
-          SOUND.setEngineSpeed(me.speed / me.spec.topSpeedMs);
+          SOUND.setEngineSpeed(me.speed / me.spec.topSpeedMs, state.caution !== null);
         }
       }
       if (hud.updateCountdown(state)) SOUND.countdownTick();
     }
 
-    renderer.draw(state, interp, Math.max(0, Math.min(1, acc / TICK_S)), dt);
+    renderer.draw(state, interp, Math.max(0, Math.min(1, acc / TICK_S)), running ? dt : 0);
 
     if (state.phase === 'finished' && !finishedShown) {
       finishedShown = true;
+      hud.clearRadio();
       hud.update(state);
       const result = buildResult(state);
       setTimeout(() => {

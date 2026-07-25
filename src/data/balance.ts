@@ -39,7 +39,7 @@ export const BAL = {
   paceSpeed: [0, 0.96, 0.98, 1.0, 1.015, 1.025],
   paceWear: [0, 0.6, 0.8, 1.0, 1.35, 1.8],
   paceFuel: [0, 0.85, 0.92, 1.0, 1.07, 1.15],
-  paceRisk: [0, 0.5, 0.75, 1.0, 1.6, 2.6],
+  paceRisk: [0, 0.5, 0.75, 1.0, 1.45, 2.0],
   paceFatigue: [0, 0.6, 0.8, 1.0, 1.4, 1.9],
 
   // -- driver skill → corner speed
@@ -52,6 +52,12 @@ export const BAL = {
   // -- lap-time noise (per corner)
   noiseSigmaBase: 0.004,
   noiseSigmaConsistency: 0.01,
+
+  // -- qualifying: how much a single lap can swing. Wide enough that the
+  //    grid is not simply the stat table sorted, tight enough that being
+  //    quick still puts you at the front.
+  qualiSigmaBase: 0.006,
+  qualiSigmaConsistency: 0.016,
 
   // -- mistakes (rolled per corner entry)
   mistakeBase: 0.0025,
@@ -77,9 +83,9 @@ export const BAL = {
   moraleEffect: 0.35,
 
   // -- tires
-  tireGripLoss: 0.03,
+  tireGripLoss: 0.042,
   tireCliffStart: 0.85,
-  tireCliffLoss: 0.06,
+  tireCliffLoss: 0.13,
   tireSmoothnessSpread: 0.5, // wear mult = 1.25 - spread * smoothness/100
   tireBattleWearMult: 1.2,
   tireWarnAt: [0.7, 0.85],
@@ -222,8 +228,8 @@ export const BAL = {
   cautionFuelFrac: 0.55,
 
   // -- pit stops
-  pitStationaryBaseS: 2,
-  pitTiresS: 10,
+  pitStationaryBaseS: 1.8,
+  pitTiresS: 6.5,
   pitFuelPerLiterS: 0.35,
   /** AI pits when wear above / fuel laps below these (with seeded jitter) */
   aiPitWearAt: 0.78,

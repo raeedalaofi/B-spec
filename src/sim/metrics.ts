@@ -252,10 +252,12 @@ export const QUALITY_TARGETS = {
   maxConversionPct: 75,
   /**
    * Identical cars at the front should be lapping within this of each other.
-   * Not zero, because driver stats and corner noise are real, but a large
-   * number here means the model is handing equal cars unequal pace.
+   * Not zero, because driver stats, corner noise and — above all — tire state
+   * are real: with compounds in play the leading cars are often on different
+   * rubber at different points in its life. A large number here still means
+   * the model is handing equal cars unequal pace.
    */
-  maxBestLapSpreadPct: 2.5,
+  maxBestLapSpreadPct: 3.2,
   /** a healthy race keeps moving to the end */
   minLateOvertakes: 1,
 } as const;

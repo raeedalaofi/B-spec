@@ -20,16 +20,21 @@ import { CARS } from '../src/data/cars';
 import { TRACK_DEFS } from '../src/data/tracks';
 import { AI_DRIVERS, AI_BY_ID } from '../src/data/aidrivers';
 import { CHAMPIONSHIPS, CHAMPIONSHIP_BY_ID } from '../src/data/championships';
-import { bandFor, CAREER_PATH } from '../src/data/careerPath';
+import {
+  bandFor,
+  CAREER_PATH,
+  licenceIncomeUpTo,
+  statsForEvent,
+} from '../src/data/careerPath';
 import { LICENSE_TRIALS } from '../src/data/licenses';
-import { PARTS, partPrice } from '../src/data/parts';
+import { buildCost } from '../src/data/parts';
 import { STARTING_CREDITS } from '../src/state/gameState';
 import { evaluateTrial, trialTrackDef } from '../src/state/trials';
 import {
   championshipRace,
   competentPolicy,
   evenRace,
-  passivePolicy,
+  POLICIES,
   REFERENCE_TRACKS,
   stats,
   track as compiledTrack,
@@ -257,7 +262,9 @@ if (mode === 'single') {
           champ.aiDriverIds,
           event.aiCarIds,
           carId,
-          tier.stats,
+          statsForEvent(tier, idx, champ.events.length),
+          tier.parts,
+          event.aiParts ?? champ.aiParts ?? [],
         );
         const m = measureRace(state, competentPolicy());
         const pos = m.result.rows.find((r) => r.isPlayer)!.position;
@@ -291,18 +298,23 @@ if (mode === 'single') {
     );
   }
 } else if (mode === 'agency') {
-  // Does skilled play actually pay? Runs the same races under a passive
-  // policy and the competent policy. If the gap is small, the strategy layer
-  // is decoration and the player has no game.
+  // Does the game reward deciding? Runs every distinct way of playing each
+  // event and reports two things: how much the best approach beats simply
+  // leaving the car alone, and whether the best approach changes race to
+  // race. A big gap with one always-winning policy is not a decision space,
+  // it is a dominant strategy wearing a costume.
   const n = parseInt(args[1] ?? '20', 10);
-  console.log(`Player agency — ${n} seeds per event, passive vs competent policy\n`);
-  console.log('championship  event   passive avgP  competent avgP   delta');
-  const deltas: number[] = [];
+  console.log(`Player agency — ${n} seeds per event, ${POLICIES.length} approaches\n`);
+  console.log(
+    `event    ${POLICIES.map((p) => p.name.padStart(9)).join('')}    best        gain`,
+  );
+  const gains: number[] = [];
+  const winners = new Map<string, number>();
   for (const tier of CAREER_PATH) {
     const champ = CHAMPIONSHIP_BY_ID[tier.championshipId];
-    for (const event of champ.events) {
+    champ.events.forEach((event, idx) => {
       const carId = tier.perEvent?.[event.id] ?? tier.carId;
-      const run = (policy: () => (s: RaceState) => ReturnType<typeof competentPolicy>) => {
+      const scores = POLICIES.map((policy) => {
         let sum = 0;
         for (let seed = 1; seed <= n; seed++) {
           const state = championshipRace(
@@ -312,66 +324,86 @@ if (mode === 'single') {
             champ.aiDriverIds,
             event.aiCarIds,
             carId,
-            tier.stats,
+            statsForEvent(tier, idx, champ.events.length),
+            tier.parts,
+            event.aiParts ?? champ.aiParts ?? [],
           );
-          sum += measureRace(state, policy() as never).result.rows.find((r) => r.isPlayer)!.position;
+          sum += measureRace(state, policy.make()).result.rows.find((r) => r.isPlayer)!.position;
         }
         return sum / n;
-      };
-      const passive = run(passivePolicy as never);
-      const competent = run(competentPolicy as never);
-      const delta = passive - competent;
-      deltas.push(delta);
+      });
+      const bestIdx = scores.indexOf(Math.min(...scores));
+      const gain = scores[0] - scores[bestIdx];
+      gains.push(gain);
+      winners.set(POLICIES[bestIdx].name, (winners.get(POLICIES[bestIdx].name) ?? 0) + 1);
       console.log(
-        `${champ.id.padEnd(13)} ${event.id.padEnd(7)} ${passive.toFixed(2).padStart(11)} ` +
-          `${competent.toFixed(2).padStart(14)} ${delta >= 0 ? '+' : ''}${delta.toFixed(2).padStart(7)}`,
+        `${event.id.padEnd(8)} ${scores.map((v) => v.toFixed(2).padStart(9)).join('')}` +
+          `  ${POLICIES[bestIdx].name.padEnd(9)} ${gain >= 0 ? '+' : ''}${gain.toFixed(2)}`,
       );
-    }
+    });
   }
-  const mean = avg(deltas);
+  const mean = avg(gains);
+  const distinct = winners.size;
   console.log(
-    `\nmean positions gained by playing well: ${mean.toFixed(2)} ` +
-      `${mean >= 1.0 ? '[32m✓ decisions matter[0m' : '[31m✗ the strategy layer is decoration[0m'}`,
+    `\nbest approach beats leaving it alone by ${mean.toFixed(2)} positions on average ` +
+      `${mean >= 0.6 ? '\u001b[32m✓\u001b[0m' : '\u001b[31m✗\u001b[0m'}`,
+  );
+  console.log(
+    `winning approach by event: ${[...winners.entries()].map(([k, v]) => `${k}:${v}`).join(' ')} ` +
+      `${distinct >= 3 ? '\u001b[32m✓ no dominant strategy\u001b[0m' : '\u001b[31m✗ one approach dominates\u001b[0m'}`,
   );
 } else if (mode === 'economy') {
-  // Can the intended path fund itself? Walks the core ladder buying the car
-  // each tier expects, paying for tuning, and banking prize money at the
-  // measured finishing positions.
+  // Can the intended path fund itself? Walks the core ladder: earn the
+  // licence the tier requires, arrive able to afford the car *and* the build
+  // the difficulty sweep assumes, then bank the prize money.
+  //
+  // Simplification worth knowing about: this counts the tier's primary car
+  // only. A player who also buys the mid-championship upgrade car pays more,
+  // and does so out of that championship's own prize money.
   console.log('Career economy — intended path, prizes at the target finishing rate\n');
   let credits = STARTING_CREDITS;
-  console.log(`start                                     ${money(credits).padStart(14)}`);
+  console.log(`start${' '.repeat(37)}${money(credits).padStart(14)}`);
   let ok = true;
+  let licencesHeld: string[] = [];
   for (const tier of CAREER_PATH) {
     const champ = CHAMPIONSHIP_BY_ID[tier.championshipId];
     const car = CARS[tier.carId];
-    if (credits < car.priceCr) {
-      ok = false;
+
+    if (champ.licenseReq && !licencesHeld.includes(champ.licenseReq)) {
+      const held = licencesHeld.length
+        ? licenceIncomeUpTo(licencesHeld[licencesHeld.length - 1] as never)
+        : 0;
+      const net = licenceIncomeUpTo(champ.licenseReq) - held;
+      credits += net;
+      licencesHeld = [...licencesHeld, champ.licenseReq];
       console.log(
-        `[31m  cannot afford ${car.name} (${money(car.priceCr)}), have ${money(credits)}[0m`,
+        `  ${champ.licenseReq.toUpperCase().padEnd(3)} licence trials      +${money(net).padStart(13)}  → ${money(credits)}`,
       );
     }
-    credits -= car.priceCr;
-    console.log(`buy ${car.name.padEnd(24)} -${money(car.priceCr).padStart(13)}  → ${money(credits)}`);
 
-    // a reasonable player buys the first stage in each category
-    const tuning = PARTS.filter((p) => p.stage === 1).reduce(
-      (sum, p) => sum + partPrice(car, p),
-      0,
+    const build = buildCost(car, tier.parts);
+    const needed = car.priceCr + build;
+    if (credits < needed) {
+      ok = false;
+      console.log(
+        `\u001b[31m  short ${money(needed - credits)} for ${car.name} + build (${money(needed)})\u001b[0m`,
+      );
+    }
+    credits -= needed;
+    console.log(
+      `buy ${car.name.padEnd(20)} -${money(car.priceCr).padStart(13)}  → ${money(credits + build)}`,
     );
-    credits -= tuning;
-    console.log(`  stage-1 tuning            -${money(tuning).padStart(13)}  → ${money(credits)}`);
+    console.log(`  build to spec             -${money(build).padStart(13)}  → ${money(credits)}`);
 
     // assume the player finishes inside their band: model as P2 average
-    const perRace = champ.prize[1];
-    const earned = perRace * champ.events.length + champ.titleBonus * 0.5;
+    const earned = champ.prize[1] * champ.events.length + champ.titleBonus * 0.5;
     credits += earned;
     console.log(
       `  ${champ.name.padEnd(24)} +${money(earned).padStart(13)}  → ${money(credits)}`,
     );
-    if (credits < 0) ok = false;
   }
   console.log(
-    `\n${ok ? '[32m✓ the core ladder self-funds[0m' : '[31m✗ the player must grind to progress[0m'}`,
+    `\n${ok ? '\u001b[32m✓ the core ladder self-funds\u001b[0m' : '\u001b[31m✗ the player must grind to progress\u001b[0m'}`,
   );
 } else if (mode === 'trials') {
   const tierStats: Record<string, ReturnType<typeof stats>> = {

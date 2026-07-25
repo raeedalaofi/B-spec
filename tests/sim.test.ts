@@ -151,7 +151,9 @@ describe('tires, fuel and pits', () => {
     const withPit = singleCarRace(track, 'vulpe', 8, 42);
     const noPit = singleCarRace(track, 'vulpe', 8, 42);
     const events = runToFinish(withPit, {
-      600: [{ type: 'PIT', carId: 'p1', tires: true, refuel: true }],
+      // same compound on purpose: this test is about what a stop restores,
+      // not about the trade between compounds
+      600: [{ type: 'PIT', carId: 'p1', tires: 'medium', refuel: true }],
     });
     runToFinish(noPit);
     expect(events.some((e) => e.type === 'PIT_IN')).toBe(true);

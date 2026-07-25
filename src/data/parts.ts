@@ -41,7 +41,7 @@ export const PARTS: PartDef[] = [
     name: 'Sports ECU',
     category: 'power',
     stage: 1,
-    priceFrac: 0.08,
+    priceFrac: 0.07,
     desc: 'Remapped engine management. +6% power.',
     effects: { powerMult: 1.06 },
   },
@@ -50,7 +50,7 @@ export const PARTS: PartDef[] = [
     name: 'Turbo Kit',
     category: 'power',
     stage: 2,
-    priceFrac: 0.2,
+    priceFrac: 0.13,
     desc: 'Bolt-on forced induction. +14% power, slightly harder on tires.',
     effects: { powerMult: 1.14, tireWearMult: 1.05 },
   },
@@ -59,7 +59,7 @@ export const PARTS: PartDef[] = [
     name: 'Race Engine Build',
     category: 'power',
     stage: 3,
-    priceFrac: 0.38,
+    priceFrac: 0.24,
     desc: 'Full competition rebuild. +25% power, more tire wear and fuel use.',
     effects: { powerMult: 1.25, tireWearMult: 1.1, fuelMult: 1.08 },
   },
@@ -68,7 +68,7 @@ export const PARTS: PartDef[] = [
     name: 'Lightweight Panels',
     category: 'weight',
     stage: 1,
-    priceFrac: 0.1,
+    priceFrac: 0.07,
     desc: 'Composite body panels. −4% weight.',
     effects: { massMult: 0.96 },
   },
@@ -77,7 +77,7 @@ export const PARTS: PartDef[] = [
     name: 'Full Strip-Out',
     category: 'weight',
     stage: 2,
-    priceFrac: 0.24,
+    priceFrac: 0.15,
     desc: 'Interior removed, cage fitted. −9% weight.',
     effects: { massMult: 0.91 },
   },
@@ -86,7 +86,7 @@ export const PARTS: PartDef[] = [
     name: 'Sports Tires',
     category: 'tires',
     stage: 1,
-    priceFrac: 0.12,
+    priceFrac: 0.08,
     desc: 'Stickier compound. +0.04 grip, +10% wear.',
     effects: { gripAdd: 0.04, tireWearMult: 1.1 },
   },
@@ -95,7 +95,7 @@ export const PARTS: PartDef[] = [
     name: 'Semi-Slicks',
     category: 'tires',
     stage: 2,
-    priceFrac: 0.28,
+    priceFrac: 0.17,
     desc: 'Near-race rubber. +0.08 grip, +25% wear.',
     effects: { gripAdd: 0.08, tireWearMult: 1.25 },
   },
@@ -104,7 +104,7 @@ export const PARTS: PartDef[] = [
     name: 'Aero Kit',
     category: 'aero',
     stage: 1,
-    priceFrac: 0.15,
+    priceFrac: 0.1,
     desc: 'Splitter and wing. −8% drag, +0.02 grip.',
     effects: { dragMult: 0.92, gripAdd: 0.02 },
   },
@@ -113,7 +113,7 @@ export const PARTS: PartDef[] = [
     name: 'Close-Ratio Gearbox',
     category: 'gearbox',
     stage: 1,
-    priceFrac: 0.1,
+    priceFrac: 0.08,
     desc: 'Optimized ratios. +4% top speed and better acceleration out of corners.',
     effects: { topSpeedMult: 1.04 },
   },
@@ -172,6 +172,27 @@ export function tunedSpec(spec: CarSpec, installedIds: string[]): CarSpec {
     tireWearMult: Number(tireWearMult.toFixed(3)),
     fuelMult: Number(fuelMult.toFixed(3)),
   };
+}
+
+/**
+ * What it costs to reach a given set of parts from stock, including the
+ * cheaper stages that must be bought first. Anything reasoning about
+ * affordability has to use this rather than summing the listed prices, or it
+ * will understate a stage-2 build by the price of every stage-1 under it.
+ */
+export function buildCost(car: CarSpec, targetIds: string[]): number {
+  const highest = new Map<PartCategory, number>();
+  for (const id of targetIds) {
+    const part = PART_BY_ID[id];
+    if (!part) continue;
+    highest.set(part.category, Math.max(highest.get(part.category) ?? 0, part.stage));
+  }
+  let total = 0;
+  for (const part of PARTS) {
+    const want = highest.get(part.category) ?? 0;
+    if (part.stage <= want) total += partPrice(car, part);
+  }
+  return total;
 }
 
 /** next purchasable stage in a category (stages must be bought in order) */

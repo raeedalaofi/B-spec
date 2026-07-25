@@ -16,7 +16,7 @@
 
 import { BAL } from '../data/balance';
 import { positionOf } from './engine';
-import { paceIndex } from './pace';
+import { orderSpec, paceIndex } from './pace';
 import { rngNext } from './rng';
 import type {
   CarRaceState,
@@ -120,6 +120,8 @@ function commitRateHz(
     rate *= BAL.commitOffZoneScale;
   }
   if (att.overtakeMode) rate *= BAL.overtakeModeCommitScale;
+  // the standing order is the player's thumb on this scale
+  rate *= orderSpec(att).commitScale;
   // a driver on dead tires or low on morale is not going to try anything
   rate *= 0.4 + 0.6 * att.morale;
   if (att.tireWear > 0.85) rate *= 0.5;
@@ -128,7 +130,9 @@ function commitRateHz(
 
 /** the defender's response, driven by their racecraft and appetite for a fight */
 function chooseDefence(def: CarRaceState, att: CarRaceState): 'cover' | 'concede' {
-  const willFight = def.stats.battle * 0.6 + def.stats.aggression * 0.4;
+  const scale = orderSpec(def).defendScale;
+  if (scale <= 0) return 'concede'; // ordered to wave them through
+  const willFight = (def.stats.battle * 0.6 + def.stats.aggression * 0.4) * scale;
   const threat = att.stats.battle * 0.5 + att.stats.aggression * 0.5;
   // a driver who knows they are beaten gives the place up rather than losing
   // more time fighting for it

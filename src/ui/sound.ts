@@ -8,6 +8,7 @@ class SoundManager {
   private ctx: AudioContext | null = null;
   private engineOsc: OscillatorNode | null = null;
   private engineOsc2: OscillatorNode | null = null;
+  private engineGain: GainNode | null = null;
 
   private ac(): AudioContext | null {
     if (!this.enabled) return null;
@@ -56,6 +57,29 @@ class SoundManager {
     notes.forEach((f, i) => this.tone(f, 0.28, 0.12, 'triangle', i * 0.13));
   }
 
+  /** rising two-note figure under a side-by-side move */
+  tension(): void {
+    this.tone(392, 0.16, 0.05, 'triangle');
+    this.tone(466, 0.2, 0.05, 'triangle', 0.09);
+  }
+
+  impact(heavy: boolean): void {
+    this.tone(heavy ? 90 : 150, heavy ? 0.35 : 0.16, heavy ? 0.16 : 0.09, 'square');
+    this.tone(heavy ? 62 : 110, heavy ? 0.4 : 0.18, 0.1, 'sawtooth', 0.02);
+  }
+
+  caution(): void {
+    // two slow yellow-flag notes, deliberately unlike the race stings
+    this.tone(330, 0.4, 0.1, 'sine');
+    this.tone(330, 0.4, 0.1, 'sine', 0.5);
+  }
+
+  /** the click that precedes a team-radio call */
+  radioIn(): void {
+    this.tone(1400, 0.04, 0.05, 'square');
+    this.tone(900, 0.07, 0.05, 'square', 0.05);
+  }
+
   private tone(
     freq: number,
     dur: number,
@@ -100,15 +124,18 @@ class SoundManager {
     osc2.start();
     this.engineOsc = osc;
     this.engineOsc2 = osc2;
+    this.engineGain = gain;
   }
 
   /** speedFrac 0..1 — pitch follows the player's speed */
-  setEngineSpeed(speedFrac: number): void {
+  setEngineSpeed(speedFrac: number, muted = false): void {
     if (!this.engineOsc || !this.ctx) return;
     const f = 55 + 160 * Math.max(0, Math.min(1, speedFrac));
     const t = this.ctx.currentTime;
     this.engineOsc.frequency.linearRampToValueAtTime(f, t + 0.25);
     this.engineOsc2!.frequency.linearRampToValueAtTime(f / 2, t + 0.25);
+    // under caution the field is cruising: drop the engine back in the mix
+    this.engineGain?.gain.linearRampToValueAtTime(muted ? 0.012 : 0.028, t + 0.4);
   }
 
   stopEngine(): void {
@@ -116,6 +143,7 @@ class SoundManager {
     this.engineOsc2?.stop();
     this.engineOsc = null;
     this.engineOsc2 = null;
+    this.engineGain = null;
   }
 
   setEnabled(on: boolean): void {
