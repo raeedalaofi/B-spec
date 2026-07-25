@@ -19,11 +19,20 @@ import path from 'node:path';
 const BASE = process.env.SCENARIO_API_BASE ?? 'https://api.cloud.scenario.com/v1';
 const KEY = process.env.SCENARIO_KEY;
 const SECRET = process.env.SCENARIO_SECRET;
-if (!KEY || !SECRET) {
-  console.error('Set SCENARIO_KEY and SCENARIO_SECRET in the environment.');
-  process.exit(1);
-}
 const AUTH = 'Basic ' + Buffer.from(`${KEY}:${SECRET}`).toString('base64');
+
+/**
+ * Credentials are only required by the commands that actually call the API.
+ * The check used to run at import time, which meant `validate` — the one
+ * command whose whole point is to catch a broken manifest *before* spending
+ * anything — could not run without a key either.
+ */
+function requireCredentials() {
+  if (!KEY || !SECRET) {
+    console.error('Set SCENARIO_KEY and SCENARIO_SECRET in the environment.');
+    process.exit(1);
+  }
+}
 
 /** resolved platform model ids per pipeline lane */
 export const MODELS = {
@@ -194,19 +203,73 @@ export async function runManifest(entries, { candidates = 1, concurrency = 4 } =
 
 // ------------------------------------------------------------------ CLI
 
+/**
+ * Static checks on a manifest, run without touching the API.
+ *
+ * Both of the mistakes this catches were real, and both fail silently:
+ * an entry with no `negative` quietly inherits GLOBAL_NEGATIVE (so a hardened
+ * per-batch negative is dropped without a word), and an entry whose `out`
+ * already exists is skipped by runManifest — a regeneration batch pointed at
+ * the live masters prints "SKIP (exists)" for every car and spends nothing
+ * while looking like it ran.
+ */
+function validateManifest(entries) {
+  const problems = [];
+  const seen = new Set();
+  for (const e of entries) {
+    const where = e.id ?? e.out ?? '(unnamed)';
+    for (const field of ['id', 'out', 'modelSlot', 'prompt']) {
+      if (!e[field]) problems.push(`${where}: missing '${field}'`);
+    }
+    if (e.modelSlot && !MODELS[e.modelSlot] && !String(e.modelSlot).startsWith('model_')) {
+      problems.push(`${where}: unknown modelSlot '${e.modelSlot}' (not in MODELS, not a model_ id)`);
+    }
+    if (!e.negative) {
+      problems.push(`${where}: no 'negative' — will silently fall back to GLOBAL_NEGATIVE`);
+    }
+    if (e.out && existsSync(e.out)) {
+      problems.push(`${where}: out '${e.out}' already exists — runManifest will SKIP it`);
+    }
+    if (e.out && seen.has(e.out)) problems.push(`${where}: duplicate out '${e.out}'`);
+    seen.add(e.out);
+  }
+  return problems;
+}
+
 const [, , cmd, arg] = process.argv;
 
 if (cmd === 'models') {
+  requireCredentials();
   const models = await listModels();
   const filter = (arg ?? '').toLowerCase();
   for (const m of models) {
     const line = `${m.id}  |  ${m.name ?? ''}`;
     if (!filter || line.toLowerCase().includes(filter)) console.log(line);
   }
+} else if (cmd === 'validate') {
+  const { entries, candidatesPerCar } = JSON.parse(await readFile(arg, 'utf8'));
+  const problems = validateManifest(entries);
+  for (const p of problems) console.error(`  ${p}`);
+  const perEntry = entries.reduce((n, e) => n + (e.candidates ?? candidatesPerCar ?? 1), 0);
+  console.log(
+    `\n${entries.length} entries, ${perEntry} candidate images total` +
+      `${problems.length ? `, ${problems.length} problem(s)` : ', no problems'}`,
+  );
+  if (problems.length) process.exitCode = 1;
 } else if (cmd === 'pilot' || cmd === 'batch') {
+  requireCredentials();
   const manifestPath = cmd === 'pilot' ? 'scripts/art/manifest-pilot.json' : arg;
   const { entries } = JSON.parse(await readFile(manifestPath, 'utf8'));
+  // never start a paid batch on a manifest that cannot work
+  const problems = validateManifest(entries);
+  if (problems.length) {
+    for (const p of problems) console.error(`  ${p}`);
+    console.error(`\nrefusing to run: ${problems.length} manifest problem(s). Fix these first.`);
+    process.exit(1);
+  }
   await runManifest(entries);
 } else {
-  console.log('usage: node scripts/art/scenario.mjs models [filter] | pilot | batch <manifest.json>');
+  console.log(
+    'usage: node scripts/art/scenario.mjs models [filter] | validate <manifest.json> | pilot | batch <manifest.json>',
+  );
 }

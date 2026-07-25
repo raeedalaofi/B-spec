@@ -11,6 +11,9 @@
     "qa:art": "node scripts/art/qaAssets.mjs",
     "qa:ui": "node scripts/uiChecks.mjs",
     "art:recolour": "node scripts/art/recolour.mjs",
+    "art:validate": "node scripts/art/scenario.mjs validate scripts/art/manifests/regen-cars.json",
+    "art:regen-cars": "node scripts/art/scenario.mjs batch scripts/art/manifests/regen-cars.json",
+    "art:review": "node scripts/art/reviewSheet.mjs",
     "sim": "tsx scripts/simulate.ts",
     "build:raw": "tsc && vite build",
     "store": "npm run build && node scripts/storeArt.mjs store && node scripts/storeShots.mjs store && node scripts/packRelease.mjs"
