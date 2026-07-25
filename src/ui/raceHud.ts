@@ -146,13 +146,20 @@ export class RaceHud {
     this.tower.setAttribute('aria-label', 'Timing tower');
     this.root.appendChild(this.tower);
 
+    // One right-hand rail rather than two absolutely-positioned panels. The
+    // intel panel used to be pinned at a hardcoded top:300px, which meant a
+    // tall condition panel (position, car, tires, fuel, fatigue, damage, last
+    // and best lap) simply grew underneath it and the two overlapped.
+    const rail = document.createElement('div');
+    rail.className = 'hud-rail';
     this.cond = document.createElement('div');
     this.cond.className = 'condition-panel';
-    this.root.appendChild(this.cond);
+    rail.appendChild(this.cond);
 
     this.intel = document.createElement('div');
     this.intel.className = 'intel-panel';
-    this.root.appendChild(this.intel);
+    rail.appendChild(this.intel);
+    this.root.appendChild(rail);
 
     this.root.appendChild(this.buildCommandBar());
 
@@ -370,8 +377,10 @@ export class RaceHud {
 
     this.lapCounter.innerHTML = `<span>LAP</span> ${Math.min(leader?.lap || 1, state.lapsTotal)}<span>/${state.lapsTotal}</span>`;
     this.flag.className = `flag-state ${state.caution ? 'caution' : ''}`;
-    this.flag.textContent = state.caution
-      ? `SAFETY CAR · ${state.caution.lapsLeft} lap(s)`
+    // the sim has had cautions from the start and never showed a flag for
+    // them; the yellow was generated, came back olive, and was never wired up
+    this.flag.innerHTML = state.caution
+      ? `${imgTag('fx/flag-yellow.svg', 'flag-img inline')}SAFETY CAR · ${state.caution.lapsLeft} lap(s)`
       : '';
 
     this.tower.innerHTML = order.map((car, i) => this.towerRow(state, car, i, leader)).join('');
@@ -566,7 +575,7 @@ export class RaceHud {
       this.lastCountdownShown = -2;
       this.showOverlay(`
         <div class="countdown-stack">
-          ${imgTag('fx/flag-green.png', 'flag-img')}
+          ${imgTag('fx/flag-green.svg', 'flag-img')}
           <div class="countdown-num green">GO!</div>
         </div>`);
       const el = this.overlay;
@@ -635,7 +644,7 @@ export class RaceHud {
       : '';
     this.showOverlay(`
       <div class="results-card">
-        <h2>${imgTag('fx/flag-checkered.png', 'flag-img inline')}Race Result</h2>
+        <h2>${imgTag('fx/flag-checkered.svg', 'flag-img inline')}Race Result</h2>
         <div class="results-body">
           <table class="results-table">
             <thead><tr><th>P</th><th>Driver</th><th>Car</th><th>Gap</th><th>Best</th></tr></thead>

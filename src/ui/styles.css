@@ -199,11 +199,28 @@ button {
 
 /* --------------------------------------------------------- condition panel */
 
-.condition-panel {
+/* The right-hand rail: driver condition on top, rival intel beneath it. They
+   stack in normal flow so the intel can never be overlapped by a tall
+   condition panel — which is what happened when each was positioned
+   absolutely and the intel's offset was a hardcoded 300px. */
+.hud-rail {
   position: absolute;
   top: 64px;
   right: 14px;
   width: 210px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+  max-height: calc(100% - 200px);
+  pointer-events: none;
+}
+
+.hud-rail > * {
+  pointer-events: auto;
+}
+
+.condition-panel {
+  width: 100%;
   background: var(--panel);
   border-top: 2px solid var(--panel-line);
   border-radius: 0 0 6px 6px;
@@ -428,7 +445,11 @@ button {
   gap: 3px;
   overflow: hidden;
   pointer-events: none;
-  mask-image: linear-gradient(to top, black 70%, transparent);
+  /* The log holds more than fits, so the oldest entry is always mid-clip. The
+     fade has to be fully transparent before it reaches that cut or you see a
+     sliced-off row with a hard edge — 70% left the top row half-visible. */
+  mask-image: linear-gradient(to top, black 46%, transparent 88%);
+  -webkit-mask-image: linear-gradient(to top, black 46%, transparent 88%);
 }
 
 .message-log .msg {
@@ -1884,24 +1905,30 @@ select.text-input {
 }
 
 .flag-state.caution {
-  color: #10131a;
-  background: #e8c65a;
-  padding: 1px 8px;
-  border-radius: 3px;
+  display: inline-flex;
+  align-items: center;
+  color: var(--on-gold);
+  background: var(--warn);
+  padding: 1px 8px 1px 4px;
+  border-radius: var(--radius-sm);
   font-weight: 700;
   animation: pulse 0.9s infinite alternate;
+}
+
+/* the caution badge is 10px type, so the flag beside it has to be tiny —
+   the 30px .inline size is for the results header */
+.flag-state.caution .flag-img.inline {
+  width: 14px;
+  margin-right: 4px;
 }
 
 /* -- rival intel --------------------------------------------------------- */
 
 .intel-panel {
-  position: absolute;
-  top: 300px;
-  right: 14px;
-  width: 210px;
+  width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--sp-3);
   pointer-events: none;
 }
 
@@ -2456,11 +2483,7 @@ select.text-input {
   .order-btn small {
     display: none;
   }
-  .intel-panel {
-    top: 286px;
-    width: 186px;
-  }
-  .condition-panel {
+  .hud-rail {
     width: 186px;
   }
 }
@@ -2502,11 +2525,14 @@ select.text-input {
 }
 
 @media (max-width: 640px) {
-  .condition-panel {
+  .hud-rail {
     top: auto;
     bottom: 128px;
     right: 8px;
     width: 150px;
+    max-height: none;
+  }
+  .condition-panel {
     padding: 8px;
   }
   .timing-tower {
@@ -2651,9 +2677,11 @@ select.text-input {
     display: none;
   }
 
-  .condition-panel {
+  .hud-rail {
     bottom: 152px;
     width: 138px;
+  }
+  .condition-panel {
     padding: 6px 8px;
     font-size: 11px;
   }

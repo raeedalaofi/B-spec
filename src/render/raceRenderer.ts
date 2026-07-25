@@ -12,6 +12,7 @@ import { posAt } from '../sim/trackCompiler';
 import type { CarRaceState, RaceState, Track } from '../sim/types';
 import { getImage, preload, ready } from '../ui/assets';
 import { ShotDirector, toScreen, type Camera } from './camera';
+import { REFERENCE_EXTENT_Y, SPRITE_METRICS } from './spriteMetrics';
 
 export interface CarSnapshot {
   totalDist: number;
@@ -22,6 +23,8 @@ export interface InterpState {
   prev: Map<string, number>;
   cur: Map<string, number>;
 }
+
+type ParticleKind = 'dust' | 'smoke' | 'spark' | 'confetti';
 
 interface Particle {
   x: number;
@@ -34,7 +37,22 @@ interface Particle {
   rot: number;
   vrot: number;
   img: string;
+  kind: ParticleKind;
 }
+
+/**
+ * How each particle composites. Sparks are light — they have to *add* to what
+ * is behind them or they read as grey stickers, which is exactly what was
+ * happening: fx/spark-1.png is a properly authored additive burst with real
+ * falloff, and it was being drawn with plain source-over alpha. Smoke and dust
+ * occlude the track, so they stay normal.
+ */
+const PARTICLE_BLEND: Record<ParticleKind, GlobalCompositeOperation> = {
+  spark: 'lighter',
+  confetti: 'lighter',
+  dust: 'source-over',
+  smoke: 'source-over',
+};
 
 interface Prop {
   x: number;
@@ -67,6 +85,10 @@ export class RaceRenderer {
   private propsBuilt = false;
   private biome: string;
   private wideMode = false;
+  /** wall-clock seconds since the renderer started, for time-driven animation */
+  private clock = 0;
+  /** pre-rendered radial glows, keyed by colour — see drawGlow */
+  private glowCache = new Map<string, HTMLCanvasElement>();
   /** elevation range, for shading */
   private elevMin = 0;
   private elevSpan = 1;
@@ -123,7 +145,7 @@ export class RaceRenderer {
   }
 
   /** spawn a particle burst at a car's position (world space) */
-  burst(car: { s: number }, kind: 'dust' | 'smoke' | 'spark' | 'confetti'): void {
+  burst(car: { s: number }, kind: ParticleKind): void {
     const pos = posAt(this.track, car.s);
     const imgs: Record<string, string[]> = {
       dust: ['fx/dust-1.png', 'fx/dust-2.png'],
@@ -146,6 +168,7 @@ export class RaceRenderer {
         rot: Math.random() * Math.PI * 2,
         vrot: (Math.random() - 0.5) * 6,
         img: imgs[kind][i % imgs[kind].length],
+        kind,
       });
     }
     if (this.particles.length > 260) this.particles.splice(0, this.particles.length - 260);
@@ -403,13 +426,56 @@ export class RaceRenderer {
       if (h < 3) continue;
       const w = h * (img.naturalWidth / img.naturalHeight);
       ctx.save();
-      ctx.globalAlpha = 0.94;
-      ctx.shadowColor = 'rgba(0,0,0,0.55)';
-      ctx.shadowBlur = 4 * this.dpr;
-      ctx.shadowOffsetY = 2 * this.dpr;
+      // A contact shadow, drawn as a squashed ellipse rather than a canvas
+      // shadowBlur — same read, without re-blurring the prop every frame.
+      // Trackside objects also draw fully opaque now; the old 0.94 alpha made
+      // solid scenery look faintly ghosted for no reason.
+      ctx.fillStyle = 'rgba(0,0,0,0.42)';
+      ctx.beginPath();
+      ctx.ellipse(x, y, w * 0.34, h * 0.07, 0, 0, Math.PI * 2);
+      ctx.fill();
       ctx.drawImage(img, x - w / 2, y - h, w, h);
       ctx.restore();
     }
+  }
+
+  /**
+   * The soft colour halo under each car.
+   *
+   * This used to be `ctx.shadowBlur` set per car, per prop, every frame.
+   * shadowBlur is the most expensive operation in Canvas2D — it re-blurs the
+   * drawn shape on every call — and with 8 cars plus 8 props on a DPR-2 canvas
+   * that was ~16 full-surface blurs per frame for what is visually a fuzzy
+   * circle. A radial gradient rendered once per colour and then blitted costs
+   * essentially nothing, and composites additively so it reads as light rather
+   * than as a drop shadow.
+   */
+  private drawGlow(x: number, y: number, size: number, colour: string, strength: number): void {
+    let sprite = this.glowCache.get(colour);
+    if (!sprite) {
+      const R = 64;
+      sprite = document.createElement('canvas');
+      sprite.width = sprite.height = R * 2;
+      const g = sprite.getContext('2d')!;
+      const grad = g.createRadialGradient(R, R, 0, R, R, R);
+      // a smooth falloff all the way from the centre — a flat core reads as a
+      // white blob under additive blending rather than as a glow
+      grad.addColorStop(0, colour);
+      grad.addColorStop(0.45, 'rgba(0,0,0,0)');
+      grad.addColorStop(1, 'rgba(0,0,0,0)');
+      g.fillStyle = grad;
+      g.beginPath();
+      g.arc(R, R, R, 0, Math.PI * 2);
+      g.fill();
+      this.glowCache.set(colour, sprite);
+    }
+    const r = size * 1.15;
+    const ctx = this.ctx;
+    ctx.save();
+    ctx.globalCompositeOperation = 'lighter';
+    ctx.globalAlpha = strength;
+    ctx.drawImage(sprite, x - r, y - r, r * 2, r * 2);
+    ctx.restore();
   }
 
   private drawScars(dt: number): void {
@@ -452,7 +518,11 @@ export class RaceRenderer {
       const [x, y] = toScreen(this.cam, p.x, p.y);
       const s = p.size * this.dpr * (0.6 + t * 0.9) * Math.max(0.5, this.cam.scale * 6);
       ctx.save();
-      ctx.globalAlpha = (1 - t) * 0.85;
+      ctx.globalCompositeOperation = PARTICLE_BLEND[p.kind];
+      // additive sprites need to burn bright at birth and fade out fast;
+      // occluding ones hold their opacity for most of their life
+      ctx.globalAlpha =
+        PARTICLE_BLEND[p.kind] === 'lighter' ? (1 - t) ** 1.6 : (1 - t) * 0.85;
       ctx.translate(x, y);
       ctx.rotate(p.rot);
       ctx.drawImage(img, -s / 2, -s / 2, s, s);
@@ -460,12 +530,7 @@ export class RaceRenderer {
     }
   }
 
-  private drawCar(
-    state: RaceState,
-    car: CarRaceState,
-    interp: InterpState,
-    alpha: number,
-  ): void {
+  private drawCar(car: CarRaceState, interp: InterpState, alpha: number): void {
     const ctx = this.ctx;
     const L = this.track.lengthM;
     const prev = interp.prev.get(car.carId) ?? car.totalDist;
@@ -488,11 +553,19 @@ export class RaceRenderer {
       4.6 * this.cam.scale * (car.isPlayer ? 1.05 : 1),
     );
 
+    // the glow goes down before the transform, in screen space, so it stays a
+    // circle rather than being squashed by the car's rotation
+    // Kept deliberately faint: this marks the player and tints each rival, it
+    // is not a light source. The old shadowBlur read at roughly this strength.
+    this.drawGlow(x, y, px, car.isPlayer ? '#ffd75e' : car.spec.color, car.isPlayer ? 0.34 : 0.15);
+
     ctx.save();
     ctx.translate(x, y);
     ctx.rotate(-pos.heading);
     if (car.mistake?.severity === 'spin') {
-      ctx.rotate((state.tickCount % 20) * 0.31);
+      // driven by elapsed time, not tick count: the old `tickCount % 20` form
+      // jumped in 17.8° steps and span at a different rate per sim speed
+      ctx.rotate(this.clock * 7.5);
     }
 
     const damaged = car.tireWear > 0.65 || car.damage > 0.3
@@ -501,21 +574,22 @@ export class RaceRenderer {
     const sprite = ready(damaged) ? damaged : getImage(`cars/${car.spec.id}-topdown.png`);
     if (ready(sprite)) {
       ctx.rotate(Math.PI / 2); // generated sprites are nose-up
-      const h = px;
+      // Normalise for the master's padding. The opaque car runs anywhere from
+      // 84% to 95% of its 1008px square, so drawing every square at the same
+      // size made otherwise-comparable cars differ by 12% on track — a
+      // difference the player reads as "that car is bigger", not "that PNG has
+      // more whitespace". Scaling by the family mean puts them on one scale.
+      const metric = SPRITE_METRICS[car.spec.id];
+      const h = px * (metric ? REFERENCE_EXTENT_Y / metric.extentY : 1);
       const w = h * (sprite.naturalWidth / sprite.naturalHeight);
-      if (car.isPlayer) {
-        ctx.shadowColor = '#ffd75e';
-        ctx.shadowBlur = 8 * this.dpr;
-      } else {
-        ctx.shadowColor = car.spec.color;
-        ctx.shadowBlur = 4 * this.dpr;
-      }
       ctx.drawImage(sprite, -w / 2, -h / 2, w, h);
-      ctx.shadowBlur = 0;
-      // brake lights: on when the car is genuinely slowing
+      // Brake lights sit against the sprite's own tail rather than a fixed
+      // fraction of the canvas — with uneven padding a fixed offset put the
+      // bar on the bumper of one car and in mid-air behind another.
       if (car.speed < (this.lastSpeed.get(car.carId) ?? car.speed) - 0.35) {
+        const tail = (h / 2) * (metric?.tail ?? 0.88);
         ctx.fillStyle = 'rgba(255,60,40,0.92)';
-        ctx.fillRect(-w * 0.34, h * 0.36, w * 0.68, h * 0.1);
+        ctx.fillRect(-w * 0.34, tail - h * 0.075, w * 0.68, h * 0.06);
       }
     } else {
       const size = px * 0.5;
@@ -559,6 +633,7 @@ export class RaceRenderer {
     dt = 0.016,
     playerId = '',
   ): void {
+    this.clock += dt;
     this.cam = this.director.update(state, playerId, dt, this.wideMode);
     if (!this.propsBuilt) this.buildProps();
     const ctx = this.ctx;
@@ -607,7 +682,7 @@ export class RaceRenderer {
         const p = this.offsetPoint(car.s, car.lateral * (this.track.def.widthM / 2) * 0.62);
         this.addScar(p.x, p.y, p.heading, 'dust');
       }
-      this.drawCar(state, car, interp, alpha);
+      this.drawCar(car, interp, alpha);
       this.lastSpeed.set(car.carId, car.speed);
     }
 
