@@ -1,8 +1,22 @@
-# Car likeness — open issue
+# Car likeness
 
-**Status: unresolved. Needs regeneration; it cannot be fixed on disk.**
+**Status: studio renders regenerated and accepted. The three other views per
+car are still the old art and still carry the original likeness.**
 
-## What is wrong
+| View | Used by | State |
+| --- | --- | --- |
+| `{id}-studio` | dealership, garage | **regenerated, accepted** |
+| `{id}-side` | tuning screen hero | old art — original likeness |
+| `{id}-topdown` | the in-race sprite | old art — original likeness, and cel-shaded |
+| `{id}-damaged` | the in-race sprite | old art — original likeness, and cel-shaded |
+
+So the exposure is reduced, not removed: the dealership now shows eight
+original cars and the race still shows the old ones. Closing this out means
+running the Kontext img2img pass from the accepted studio renders, which is
+what §2.1 of `ART_PRODUCTION_PLAN.md` always intended and which also fixes the
+photoreal-vs-cel-shaded mismatch in one move.
+
+## What was wrong
 
 Seven of the eight studio renders in `public/assets/cars/` are close likenesses
 of identifiable production cars, and one is a near-exact copy of a specific
@@ -74,24 +88,33 @@ homologation hatch, mid-engine GT, closed prototype.
 The shared negative now names the marques directly. That is a backstop, not the
 mechanism — the positive description is what does the work.
 
-## What has been done in the meantime
+Painting out the badges was considered and rejected as theatre: it removes the
+trademark that is easiest to spot while leaving a recognisable 911 GT1
+silhouette untouched, which is the larger part of the exposure.
 
-Nothing that solves it. Painting out the badges was considered and rejected as
-theatre: it removes the trademark that is easiest to spot while leaving a
-recognisable 911 GT1 silhouette untouched, which is the larger part of the
-exposure. Shipping a de-badged copy of a real car is not materially safer than
-shipping a badged one, and it would make the problem look handled when it is
-not.
+## What the review rejected
+
+Two rounds, 19 candidates, 152 CU. The review is not a formality — a third of
+the first batch failed it:
+
+- `phantom` (both candidates) — the first was a **Porsche 911 GT3 R with the
+  crest on the nose**, garbled "PIRELLI" on the tyre sidewalls and text on the
+  rear wing. The second lost the Porsche shape but kept the tyre lettering.
+  Regenerated with round headlamps and tyre branding added to the negative,
+  and "wedge nose with a single narrow full-width lamp strip" replacing the
+  cab-forward canopy that was pulling toward the 911.
+- `falcon.alt1` — boxy saloon with round quad lamps, back in Skyline/Accord
+  territory. Rejected in favour of the base candidate.
+- `taro.alt1` — read as an R33 Skyline coupe. Rejected.
+
+Accepted: the base candidate for all seven others, plus the regenerated
+phantom. `arrow` came out best of the eight — a genuinely original teardrop
+prototype, no badge, no text, not attributable to any real car.
 
 ## To close this out
 
-1. Configure Scenario credentials (`scripts/art/scenario.mjs`).
-2. Run the batch from `scripts/art/manifests/regen-cars.json`.
-3. Generate 8–16 candidates per car, as §5 of `ART_PRODUCTION_PLAN.md` requires.
-4. **Likeness review before shortlisting** — for each candidate ask "which real
-   car is this?". If the answer comes quickly and confidently, reject it. Pay
-   particular attention to `arrow`, which produced the most exact copy.
-5. Re-run the top-down (Kontext) pass from the approved renders so
-   `{id}-studio` and `{id}-topdown` finally match — see the separate style
-   mismatch noted in `ART_BIBLE.md`.
-6. `npm run qa:art`, then `node scripts/art/spriteMetrics.mjs` to re-measure.
+1. Run the Kontext img2img pass from the eight accepted studio renders to
+   produce `-side`, `-topdown` and `-damaged`. Until then the race view still
+   shows the old cars.
+2. Review those the same way, then `npm run qa:art` and
+   `node scripts/art/spriteMetrics.mjs` to re-measure the sprite padding.
