@@ -9,6 +9,7 @@ import { tunedSpec } from '../../data/parts';
 import { championshipProgress } from '../../state/gameState';
 import { ppOf } from '../../state/pp';
 import { standingsOf } from '../../state/progression';
+import { TRAIT_INFO } from '../../data/aidrivers';
 import { hasLicense } from '../../state/trials';
 import { imgTag } from '../assets';
 import { fmtCr, fmtLapTime, menuShell } from '../menuCommon';
@@ -159,11 +160,39 @@ function championshipDetail(ctx: AppContext, champ: ChampionshipDef): void {
   const aiNames = Object.fromEntries(champ.aiDriverIds.map((id) => [id, AI_BY_ID[id].name]));
   const standings = standingsOf(gs, champ, aiNames);
 
+  // The rival: whoever is closest to the player in the standings, or the
+  // roster's strongest driver before a wheel has turned. Naming one opponent
+  // is what turns a table of seven identical rows into a season with a
+  // villain in it.
+  const rival = titleRival(standings, champ.aiDriverIds);
+  const rivalDriver = rival ? AI_BY_ID[rival.key] : null;
+  const playerPts = standings.find((s2) => s2.isPlayer)?.points ?? 0;
+
   const firstTrack = champ.events[0] ? TRACK_DEFS[champ.events[0].trackId] : null;
   content.innerHTML = `
     ${firstTrack ? `<div class="detail-backdrop-wrap">${imgTag(`tracks/backdrops/${biomeOf(firstTrack.id)}.png`, 'detail-backdrop', '')}</div>` : ''}
     <button class="btn" id="back-events">‹ All Championships</button>
     ${carOk ? '' : `<div class="entry-warning">${entryProblem}</div>`}
+    ${
+      rivalDriver
+        ? `<div class="rival-card">
+             ${imgTag(`portraits/${rivalDriver.id}.png`, 'rival-portrait', rivalDriver.name)}
+             <div>
+               <span class="label">Your title rival</span>
+               <b>${rivalDriver.name}</b>
+               <span class="rival-trait">${TRAIT_INFO[rivalDriver.trait].label}</span>
+               <p>${TRAIT_INFO[rivalDriver.trait].hint}</p>
+             </div>
+             <div class="rival-pts">
+               <span class="label">Points</span>
+               <b>${rival!.points}</b>
+               <span class="${playerPts >= rival!.points ? 'good' : 'warn'}">
+                 ${playerPts === rival!.points ? 'level' : playerPts > rival!.points ? `you lead by ${playerPts - rival!.points}` : `${rival!.points - playerPts} behind`}
+               </span>
+             </div>
+           </div>`
+        : ''
+    }
     <div class="events-layout">
       <div>
         <h2 class="section-title">Races</h2>
@@ -223,4 +252,30 @@ export function eventsScreen(ctx: AppContext, params?: unknown): void {
   const champ = p?.championshipId ? CHAMPIONSHIP_BY_ID[p.championshipId] : null;
   if (champ) championshipDetail(ctx, champ);
   else championshipList(ctx);
+}
+
+/**
+ * Who the season is really against: the closest rival on points, or — before
+ * anyone has scored — the roster's strongest driver, so the card says
+ * something meaningful from the first race rather than picking at random.
+ */
+function titleRival(
+  standings: Array<{ key: string; points: number; isPlayer: boolean }>,
+  rosterIds: string[],
+): { key: string; points: number } | null {
+  const rivals = standings.filter((s) => !s.isPlayer && rosterIds.includes(s.key));
+  if (!rivals.length) return null;
+  const scored = rivals.some((r) => r.points > 0);
+  if (!scored) {
+    const best = rosterIds
+      .map((id) => AI_BY_ID[id])
+      .filter(Boolean)
+      .sort((a, b) => b.stats.pace + b.stats.battle - (a.stats.pace + a.stats.battle))[0];
+    return best ? { key: best.id, points: 0 } : null;
+  }
+  const player = standings.find((s) => s.isPlayer);
+  const playerPts = player?.points ?? 0;
+  return rivals.reduce((a, b) =>
+    Math.abs(b.points - playerPts) < Math.abs(a.points - playerPts) ? b : a,
+  );
 }

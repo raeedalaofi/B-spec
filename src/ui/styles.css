@@ -1,4 +1,4 @@
-/* B-Spec — GT4-inspired broadcast look: deep navy, thin gold rules,
+/* B-Spec — motorsport-broadcast look: deep navy, thin gold rules,
    condensed uppercase labels, monospace timing figures. */
 
 :root {
@@ -150,8 +150,8 @@ button {
 
 .tower-row {
   display: grid;
-  grid-template-columns: 24px 10px 1fr 66px;
-  gap: 6px;
+  grid-template-columns: 22px 9px 1fr 18px 58px;
+  gap: 5px;
   align-items: center;
   padding: 4px 8px;
   font-size: 12px;
@@ -302,12 +302,12 @@ button {
 
 .command-bar {
   position: absolute;
-  bottom: 14px;
+  bottom: 12px;
   left: 50%;
   transform: translateX(-50%);
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 10px;
   background: var(--panel);
   border-top: 2px solid var(--panel-line);
   border-radius: 6px;
@@ -315,39 +315,76 @@ button {
   backdrop-filter: blur(3px);
 }
 
-.pace-group {
+.order-group {
   display: flex;
   flex-direction: column;
+  gap: 5px;
+}
+
+.order-buttons {
+  display: flex;
   gap: 4px;
 }
 
-.pace-buttons {
+.order-btn {
   display: flex;
-  gap: 3px;
-}
-
-.pace-buttons button {
-  width: 34px;
-  height: 30px;
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  background: rgba(255, 255, 255, 0.05);
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  width: 104px;
+  min-height: 42px;
+  padding: 5px 8px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.04);
   color: var(--text-dim);
-  border-radius: 3px;
-  font-family: var(--font-timing);
-  font-size: 13px;
+  border-radius: 4px;
+  text-align: left;
+  transition: background 0.12s, border-color 0.12s;
 }
 
-.pace-buttons button.active {
+.order-btn b {
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text);
+}
+
+.order-btn small {
+  font-size: 9.5px;
+  line-height: 1.25;
+  color: var(--text-dim);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.order-btn:hover,
+.order-btn:focus-visible {
+  background: rgba(255, 255, 255, 0.09);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.order-btn.active {
   background: var(--accent);
   border-color: var(--accent);
-  color: #fff;
-  font-weight: 700;
 }
 
-.pace-buttons button:nth-child(4).active,
-.pace-buttons button:nth-child(5).active {
+.order-btn.active b,
+.order-btn.active small {
+  color: #fff;
+}
+
+/* the two orders that cost you something get their own colour */
+.order-btn.order-attack.active {
   background: var(--bad);
   border-color: var(--bad);
+}
+
+.order-btn.order-let-by.active {
+  background: #5b6472;
+  border-color: #5b6472;
 }
 
 .cmd-toggle {
@@ -395,7 +432,7 @@ button {
 
 .message-log {
   position: absolute;
-  bottom: 14px;
+  bottom: 104px;
   left: 14px;
   width: 300px;
   max-height: 180px;
@@ -1754,4 +1791,962 @@ select.text-input {
 
 .driver-head > div:nth-child(2) {
   flex: 1;
+}
+
+/* ------------------------------------------------- strategy, radio, intel */
+/* Everything below serves one idea: the player is a race director, so the
+   screen should look like a pit wall — live condition data, a rival dossier,
+   and the radio cutting in when a decision cannot wait. */
+
+.pit-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  min-height: 44px;
+}
+
+.pit-btn b {
+  font-size: 12px;
+  letter-spacing: 0.1em;
+}
+
+.pit-btn small {
+  font-size: 9px;
+  color: var(--text-dim);
+  text-transform: none;
+  letter-spacing: 0.02em;
+}
+
+.pit-btn.armed small {
+  color: #2b2410;
+}
+
+/* -- tire compound chips ------------------------------------------------- */
+
+.tower-tire,
+.cond-row .label i {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 17px;
+  height: 17px;
+  border-radius: 50%;
+  font-family: var(--font-timing);
+  font-size: 9.5px;
+  font-weight: 700;
+  font-style: normal;
+  color: #10131a;
+}
+
+.tire-soft {
+  background: #e05a5a;
+}
+.tire-medium {
+  background: #e8c65a;
+}
+.tire-hard {
+  background: #dfe4ec;
+}
+
+.tower-row.out {
+  opacity: 0.4;
+}
+
+.st.bad {
+  color: var(--bad);
+}
+.st.atk {
+  color: var(--gold-bright);
+}
+.st.def {
+  color: var(--accent);
+}
+
+.cond-note {
+  font-size: 9.5px;
+  letter-spacing: 0.04em;
+  color: var(--text-dim);
+  margin: -2px 0 6px;
+}
+
+.cond-note.warn {
+  color: var(--bad);
+}
+
+.val.bad {
+  color: var(--bad);
+}
+
+/* -- lap counter + flag state -------------------------------------------- */
+
+.lap-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.flag-state {
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  min-height: 12px;
+  color: transparent;
+}
+
+.flag-state.caution {
+  color: #10131a;
+  background: #e8c65a;
+  padding: 1px 8px;
+  border-radius: 3px;
+  font-weight: 700;
+  animation: pulse 0.9s infinite alternate;
+}
+
+/* -- rival intel --------------------------------------------------------- */
+
+.intel-panel {
+  position: absolute;
+  top: 300px;
+  right: 14px;
+  width: 210px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  pointer-events: none;
+}
+
+.intel-card {
+  background: var(--panel);
+  border-left: 2px solid var(--panel-line);
+  border-radius: 4px;
+  padding: 8px 10px;
+  backdrop-filter: blur(3px);
+}
+
+.intel-role {
+  display: flex;
+  justify-content: space-between;
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  color: var(--text-dim);
+}
+
+.intel-gap {
+  font-family: var(--font-timing);
+  color: var(--gold-bright);
+}
+
+.intel-name {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  margin-top: 3px;
+}
+
+.intel-trait {
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-top: 4px;
+}
+
+.intel-hint {
+  font-size: 10.5px;
+  line-height: 1.35;
+  color: var(--text-dim);
+  margin-top: 2px;
+}
+
+.intel-cond {
+  font-family: var(--font-timing);
+  font-size: 10px;
+  color: var(--text-dim);
+  margin-top: 5px;
+}
+
+/* -- team radio ---------------------------------------------------------- */
+
+.radio-prompt {
+  position: absolute;
+  left: 50%;
+  bottom: 120px;
+  transform: translateX(-50%);
+  width: min(520px, 90vw);
+  background: rgba(10, 16, 28, 0.96);
+  border: 1px solid var(--gold);
+  border-radius: 6px;
+  padding: 12px 16px 14px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+  animation: radio-in 0.18s ease-out;
+}
+
+@keyframes radio-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 10px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+.radio-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.radio-tag {
+  font-size: 9px;
+  letter-spacing: 0.24em;
+  color: #10131a;
+  background: var(--gold-bright);
+  padding: 2px 7px;
+  border-radius: 2px;
+  font-weight: 700;
+}
+
+.radio-timer {
+  flex: 1;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--gold-bright);
+  width: 100%;
+  transition: width 0.1s linear;
+}
+
+.radio-text {
+  font-size: 14px;
+  line-height: 1.45;
+  margin: 10px 0 12px;
+  color: var(--text);
+  font-style: italic;
+}
+
+.radio-options {
+  display: flex;
+  gap: 8px;
+}
+
+.radio-opt {
+  flex: 1;
+  padding: 9px 12px;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text);
+  font-size: 12px;
+}
+
+.radio-opt:hover,
+.radio-opt:focus-visible {
+  background: var(--gold);
+  border-color: var(--gold);
+  color: #10131a;
+  font-weight: 600;
+}
+
+/* -- pit dialog ---------------------------------------------------------- */
+
+.pit-dialog {
+  background: var(--panel);
+  border: 1px solid var(--panel-line);
+  border-radius: 8px;
+  padding: 20px 24px;
+  width: min(560px, 92vw);
+}
+
+.pit-dialog h2 {
+  font-size: 20px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.pit-sub {
+  font-size: 12px;
+  color: var(--text-dim);
+  margin: 4px 0 14px;
+}
+
+.pit-choices {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 6px;
+  margin: 6px 0 14px;
+}
+
+.pit-choice,
+.prerace-choice {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  text-align: left;
+  padding: 9px 11px;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text-dim);
+}
+
+.pit-choice b,
+.prerace-choice b {
+  font-size: 12.5px;
+  color: var(--text);
+  letter-spacing: 0.04em;
+}
+
+.pit-choice small,
+.prerace-choice small {
+  font-size: 10.5px;
+  line-height: 1.35;
+}
+
+.prerace-choice em {
+  font-style: normal;
+  font-family: var(--font-timing);
+  font-size: 10.5px;
+  margin-top: 3px;
+}
+
+.prerace-choice em.good {
+  color: var(--good);
+}
+.prerace-choice em.warn {
+  color: var(--gold-bright);
+}
+
+.pit-choice.active,
+.prerace-choice.active {
+  border-color: var(--gold);
+  background: rgba(201, 165, 74, 0.16);
+}
+
+.pit-choice:hover,
+.prerace-choice:hover,
+.pit-choice:focus-visible,
+.prerace-choice:focus-visible {
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+.pit-fuel {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 6px 0 16px;
+}
+
+.pit-fuel input,
+.prerace-fuel input {
+  flex: 1;
+  accent-color: var(--gold);
+}
+
+.pit-fuel-val {
+  font-family: var(--font-timing);
+  min-width: 56px;
+  text-align: right;
+}
+
+/* -- pre-race strategy screen -------------------------------------------- */
+
+.prerace-screen {
+  height: 100%;
+  overflow-y: auto;
+  padding: 24px 32px 48px;
+}
+
+.prerace-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.prerace-head h1 {
+  font-size: 24px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--gold-bright);
+}
+
+.prerace-sub {
+  font-size: 12px;
+  color: var(--text-dim);
+  margin-top: 3px;
+}
+
+.prerace-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 14px;
+  max-width: 1180px;
+}
+
+.prerace-card {
+  background: var(--panel);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-top: 2px solid var(--panel-line);
+  border-radius: 6px;
+  padding: 14px 16px 16px;
+}
+
+.prerace-choices {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.prerace-choices.compact {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.prerace-fuel {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 10px;
+}
+
+.prerace-fuel-read {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  min-width: 120px;
+}
+
+.prerace-fuel-read b {
+  font-family: var(--font-timing);
+  font-size: 16px;
+}
+
+.prerace-fuel-read span {
+  font-size: 10.5px;
+}
+
+.prerace-fuel-read .good,
+.plan-row .good {
+  color: var(--good);
+}
+
+.prerace-fuel-read .warn,
+.plan-row .warn {
+  color: var(--gold-bright);
+}
+
+.prerace-note {
+  font-size: 11px;
+  line-height: 1.45;
+  color: var(--text-dim);
+  margin-top: 10px;
+}
+
+.plan-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 6px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  font-size: 12px;
+}
+
+.plan-row span {
+  color: var(--text-dim);
+}
+
+.plan-row b {
+  font-family: var(--font-timing);
+}
+
+.btn.big {
+  width: 100%;
+  margin-top: 14px;
+  padding: 12px;
+  font-size: 13px;
+}
+
+/* ---------------------------------------------------- broadcast presentation */
+
+.shot-caption {
+  position: absolute;
+  left: 50%;
+  top: 78px;
+  transform: translateX(-50%);
+  padding: 4px 14px;
+  border-radius: 3px;
+  background: rgba(8, 14, 26, 0.85);
+  border-left: 2px solid var(--gold);
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--gold-bright);
+  opacity: 0;
+  transition: opacity 0.25s;
+  pointer-events: none;
+}
+
+.shot-caption.visible {
+  opacity: 1;
+}
+
+.results-body {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+}
+
+@media (min-width: 900px) {
+  .results-body {
+    grid-template-columns: 1.35fr 1fr;
+    align-items: start;
+  }
+}
+
+.reel {
+  background: rgba(255, 255, 255, 0.03);
+  border-left: 2px solid var(--panel-line);
+  border-radius: 4px;
+  padding: 10px 12px 12px;
+}
+
+.reel-row {
+  display: flex;
+  gap: 10px;
+  align-items: baseline;
+  padding: 5px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  font-size: 12px;
+}
+
+.reel-row:last-child {
+  border-bottom: none;
+}
+
+.reel-time {
+  font-family: var(--font-timing);
+  font-size: 10px;
+  color: var(--text-dim);
+  min-width: 74px;
+}
+
+.reel-row.good .reel-text {
+  color: var(--good);
+}
+
+.reel-row.bad .reel-text {
+  color: var(--bad);
+}
+
+.results-card {
+  max-width: min(980px, 94vw);
+}
+
+.results-table {
+  width: 100%;
+}
+
+/* --------------------------------------------------------------- coaching */
+
+.coach-tip {
+  position: absolute;
+  z-index: 40;
+  width: min(340px, 84vw);
+  background: rgba(10, 16, 28, 0.97);
+  border: 1px solid var(--gold);
+  border-radius: 6px;
+  padding: 12px 14px 14px;
+  box-shadow: 0 12px 44px rgba(0, 0, 0, 0.65);
+  animation: radio-in 0.2s ease-out;
+}
+
+.coach-head {
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--gold-bright);
+  margin-bottom: 6px;
+}
+
+.coach-tip p {
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--text);
+  margin-bottom: 10px;
+}
+
+.btn.small {
+  padding: 6px 14px;
+  font-size: 11px;
+}
+
+/* anchored near whatever the tip is about */
+.coach-orders {
+  bottom: 108px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+.coach-pit {
+  bottom: 108px;
+  right: 24px;
+}
+.coach-condition {
+  top: 90px;
+  right: 236px;
+}
+.coach-intel {
+  top: 320px;
+  right: 236px;
+}
+.coach-tower {
+  top: 90px;
+  left: 268px;
+}
+.coach-radio {
+  bottom: 200px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+/* ---------------------------------------------------------- accessibility */
+
+/* A visible focus ring everywhere. The game was fully keyboard-operable and
+   gave no indication at all of where the keyboard was. */
+:focus-visible {
+  outline: 2px solid var(--gold-bright);
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+
+/* Colour is never the only signal: every car chip carries its position, and
+   the tire chips carry a letter as well as a colour, for the roughly one in
+   twelve players who cannot separate the reds from the greens. */
+.tower-chip {
+  border: 1px solid rgba(255, 255, 255, 0.35);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+@media (prefers-contrast: more) {
+  :root {
+    --panel: rgba(4, 8, 16, 0.97);
+    --text-dim: #b9c4d4;
+    --panel-line: #e8c65a;
+  }
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ------------------------------------------------------------- responsive */
+
+/* The race HUD was laid out for a 1440px desktop and nothing else: fixed
+   panels, no wrapping, and hit targets a finger cannot land on. */
+
+@media (max-width: 1180px) {
+  .order-btn {
+    width: 88px;
+  }
+  .order-btn small {
+    display: none;
+  }
+  .intel-panel {
+    top: 286px;
+    width: 186px;
+  }
+  .condition-panel {
+    width: 186px;
+  }
+}
+
+@media (max-width: 900px) {
+  .command-bar {
+    left: 8px;
+    right: 8px;
+    transform: none;
+    justify-content: space-between;
+    padding: 8px 10px;
+  }
+  .order-buttons {
+    flex-wrap: wrap;
+  }
+  .order-btn {
+    width: auto;
+    flex: 1 1 30%;
+    min-width: 84px;
+    min-height: 40px;
+    align-items: center;
+  }
+  .pit-btn {
+    min-width: 76px;
+  }
+  .timing-tower {
+    width: 190px;
+    font-size: 11px;
+  }
+  .intel-panel {
+    display: none;
+  }
+  .message-log {
+    display: none;
+  }
+  .prerace-screen {
+    padding: 16px 14px 40px;
+  }
+}
+
+@media (max-width: 640px) {
+  .condition-panel {
+    top: auto;
+    bottom: 128px;
+    right: 8px;
+    width: 150px;
+    padding: 8px;
+  }
+  .timing-tower {
+    width: 150px;
+    left: 8px;
+  }
+  .race-title small {
+    display: none;
+  }
+  .speed-controls button {
+    padding: 8px 10px;
+  }
+  .radio-prompt {
+    bottom: 180px;
+  }
+  .results-card,
+  .pit-dialog {
+    padding: 14px;
+  }
+}
+
+/* Touch: the whole interface assumed a mouse pointer with pixel accuracy. */
+@media (pointer: coarse) {
+  button {
+    min-height: 40px;
+  }
+  .order-btn,
+  .pit-choice,
+  .prerace-choice {
+    min-height: 46px;
+  }
+  .speed-controls button {
+    min-width: 42px;
+  }
+  input[type='range'] {
+    height: 34px;
+  }
+}
+
+/* ------------------------------------------------------- resume a race */
+
+.resume-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  background: rgba(201, 165, 74, 0.12);
+  border: 1px solid var(--gold);
+  border-radius: 6px;
+  padding: 12px 16px;
+  margin-bottom: 16px;
+}
+
+.resume-banner b {
+  display: block;
+  font-size: 16px;
+  letter-spacing: 0.06em;
+  margin-top: 2px;
+}
+
+.resume-sub {
+  font-size: 11px;
+  color: var(--text-dim);
+}
+
+.resume-actions {
+  display: flex;
+  gap: 8px;
+}
+
+/* On a narrow screen the anchored positions push the tip off the edge, so
+   drop the anchoring and centre it — there is nothing far enough away from
+   anything else on a phone for pointing to be meaningful anyway. */
+@media (max-width: 720px) {
+  .coach-tip,
+  .coach-orders,
+  .coach-pit,
+  .coach-condition,
+  .coach-intel,
+  .coach-tower,
+  .coach-radio {
+    left: 50%;
+    right: auto;
+    top: auto;
+    bottom: 50%;
+    transform: translate(-50%, 50%);
+    width: min(340px, 90vw);
+  }
+}
+
+/* Menu screens scroll on short viewports; the race screen never does. */
+@media (max-width: 900px), (max-height: 620px) {
+  body {
+    overflow: auto;
+  }
+  .race-screen {
+    overflow: hidden;
+  }
+}
+
+/* The header, tower and condition panel were still sized for a desktop even
+   inside the small-screen breakpoints: the controls ran off the edge and the
+   driver names shrank to a single letter. */
+@media (max-width: 640px) {
+  .hud-top {
+    padding: 6px 8px;
+    gap: 6px;
+  }
+  .race-title {
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    max-width: 84px;
+    line-height: 1.2;
+  }
+  .lap-counter {
+    font-size: 16px;
+  }
+  .lap-counter span {
+    font-size: 10px;
+  }
+  .speed-controls {
+    gap: 2px;
+  }
+  .speed-controls button {
+    padding: 6px 7px;
+    font-size: 11px;
+    min-width: 30px;
+  }
+
+  .timing-tower {
+    width: 172px;
+    top: 52px;
+  }
+  .tower-row {
+    grid-template-columns: 16px 6px 1fr 15px 44px;
+    gap: 4px;
+    padding: 3px 5px;
+    font-size: 10.5px;
+  }
+  .tower-name small {
+    display: none;
+  }
+
+  .condition-panel {
+    bottom: 152px;
+    width: 138px;
+    padding: 6px 8px;
+    font-size: 11px;
+  }
+  .cond-pos b {
+    font-size: 24px;
+  }
+  /* on a phone the essentials are position, tires and fuel */
+  .condition-panel .cond-car,
+  .condition-panel .cond-lastlap {
+    display: none;
+  }
+}
+
+/* ------------------------------------------------------------ title rival */
+
+.rival-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: var(--panel);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-left: 3px solid var(--bad);
+  border-radius: 6px;
+  padding: 12px 16px;
+  margin: 12px 0 4px;
+  flex-wrap: wrap;
+}
+
+.rival-portrait {
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--panel-line);
+}
+
+.rival-card b {
+  display: block;
+  font-size: 17px;
+  letter-spacing: 0.05em;
+  margin-top: 2px;
+}
+
+.rival-trait {
+  display: inline-block;
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-top: 2px;
+}
+
+.rival-card p {
+  font-size: 11.5px;
+  color: var(--text-dim);
+  margin-top: 4px;
+  max-width: 46ch;
+}
+
+.rival-pts {
+  margin-left: auto;
+  text-align: right;
+}
+
+.rival-pts b {
+  font-family: var(--font-timing);
+  font-size: 24px;
+}
+
+.rival-pts .good {
+  color: var(--good);
+  font-size: 11px;
+}
+
+.rival-pts .warn {
+  color: var(--bad);
+  font-size: 11px;
 }

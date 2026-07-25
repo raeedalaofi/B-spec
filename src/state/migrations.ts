@@ -3,6 +3,7 @@
 // SCHEMA_VERSION. Keep every historical migration — old saves in the wild
 // stay loadable forever.
 
+import { COACH_TIP_IDS } from '../ui/coaching';
 import type { GameState } from './gameState';
 
 type Migration = (old: Record<string, unknown>) => Record<string, unknown>;
@@ -24,6 +25,23 @@ export const MIGRATIONS: Migration[] = [
     trialMedals: old.trialMedals ?? {},
     standaloneResults: old.standaloneResults ?? {},
   }),
+  // v3 → v4: the aggression driver stat, and per-car strategy presets
+  (old) => {
+    const driver = (old.driver ?? {}) as Record<string, unknown>;
+    const stats = (driver.stats ?? {}) as Record<string, number>;
+    return {
+      ...old,
+      driver: {
+        ...driver,
+        // seed aggression from existing racecraft so migrated drivers feel
+        // continuous rather than reset to a default
+        stats: { ...stats, aggression: stats.aggression ?? stats.battle ?? 45 },
+      },
+      strategies: old.strategies ?? {},
+      // an existing player has already learned the game by playing it
+      coachSeen: old.coachSeen ?? Object.fromEntries(COACH_TIP_IDS.map((id) => [id, 1])),
+    };
+  },
 ];
 
 export function migrate(raw: Record<string, unknown>, targetVersion: number): GameState {

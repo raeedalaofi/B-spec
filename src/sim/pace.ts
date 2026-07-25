@@ -3,14 +3,23 @@
 // morale, corner noise and mistake recovery.
 
 import { BAL } from '../data/balance';
+import { COMPOUNDS, ORDERS } from '../data/strategy';
 import { profileSpeedAt } from './speedProfile';
-import type { CarRaceState, RaceState } from './types';
+import type { CarRaceState, RaceState, TireCompound } from './types';
 
-/** tire grip multiplier: gradual loss, then a cliff past tireCliffStart */
-export function tireFactor(wear: number): number {
-  let f = 1 - BAL.tireGripLoss * Math.pow(Math.min(wear, 1), 1.5);
-  if (wear > BAL.tireCliffStart) {
-    const over = (wear - BAL.tireCliffStart) / (1 - BAL.tireCliffStart);
+/**
+ * Tire grip: a gradual loss, then a cliff. The compound sets both the peak
+ * grip and where the cliff begins — softs are quicker from the first lap and
+ * fall away much earlier, which is what turns compound choice into a bet on
+ * how long the stint has to be.
+ */
+export function tireFactor(wear: number, compound: TireCompound = 'medium'): number {
+  // compounds arrive from saved games and commands, so an unknown one is a
+  // data problem rather than a crash
+  const spec = COMPOUNDS[compound] ?? COMPOUNDS.medium;
+  let f = spec.gripMult - BAL.tireGripLoss * Math.pow(Math.min(wear, 1), 1.5);
+  if (wear > spec.cliffStart) {
+    const over = (wear - spec.cliffStart) / (1 - spec.cliffStart);
     f -= BAL.tireCliffLoss * over * over;
   }
   return f;
@@ -24,6 +33,23 @@ export function fatigueFactor(fatigue: number, stamina: number): number {
   return 1 - BAL.fatigueSpeedLoss * fatigue * (1 - stamina / 150);
 }
 
+/** a damaged car is simply a slower car */
+export function damageFactor(damage: number): number {
+  return 1 - BAL.damageSpeedLoss * damage;
+}
+
+/**
+ * Cost of not being on the racing line. Applied in corners only — off-line
+ * tarmac is dirty and the geometry is worse, but a straight is a straight.
+ * This is what makes an overtake a genuine trade rather than a free move:
+ * the attacker gives up corner speed for track position.
+ */
+export function offLineFactor(car: CarRaceState): number {
+  const offLine = Math.min(1, Math.abs(car.lateral));
+  const defending = car.defence === 'cover' ? BAL.defendLoss : 0;
+  return 1 - BAL.offLineLoss * offLine - defending;
+}
+
 /**
  * Corner weight: 1 where the car is at its slowest (deep in corners),
  * 0 on flat-out straights. Driver skill, pace command, morale and noise
@@ -33,6 +59,11 @@ export function cornerWeight(car: CarRaceState, idealV: number): number {
   const vMax = car.profileMax;
   const w = (vMax - idealV) / (vMax * BAL.cornerWeightWindow);
   return Math.max(0, Math.min(1, w));
+}
+
+/** the standing order this car is driving to */
+export function orderSpec(car: CarRaceState) {
+  return ORDERS[car.order] ?? ORDERS.push;
 }
 
 export function effectivePace(car: CarRaceState): number {
@@ -60,9 +91,10 @@ export function paceIndex(state: RaceState, car: CarRaceState): number {
     fPace *
     fDriver *
     fMorale *
-    tireFactor(car.tireWear) *
+    tireFactor(car.tireWear, car.compound) *
     fuelFactor(car.fuelL) *
-    fatigueFactor(car.fatigue, car.stats.stamina)
+    fatigueFactor(car.fatigue, car.stats.stamina) *
+    damageFactor(car.damage)
   );
 }
 
@@ -85,9 +117,14 @@ export function computeVTarget(state: RaceState, car: CarRaceState): number {
     blend(fPace) *
     blend(fMorale) *
     blend(car.noise) *
-    tireFactor(car.tireWear) *
+    // aero and line effects are corner-weighted too: dirty air costs grip in
+    // the turns, and being off-line only matters where geometry matters
+    blend(car.dirtyAir) *
+    blend(offLineFactor(car)) *
+    tireFactor(car.tireWear, car.compound) *
     fuelFactor(car.fuelL) *
-    fatigueFactor(car.fatigue, car.stats.stamina);
+    fatigueFactor(car.fatigue, car.stats.stamina) *
+    damageFactor(car.damage);
 
   if (car.mistake) v *= car.mistake.factor;
   if (car.fuelL <= 0) v = Math.min(v, BAL.fuelEmptyCrawl);

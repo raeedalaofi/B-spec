@@ -5,12 +5,16 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build",
+    "build": "tsc && vite build && node scripts/optimizeAssets.mjs",
     "preview": "vite preview",
     "test": "vitest run",
-    "sim": "tsx scripts/simulate.ts"
+    "sim": "tsx scripts/simulate.ts",
+    "build:raw": "tsc && vite build",
+    "store": "npm run build && node scripts/storeArt.mjs store && node scripts/storeShots.mjs store && node scripts/packRelease.mjs"
   },
   "devDependencies": {
+    "playwright": "^1.62.0",
+    "sharp": "^0.35.3",
     "tsx": "^4.23.1",
     "typescript": "~6.0.2",
     "vite": "^8.1.1",

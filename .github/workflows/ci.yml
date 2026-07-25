@@ -1,0 +1,52 @@
+# Validates every pull request.
+#
+# The deploy workflow only runs on pushes to the release branches, which
+# meant a pull request got no checks at all — the first time anything ran
+# against a change was after it had already been merged and deployed.
+
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches-ignore: [gh-pages]
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    env:
+      # nothing in CI drives a browser; the screenshot script is a local
+      # release-prep tool, and downloading Chromium for every run is minutes
+      # of wall clock for no benefit
+      PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Typecheck
+        run: npx tsc --noEmit
+
+      - name: Tests
+        # includes the race-quality and difficulty guards, which run several
+        # hundred full races and are the slowest thing here by far
+        run: npx vitest run
+
+      - name: Build
+        run: npm run build
+
+      - name: Check the shipped build stays small
+        # a browser game people wait to download is a browser game people
+        # close; this caught the build at 251 MB once already
+        run: |
+          size=$(du -sm dist | cut -f1)
+          echo "dist is ${size} MB"
+          if [ "$size" -gt 40 ]; then
+            echo "::error::dist is ${size} MB — over the 40 MB budget for a browser game"
+            exit 1
+          fi

@@ -71,7 +71,7 @@ describe('save migrations', () => {
         level: 3,
         bspecPoints: 10,
         totalPoints: 100,
-        stats: { pace: 50, consistency: 50, battle: 50, smoothness: 50, stamina: 50 },
+        stats: { pace: 50, consistency: 50, battle: 50, smoothness: 50, stamina: 50, aggression: 50 },
       },
       ownedCarIds: ['vulpe'],
       activeCarId: 'vulpe',

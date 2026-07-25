@@ -1,7 +1,8 @@
 // Tire wear, fuel consumption and pit stop mechanics.
 
 import { BAL } from '../data/balance';
-import { effectivePace } from './pace';
+import { COMPOUNDS } from '../data/strategy';
+import { effectivePace, orderSpec } from './pace';
 import type { CarRaceState, RaceEvent, RaceState } from './types';
 
 /** accrue wear/fuel/fatigue for distance ds just travelled */
@@ -15,14 +16,22 @@ export function accrueConsumption(
   const lapFrac = ds / track.lengthM;
   const pace = effectivePace(car);
   const inBattle = car.battle !== null;
+  // circulating behind a safety car barely uses the car up — which is exactly
+  // why a stop taken under caution is such a bargain
+  const cautionWear = state.caution ? BAL.cautionWearFrac : 1;
+  const cautionFuel = state.caution ? BAL.cautionFuelFrac : 1;
 
+  const order = orderSpec(car);
   const prevWear = car.tireWear;
   const wearPerLap =
     track.def.tireWearBase *
     car.spec.tireWearMult *
+    COMPOUNDS[car.compound].wearMult *
     BAL.paceWear[pace] *
+    order.wearMult *
     (1.25 - BAL.tireSmoothnessSpread * (car.stats.smoothness / 100)) *
-    (inBattle ? BAL.tireBattleWearMult : 1);
+    (inBattle ? BAL.tireBattleWearMult : 1) *
+    cautionWear;
   car.tireWear = Math.min(1, car.tireWear + wearPerLap * lapFrac);
 
   for (const warnAt of BAL.tireWarnAt) {
@@ -31,7 +40,8 @@ export function accrueConsumption(
     }
   }
 
-  const fuelPerLap = track.def.fuelBase * car.spec.fuelMult * BAL.paceFuel[pace];
+  const fuelPerLap =
+    track.def.fuelBase * car.spec.fuelMult * BAL.paceFuel[pace] * order.fuelMult * cautionFuel;
   const prevFuel = car.fuelL;
   car.fuelL = Math.max(0, car.fuelL - fuelPerLap * lapFrac);
   const lapsLeft = car.fuelL / fuelPerLap;
@@ -53,7 +63,12 @@ export function accrueConsumption(
 }
 
 export function fuelPerLapFor(state: RaceState, car: CarRaceState): number {
-  return state.track.def.fuelBase * car.spec.fuelMult * BAL.paceFuel[effectivePace(car)];
+  return (
+    state.track.def.fuelBase *
+    car.spec.fuelMult *
+    BAL.paceFuel[effectivePace(car)] *
+    orderSpec(car).fuelMult
+  );
 }
 
 /** arc position of pit entry / exit */
@@ -71,7 +86,10 @@ export function pitDurationS(state: RaceState, car: CarRaceState): number {
   let stationary = BAL.pitStationaryBaseS;
   if (pit.tires) stationary += BAL.pitTiresS;
   if (pit.refuel) {
-    const need = car.spec.fuelTankL - car.fuelL;
+    // a splash-and-dash is genuinely quicker than brimming the tank, which
+    // is what makes fuel target a decision rather than a formality
+    const target = Math.min(pit.fuelTargetL ?? car.spec.fuelTankL, car.spec.fuelTankL);
+    const need = Math.max(0, target - car.fuelL);
     stationary += need * BAL.pitFuelPerLiterS;
   }
   return state.track.def.pit.laneTimeLossS + stationary;

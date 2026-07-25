@@ -25,7 +25,7 @@ export function mainMenuScreen(ctx: AppContext): void {
         <button class="btn ${canContinue ? '' : 'primary'} big" id="mm-new">New Career</button>
       </div>
     </div>
-    <div class="menu-footnote">A browser revival of the Gran Turismo 4 B-Spec spirit — manage your AI driver through a racing career.</div>`;
+    <div class="menu-footnote">You are the race director, not the driver. Read the race, call the strategy, take your driver through a career.</div>`;
   ctx.root.appendChild(wrap);
 
   wrap.querySelector('#mm-continue')?.addEventListener('click', () => {
