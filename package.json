@@ -9,6 +9,7 @@
     "preview": "vite preview",
     "test": "vitest run",
     "qa:art": "node scripts/art/qaAssets.mjs",
+    "qa:ui": "node scripts/uiChecks.mjs",
     "art:recolour": "node scripts/art/recolour.mjs",
     "sim": "tsx scripts/simulate.ts",
     "build:raw": "tsc && vite build",

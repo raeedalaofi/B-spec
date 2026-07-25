@@ -42,6 +42,9 @@ export interface RaceScreenOptions {
   /** initial audio setting; toggle persisted via onAudioToggle */
   audio?: boolean;
   onAudioToggle?(on: boolean): void;
+  /** playback speed to open at, remembered from the player's last race */
+  defaultSpeed?: 1 | 2 | 4;
+  onSpeedChange?(mult: 1 | 2 | 4): void;
 }
 
 const MAX_TICKS_PER_FRAME = 40;
@@ -61,14 +64,18 @@ export function mountRaceScreen(root: HTMLElement, opts: RaceScreenOptions): () 
 
   SOUND.setEnabled(opts.audio ?? true);
 
-  let speedMult = 1;
+  let speedMult: number = opts.defaultSpeed ?? 1;
   let paused = false;
   const pending: Command[] = [];
   const hud = new RaceHud(screen, opts.title, opts.subtitle, {
     onOrder: (order) => pending.push({ type: 'SET_ORDER', carId: playerId, order }),
     onPit: (tires, refuel, fuelTargetL) =>
       pending.push({ type: 'PIT', carId: playerId, tires, refuel, fuelTargetL }),
-    onSpeed: (mult) => (speedMult = mult),
+    onSpeed: (mult) => {
+      speedMult = mult;
+      opts.onSpeedChange?.(mult as 1 | 2 | 4);
+    },
+    defaultSpeed: opts.defaultSpeed ?? 1,
     onPause: (on) => (paused = on),
     onWideView: (on) => renderer.setWideMode(on),
     onRetire: () => opts.onRetire?.(),
