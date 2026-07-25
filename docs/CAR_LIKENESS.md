@@ -1,28 +1,26 @@
 # Car likeness
 
-**Status: studio renders regenerated and accepted. The three other views per
-car are still the old art and still carry the original likeness.**
+**Status: closed. All four views of all eight cars are regenerated original
+designs.**
 
 | View | Used by | State |
 | --- | --- | --- |
-| `{id}-studio` | dealership, garage | **regenerated, accepted** |
-| `{id}-side` | tuning screen hero | old art — original likeness |
-| `{id}-topdown` | the in-race sprite | old art — original likeness, and cel-shaded |
-| `{id}-damaged` | the in-race sprite | old art — original likeness, and cel-shaded |
+| `{id}-studio` | dealership, garage | regenerated from a corrected prompt |
+| `{id}-side` | tuning screen hero | Kontext img2img from the accepted studio render |
+| `{id}-topdown` | the in-race sprite | Kontext, corrected to nose-up, sprite-prepped |
+| `{id}-damaged` | the in-race sprite | Kontext from that car's own top-down |
 
-So the exposure is reduced, not removed: the dealership now shows eight
-original cars and the race still shows the old ones. Closing this out means
-running the Kontext img2img pass from the accepted studio renders, which is
-what §2.1 of `ART_PRODUCTION_PLAN.md` always intended and which also fixes the
-photoreal-vs-cel-shaded mismatch in one move.
+Deriving the three other views from the accepted studio render — rather than
+generating each independently — is what makes them the *same* car, and it
+retired the photoreal-vs-cel-shaded mismatch at the same time.
 
 ## What was wrong
 
-Seven of the eight studio renders in `public/assets/cars/` are close likenesses
-of identifiable production cars, and one is a near-exact copy of a specific
-racing car.
+Seven of the eight studio renders **were** close likenesses
+of identifiable production cars, and one was a near-exact copy of a specific
+racing car. The table below is the record of what was replaced.
 
-| Asset | Reads as | Visible badge |
+| Asset | Read as | Visible badge |
 | --- | --- | --- |
 | `arrow-studio.png` | Porsche 911 GT1 | — |
 | `phantom-studio.png` | Nissan Skyline GT-R (R32/R33) | red "R" grille badge |
@@ -37,13 +35,13 @@ There are two separate problems here.
 
 **Legal.** Vehicle manufacturers hold trademarks in their badges and grille
 designs, and in many jurisdictions design rights in body shapes. Racing games
-license these. B-Spec is heading for a public itch.io release and ships
+license these. B-Spec was heading for a public itch.io release shipping
 identifiable cars with badges on them.
 
-**Art direction.** Four of the eight cars are the same Nissan Skyline. A roster
-that spans Class C to Class A should read as eight distinct machines; instead
-half of it is one car in four colours. That undermines the progression fantasy
-regardless of the legal question.
+**Art direction.** Four of the eight cars were the same Nissan Skyline. A roster
+that spans Class C to Class A should read as eight distinct machines; half of it
+was one car in four colours. That undermined the progression fantasy regardless
+of the legal question.
 
 ## Why it happened
 
@@ -111,10 +109,28 @@ Accepted: the base candidate for all seven others, plus the regenerated
 phantom. `arrow` came out best of the eight — a genuinely original teardrop
 prototype, no badge, no text, not attributable to any real car.
 
-## To close this out
+## What the derived pass taught us
 
-1. Run the Kontext img2img pass from the eight accepted studio renders to
-   produce `-side`, `-topdown` and `-damaged`. Until then the race view still
-   shows the old cars.
-2. Review those the same way, then `npm run qa:art` and
-   `node scripts/art/spriteMetrics.mjs` to re-measure the sprite padding.
+Two things worth keeping, because neither was obvious:
+
+**Kontext returns the overhead view nose-down, every time.** The renderer
+rotates sprites by PI/2 assuming nose-up. Arguing with the model about which
+way is up wastes credits; `rotate: 180` in the manifest is deterministic and
+free.
+
+**A photoreal render is a worse 30px sprite than a cel-shaded one, until you
+finish it.** Dropped straight into the race view the raw Kontext top-downs read
+*worse* than the anime sprites they replaced — paler, lower contrast, and
+smaller in frame because the model leaves a lot of air around the car. Soft
+studio lighting and a wide frame are precisely what a 30x downscale punishes.
+
+That is not a reason to keep cel shading. It is a reason to prep the asset:
+`scripts/art/spritePrep.mjs` trims to the opaque bounding box and lifts
+saturation and contrast. After it, the new sprites read as well as the old ones
+and are the right cars.
+
+The trim had a second effect worth noting. Sprite padding across the family had
+varied 84%–95%, which is why `spriteMetrics.ts` and the renderer's scale
+compensation exist at all. Trimmed, the spread is 97.7%–98.2% — the
+compensation is now very nearly a no-op, which is the correct end state: it was
+there to paper over inconsistent art, and the art is consistent now.

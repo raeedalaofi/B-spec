@@ -16,16 +16,16 @@ export interface SpriteMetric {
 }
 
 export const SPRITE_METRICS: Record<string, SpriteMetric> = {
-  'arrow': { extentY: 0.8611, extentX: 0.5169, tail: 0.8214, damagedExtentY: 0.8403 },
-  'falcon': { extentY: 0.8661, extentX: 0.5188, tail: 0.8631, damagedExtentY: 0.8681 },
-  'kestrel': { extentY: 0.88, extentX: 0.494, tail: 0.8869, damagedExtentY: 0.9246 },
-  'kite': { extentY: 0.9127, extentX: 0.495, tail: 0.8889, damagedExtentY: 0.9127 },
-  'phantom': { extentY: 0.9256, extentX: 0.502, tail: 0.9246, damagedExtentY: 0.9296 },
-  'serval': { extentY: 0.9454, extentX: 0.4881, tail: 0.9484, damagedExtentY: 0.871 },
-  'taro': { extentY: 0.9028, extentX: 0.4167, tail: 0.9087, damagedExtentY: 0.9058 },
-  'vulpe': { extentY: 0.8423, extentX: 0.4673, tail: 0.8353, damagedExtentY: 0.8879 },
+  'arrow': { extentY: 0.9817, extentX: 0.9709, tail: 0.9817, damagedExtentY: 0.984 },
+  'falcon': { extentY: 0.9767, extentX: 0.9655, tail: 0.9767, damagedExtentY: 0.9816 },
+  'kestrel': { extentY: 0.9804, extentX: 0.9645, tail: 0.9791, damagedExtentY: 0.9801 },
+  'kite': { extentY: 0.9782, extentX: 0.963, tail: 0.9782, damagedExtentY: 0.9827 },
+  'phantom': { extentY: 0.9772, extentX: 0.9678, tail: 0.9772, damagedExtentY: 0.9824 },
+  'serval': { extentY: 0.9773, extentX: 0.9717, tail: 0.9773, damagedExtentY: 0.9802 },
+  'taro': { extentY: 0.9824, extentX: 0.9679, tail: 0.9835, damagedExtentY: 0.9828 },
+  'vulpe': { extentY: 0.9818, extentX: 0.9691, tail: 0.983, damagedExtentY: 0.9826 },
 };
 
 /** Mean opaque height, used to normalise every car to one physical scale. */
 export const REFERENCE_EXTENT_Y =
-  0.8920;
+  0.9795;

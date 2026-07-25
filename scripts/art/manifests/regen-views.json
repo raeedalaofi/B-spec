@@ -1,0 +1,181 @@
+{
+  "note": "Stage 1: top-down and side views derived from the eight accepted studio renders via instruction-based img2img (Flux Kontext). Output to art-review/views — review before promoting. Run regen-damaged.json afterwards; it references these outputs.",
+  "entries": [
+    {
+      "id": "car-topdown-kestrel",
+      "out": "art-review/views/kestrel-topdown.png",
+      "modelSlot": "kontext",
+      "referenceFile": "public/assets/cars/kestrel-studio.png",
+      "aspectRatio": "1:1",
+      "alpha": "remove-bg",
+      "candidates": 1,
+      "rotate": 180,
+      "prompt": "Show this exact same car in a strict top-down orthographic view photographed from directly overhead, looking straight down at the roof. The car is perfectly vertical and centred in the frame, nose at the top, tail at the bottom. Keep the identical body shape, proportions, wheels and paint colour as the reference image. Photorealistic studio render, plain light gray background, no text, no badge, no logo."
+    },
+    {
+      "id": "car-side-kestrel",
+      "out": "art-review/views/kestrel-side.png",
+      "modelSlot": "kontext",
+      "referenceFile": "public/assets/cars/kestrel-studio.png",
+      "aspectRatio": "1:1",
+      "alpha": "remove-bg",
+      "candidates": 1,
+      "rotate": 0,
+      "prompt": "Show this exact same car in a strict side profile view, photographed perpendicular from the left side at wheel height. The car is perfectly horizontal and centred, facing left, with both wheels fully visible and no perspective distortion. Keep the identical body shape, proportions, wheels and paint colour as the reference image. Photorealistic studio render, plain light gray background, no text, no badge, no logo."
+    },
+    {
+      "id": "car-topdown-vulpe",
+      "out": "art-review/views/vulpe-topdown.png",
+      "modelSlot": "kontext",
+      "referenceFile": "public/assets/cars/vulpe-studio.png",
+      "aspectRatio": "1:1",
+      "alpha": "remove-bg",
+      "candidates": 1,
+      "rotate": 180,
+      "prompt": "Show this exact same car in a strict top-down orthographic view photographed from directly overhead, looking straight down at the roof. The car is perfectly vertical and centred in the frame, nose at the top, tail at the bottom. Keep the identical body shape, proportions, wheels and paint colour as the reference image. Photorealistic studio render, plain light gray background, no text, no badge, no logo."
+    },
+    {
+      "id": "car-side-vulpe",
+      "out": "art-review/views/vulpe-side.png",
+      "modelSlot": "kontext",
+      "referenceFile": "public/assets/cars/vulpe-studio.png",
+      "aspectRatio": "1:1",
+      "alpha": "remove-bg",
+      "candidates": 1,
+      "rotate": 0,
+      "prompt": "Show this exact same car in a strict side profile view, photographed perpendicular from the left side at wheel height. The car is perfectly horizontal and centred, facing left, with both wheels fully visible and no perspective distortion. Keep the identical body shape, proportions, wheels and paint colour as the reference image. Photorealistic studio render, plain light gray background, no text, no badge, no logo."
+    },
+    {
+      "id": "car-topdown-taro",
+      "out": "art-review/views/taro-topdown.png",
+      "modelSlot": "kontext",
+      "referenceFile": "public/assets/cars/taro-studio.png",
+      "aspectRatio": "1:1",
+      "alpha": "remove-bg",
+      "candidates": 1,
+      "rotate": 180,
+      "prompt": "Show this exact same car in a strict top-down orthographic view photographed from directly overhead, looking straight down at the roof. The car is perfectly vertical and centred in the frame, nose at the top, tail at the bottom. Keep the identical body shape, proportions, wheels and paint colour as the reference image. Photorealistic studio render, plain light gray background, no text, no badge, no logo."
+    },
+    {
+      "id": "car-side-taro",
+      "out": "art-review/views/taro-side.png",
+      "modelSlot": "kontext",
+      "referenceFile": "public/assets/cars/taro-studio.png",
+      "aspectRatio": "1:1",
+      "alpha": "remove-bg",
+      "candidates": 1,
+      "rotate": 0,
+      "prompt": "Show this exact same car in a strict side profile view, photographed perpendicular from the left side at wheel height. The car is perfectly horizontal and centred, facing left, with both wheels fully visible and no perspective distortion. Keep the identical body shape, proportions, wheels and paint colour as the reference image. Photorealistic studio render, plain light gray background, no text, no badge, no logo."
+    },
+    {
+      "id": "car-topdown-falcon",
+      "out": "art-review/views/falcon-topdown.png",
+      "modelSlot": "kontext",
+      "referenceFile": "public/assets/cars/falcon-studio.png",
+      "aspectRatio": "1:1",
+      "alpha": "remove-bg",
+      "candidates": 1,
+      "rotate": 180,
+      "prompt": "Show this exact same car in a strict top-down orthographic view photographed from directly overhead, looking straight down at the roof. The car is perfectly vertical and centred in the frame, nose at the top, tail at the bottom. Keep the identical body shape, proportions, wheels and paint colour as the reference image. Photorealistic studio render, plain light gray background, no text, no badge, no logo."
+    },
+    {
+      "id": "car-side-falcon",
+      "out": "art-review/views/falcon-side.png",
+      "modelSlot": "kontext",
+      "referenceFile": "public/assets/cars/falcon-studio.png",
+      "aspectRatio": "1:1",
+      "alpha": "remove-bg",
+      "candidates": 1,
+      "rotate": 0,
+      "prompt": "Show this exact same car in a strict side profile view, photographed perpendicular from the left side at wheel height. The car is perfectly horizontal and centred, facing left, with both wheels fully visible and no perspective distortion. Keep the identical body shape, proportions, wheels and paint colour as the reference image. Photorealistic studio render, plain light gray background, no text, no badge, no logo."
+    },
+    {
+      "id": "car-topdown-serval",
+      "out": "art-review/views/serval-topdown.png",
+      "modelSlot": "kontext",
+      "referenceFile": "public/assets/cars/serval-studio.png",
+      "aspectRatio": "1:1",
+      "alpha": "remove-bg",
+      "candidates": 1,
+      "rotate": 180,
+      "prompt": "Show this exact same car in a strict top-down orthographic view photographed from directly overhead, looking straight down at the roof. The car is perfectly vertical and centred in the frame, nose at the top, tail at the bottom. Keep the identical body shape, proportions, wheels and paint colour as the reference image. Photorealistic studio render, plain light gray background, no text, no badge, no logo."
+    },
+    {
+      "id": "car-side-serval",
+      "out": "art-review/views/serval-side.png",
+      "modelSlot": "kontext",
+      "referenceFile": "public/assets/cars/serval-studio.png",
+      "aspectRatio": "1:1",
+      "alpha": "remove-bg",
+      "candidates": 1,
+      "rotate": 0,
+      "prompt": "Show this exact same car in a strict side profile view, photographed perpendicular from the left side at wheel height. The car is perfectly horizontal and centred, facing left, with both wheels fully visible and no perspective distortion. Keep the identical body shape, proportions, wheels and paint colour as the reference image. Photorealistic studio render, plain light gray background, no text, no badge, no logo."
+    },
+    {
+      "id": "car-topdown-kite",
+      "out": "art-review/views/kite-topdown.png",
+      "modelSlot": "kontext",
+      "referenceFile": "public/assets/cars/kite-studio.png",
+      "aspectRatio": "1:1",
+      "alpha": "remove-bg",
+      "candidates": 1,
+      "rotate": 180,
+      "prompt": "Show this exact same car in a strict top-down orthographic view photographed from directly overhead, looking straight down at the roof. The car is perfectly vertical and centred in the frame, nose at the top, tail at the bottom. Keep the identical body shape, proportions, wheels and paint colour as the reference image. Photorealistic studio render, plain light gray background, no text, no badge, no logo."
+    },
+    {
+      "id": "car-side-kite",
+      "out": "art-review/views/kite-side.png",
+      "modelSlot": "kontext",
+      "referenceFile": "public/assets/cars/kite-studio.png",
+      "aspectRatio": "1:1",
+      "alpha": "remove-bg",
+      "candidates": 1,
+      "rotate": 0,
+      "prompt": "Show this exact same car in a strict side profile view, photographed perpendicular from the left side at wheel height. The car is perfectly horizontal and centred, facing left, with both wheels fully visible and no perspective distortion. Keep the identical body shape, proportions, wheels and paint colour as the reference image. Photorealistic studio render, plain light gray background, no text, no badge, no logo."
+    },
+    {
+      "id": "car-topdown-phantom",
+      "out": "art-review/views/phantom-topdown.png",
+      "modelSlot": "kontext",
+      "referenceFile": "public/assets/cars/phantom-studio.png",
+      "aspectRatio": "1:1",
+      "alpha": "remove-bg",
+      "candidates": 1,
+      "rotate": 180,
+      "prompt": "Show this exact same car in a strict top-down orthographic view photographed from directly overhead, looking straight down at the roof. The car is perfectly vertical and centred in the frame, nose at the top, tail at the bottom. Keep the identical body shape, proportions, wheels and paint colour as the reference image. Photorealistic studio render, plain light gray background, no text, no badge, no logo."
+    },
+    {
+      "id": "car-side-phantom",
+      "out": "art-review/views/phantom-side.png",
+      "modelSlot": "kontext",
+      "referenceFile": "public/assets/cars/phantom-studio.png",
+      "aspectRatio": "1:1",
+      "alpha": "remove-bg",
+      "candidates": 1,
+      "rotate": 0,
+      "prompt": "Show this exact same car in a strict side profile view, photographed perpendicular from the left side at wheel height. The car is perfectly horizontal and centred, facing left, with both wheels fully visible and no perspective distortion. Keep the identical body shape, proportions, wheels and paint colour as the reference image. Photorealistic studio render, plain light gray background, no text, no badge, no logo."
+    },
+    {
+      "id": "car-topdown-arrow",
+      "out": "art-review/views/arrow-topdown.png",
+      "modelSlot": "kontext",
+      "referenceFile": "public/assets/cars/arrow-studio.png",
+      "aspectRatio": "1:1",
+      "alpha": "remove-bg",
+      "candidates": 1,
+      "rotate": 180,
+      "prompt": "Show this exact same car in a strict top-down orthographic view photographed from directly overhead, looking straight down at the roof. The car is perfectly vertical and centred in the frame, nose at the top, tail at the bottom. Keep the identical body shape, proportions, wheels and paint colour as the reference image. Photorealistic studio render, plain light gray background, no text, no badge, no logo."
+    },
+    {
+      "id": "car-side-arrow",
+      "out": "art-review/views/arrow-side.png",
+      "modelSlot": "kontext",
+      "referenceFile": "public/assets/cars/arrow-studio.png",
+      "aspectRatio": "1:1",
+      "alpha": "remove-bg",
+      "candidates": 1,
+      "rotate": 0,
+      "prompt": "Show this exact same car in a strict side profile view, photographed perpendicular from the left side at wheel height. The car is perfectly horizontal and centred, facing left, with both wheels fully visible and no perspective distortion. Keep the identical body shape, proportions, wheels and paint colour as the reference image. Photorealistic studio render, plain light gray background, no text, no badge, no logo."
+    }
+  ]
+}

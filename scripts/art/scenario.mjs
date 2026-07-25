@@ -15,6 +15,7 @@
 import { mkdir, writeFile, appendFile, readFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import path from 'node:path';
+import sharp from 'sharp';
 
 const BASE = process.env.SCENARIO_API_BASE ?? 'https://api.cloud.scenario.com/v1';
 const KEY = process.env.SCENARIO_KEY;
@@ -42,6 +43,10 @@ export const MODELS = {
   vector: 'model_ideogram-v3-generate-transparent', // flat badges/emblems lane
   removeBg: 'model_bria-remove-background', // clean matting (Photoroom as backup)
   upscale: 'model_recraft-crisp-upscale',
+  // instruction-based img2img: re-views an approved render from another angle
+  // while holding the body shape and paint. This is what makes {id}-topdown
+  // the same car as {id}-studio instead of a separate roll of the dice.
+  kontext: 'model_flux-kontext-editing',
 };
 
 async function api(pathname, options = {}) {
@@ -114,6 +119,22 @@ export async function generate(modelId, body) {
   return assets;
 }
 
+/**
+ * Upload a local image and return its asset id, so it can be handed to an
+ * img2img model as a reference. The API wants a data URI on `image`.
+ */
+export async function uploadImage(filePath) {
+  const b64 = (await readFile(filePath)).toString('base64');
+  const out = await api('/assets', {
+    method: 'POST',
+    body: JSON.stringify({
+      image: `data:image/png;base64,${b64}`,
+      name: path.basename(filePath, '.png'),
+    }),
+  });
+  return (out.asset ?? out).id;
+}
+
 export async function assetUrl(assetId) {
   const out = await api(`/assets/${assetId}`);
   return (out.asset ?? out).url;
@@ -157,9 +178,18 @@ async function logAccepted(row) {
   );
 }
 
+/** cache so one source render is uploaded once, not once per derived view */
+const uploadCache = new Map();
+async function referenceFor(file) {
+  if (!uploadCache.has(file)) uploadCache.set(file, await uploadImage(file));
+  return uploadCache.get(file);
+}
+
 async function runEntry(entry, candidates) {
   const modelId = MODELS[entry.modelSlot] ?? entry.modelSlot;
   const want = entry.candidates ?? candidates;
+  // img2img entries derive from an already-approved render on disk
+  const reference = entry.referenceFile ? await referenceFor(entry.referenceFile) : null;
   // `numSamples` is accepted and then ignored by the FLUX editing model — it
   // returns exactly one asset however many you ask for, so asking for eight
   // candidates silently produced one. Candidates are separate calls, which
@@ -169,9 +199,13 @@ async function runEntry(entry, candidates) {
   for (let i = 0; i < want; i++) {
     const assets = await generate(modelId, {
       prompt: entry.prompt,
-      negativePrompt: entry.negative ?? GLOBAL_NEGATIVE,
-      width: entry.width,
-      height: entry.height,
+      ...(reference
+        ? { referenceImages: [reference], numOutputs: 1, aspectRatio: entry.aspectRatio ?? '1:1' }
+        : {
+            negativePrompt: entry.negative ?? GLOBAL_NEGATIVE,
+            width: entry.width,
+            height: entry.height,
+          }),
       ...(entry.seed !== undefined ? { seed: entry.seed + i } : {}),
       ...(entry.extra ?? {}),
     });
@@ -186,6 +220,14 @@ async function runEntry(entry, candidates) {
       }
       const file = written === 0 ? entry.out : entry.out.replace('.png', `.alt${written}.png`);
       await download(assetId, file);
+      // Kontext reliably returns the top-down view nose-down, and the renderer
+      // expects nose-up (raceRenderer rotates by PI/2 on that assumption).
+      // Rotating here is deterministic and free; arguing with the model about
+      // which way is up is neither.
+      if (entry.rotate) {
+        const buf = await sharp(file).rotate(entry.rotate).png({ compressionLevel: 9 }).toBuffer();
+        await writeFile(file, buf);
+      }
       written++;
     }
   }
@@ -242,7 +284,9 @@ export async function runManifest(entries, { candidates = 1, concurrency = 4 } =
  */
 function validateManifest(entries) {
   const problems = [];
+  const notes = [];
   const seen = new Set();
+  let existing = 0;
   for (const e of entries) {
     const where = e.id ?? e.out ?? '(unnamed)';
     for (const field of ['id', 'out', 'modelSlot', 'prompt']) {
@@ -251,16 +295,31 @@ function validateManifest(entries) {
     if (e.modelSlot && !MODELS[e.modelSlot] && !String(e.modelSlot).startsWith('model_')) {
       problems.push(`${where}: unknown modelSlot '${e.modelSlot}' (not in MODELS, not a model_ id)`);
     }
-    if (!e.negative) {
+    // img2img entries steer with the reference image and the instruction; the
+    // Kontext model takes no negativePrompt, so requiring one here would be noise
+    if (!e.negative && !e.referenceFile) {
       problems.push(`${where}: no 'negative' — will silently fall back to GLOBAL_NEGATIVE`);
     }
-    if (e.out && existsSync(e.out)) {
-      problems.push(`${where}: out '${e.out}' already exists — runManifest will SKIP it`);
+    if (e.referenceFile && !existsSync(e.referenceFile)) {
+      problems.push(`${where}: referenceFile '${e.referenceFile}' does not exist`);
     }
+    if (e.out && existsSync(e.out)) existing++;
     if (e.out && seen.has(e.out)) problems.push(`${where}: duplicate out '${e.out}'`);
     seen.add(e.out);
   }
-  return problems;
+  // Skipping *some* entries is how a batch resumes after a failure, so that is
+  // a note rather than a fault. Skipping *every* entry is the silent no-op this
+  // check exists to catch — a regeneration manifest still pointed at the live
+  // masters prints "SKIP (exists)" for everything and spends nothing.
+  if (existing && existing === entries.length) {
+    problems.push(
+      `all ${entries.length} outputs already exist — this batch would skip everything and generate nothing. ` +
+        `Point 'out' somewhere new, or delete the existing files to regenerate.`,
+    );
+  } else if (existing) {
+    notes.push(`${existing} of ${entries.length} outputs already exist and will be skipped (resume)`);
+  }
+  return { problems, notes };
 }
 
 const [, , cmd, arg] = process.argv;
@@ -275,7 +334,8 @@ if (cmd === 'models') {
   }
 } else if (cmd === 'validate') {
   const { entries, candidatesPerCar } = JSON.parse(await readFile(arg, 'utf8'));
-  const problems = validateManifest(entries);
+  const { problems, notes } = validateManifest(entries);
+  for (const n of notes) console.log(`  note: ${n}`);
   for (const p of problems) console.error(`  ${p}`);
   const perEntry = entries.reduce((n, e) => n + (e.candidates ?? candidatesPerCar ?? 1), 0);
   console.log(
@@ -288,7 +348,8 @@ if (cmd === 'models') {
   const manifestPath = cmd === 'pilot' ? 'scripts/art/manifest-pilot.json' : arg;
   const { entries } = JSON.parse(await readFile(manifestPath, 'utf8'));
   // never start a paid batch on a manifest that cannot work
-  const problems = validateManifest(entries);
+  const { problems, notes } = validateManifest(entries);
+  for (const n of notes) console.log(`  note: ${n}`);
   if (problems.length) {
     for (const p of problems) console.error(`  ${p}`);
     console.error(`\nrefusing to run: ${problems.length} manifest problem(s). Fix these first.`);
