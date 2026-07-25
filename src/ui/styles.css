@@ -2352,3 +2352,401 @@ select.text-input {
 .results-table {
   width: 100%;
 }
+
+/* --------------------------------------------------------------- coaching */
+
+.coach-tip {
+  position: absolute;
+  z-index: 40;
+  width: min(340px, 84vw);
+  background: rgba(10, 16, 28, 0.97);
+  border: 1px solid var(--gold);
+  border-radius: 6px;
+  padding: 12px 14px 14px;
+  box-shadow: 0 12px 44px rgba(0, 0, 0, 0.65);
+  animation: radio-in 0.2s ease-out;
+}
+
+.coach-head {
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--gold-bright);
+  margin-bottom: 6px;
+}
+
+.coach-tip p {
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--text);
+  margin-bottom: 10px;
+}
+
+.btn.small {
+  padding: 6px 14px;
+  font-size: 11px;
+}
+
+/* anchored near whatever the tip is about */
+.coach-orders {
+  bottom: 108px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+.coach-pit {
+  bottom: 108px;
+  right: 24px;
+}
+.coach-condition {
+  top: 90px;
+  right: 236px;
+}
+.coach-intel {
+  top: 320px;
+  right: 236px;
+}
+.coach-tower {
+  top: 90px;
+  left: 268px;
+}
+.coach-radio {
+  bottom: 200px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+/* ---------------------------------------------------------- accessibility */
+
+/* A visible focus ring everywhere. The game was fully keyboard-operable and
+   gave no indication at all of where the keyboard was. */
+:focus-visible {
+  outline: 2px solid var(--gold-bright);
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+
+/* Colour is never the only signal: every car chip carries its position, and
+   the tire chips carry a letter as well as a colour, for the roughly one in
+   twelve players who cannot separate the reds from the greens. */
+.tower-chip {
+  border: 1px solid rgba(255, 255, 255, 0.35);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+@media (prefers-contrast: more) {
+  :root {
+    --panel: rgba(4, 8, 16, 0.97);
+    --text-dim: #b9c4d4;
+    --panel-line: #e8c65a;
+  }
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ------------------------------------------------------------- responsive */
+
+/* The race HUD was laid out for a 1440px desktop and nothing else: fixed
+   panels, no wrapping, and hit targets a finger cannot land on. */
+
+@media (max-width: 1180px) {
+  .order-btn {
+    width: 88px;
+  }
+  .order-btn small {
+    display: none;
+  }
+  .intel-panel {
+    top: 286px;
+    width: 186px;
+  }
+  .condition-panel {
+    width: 186px;
+  }
+}
+
+@media (max-width: 900px) {
+  .command-bar {
+    left: 8px;
+    right: 8px;
+    transform: none;
+    justify-content: space-between;
+    padding: 8px 10px;
+  }
+  .order-buttons {
+    flex-wrap: wrap;
+  }
+  .order-btn {
+    width: auto;
+    flex: 1 1 30%;
+    min-width: 84px;
+    min-height: 40px;
+    align-items: center;
+  }
+  .pit-btn {
+    min-width: 76px;
+  }
+  .timing-tower {
+    width: 190px;
+    font-size: 11px;
+  }
+  .intel-panel {
+    display: none;
+  }
+  .message-log {
+    display: none;
+  }
+  .prerace-screen {
+    padding: 16px 14px 40px;
+  }
+}
+
+@media (max-width: 640px) {
+  .condition-panel {
+    top: auto;
+    bottom: 128px;
+    right: 8px;
+    width: 150px;
+    padding: 8px;
+  }
+  .timing-tower {
+    width: 150px;
+    left: 8px;
+  }
+  .race-title small {
+    display: none;
+  }
+  .speed-controls button {
+    padding: 8px 10px;
+  }
+  .radio-prompt {
+    bottom: 180px;
+  }
+  .results-card,
+  .pit-dialog {
+    padding: 14px;
+  }
+}
+
+/* Touch: the whole interface assumed a mouse pointer with pixel accuracy. */
+@media (pointer: coarse) {
+  button {
+    min-height: 40px;
+  }
+  .order-btn,
+  .pit-choice,
+  .prerace-choice {
+    min-height: 46px;
+  }
+  .speed-controls button {
+    min-width: 42px;
+  }
+  input[type='range'] {
+    height: 34px;
+  }
+}
+
+/* ------------------------------------------------------- resume a race */
+
+.resume-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  background: rgba(201, 165, 74, 0.12);
+  border: 1px solid var(--gold);
+  border-radius: 6px;
+  padding: 12px 16px;
+  margin-bottom: 16px;
+}
+
+.resume-banner b {
+  display: block;
+  font-size: 16px;
+  letter-spacing: 0.06em;
+  margin-top: 2px;
+}
+
+.resume-sub {
+  font-size: 11px;
+  color: var(--text-dim);
+}
+
+.resume-actions {
+  display: flex;
+  gap: 8px;
+}
+
+/* On a narrow screen the anchored positions push the tip off the edge, so
+   drop the anchoring and centre it — there is nothing far enough away from
+   anything else on a phone for pointing to be meaningful anyway. */
+@media (max-width: 720px) {
+  .coach-tip,
+  .coach-orders,
+  .coach-pit,
+  .coach-condition,
+  .coach-intel,
+  .coach-tower,
+  .coach-radio {
+    left: 50%;
+    right: auto;
+    top: auto;
+    bottom: 50%;
+    transform: translate(-50%, 50%);
+    width: min(340px, 90vw);
+  }
+}
+
+/* Menu screens scroll on short viewports; the race screen never does. */
+@media (max-width: 900px), (max-height: 620px) {
+  body {
+    overflow: auto;
+  }
+  .race-screen {
+    overflow: hidden;
+  }
+}
+
+/* The header, tower and condition panel were still sized for a desktop even
+   inside the small-screen breakpoints: the controls ran off the edge and the
+   driver names shrank to a single letter. */
+@media (max-width: 640px) {
+  .hud-top {
+    padding: 6px 8px;
+    gap: 6px;
+  }
+  .race-title {
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    max-width: 84px;
+    line-height: 1.2;
+  }
+  .lap-counter {
+    font-size: 16px;
+  }
+  .lap-counter span {
+    font-size: 10px;
+  }
+  .speed-controls {
+    gap: 2px;
+  }
+  .speed-controls button {
+    padding: 6px 7px;
+    font-size: 11px;
+    min-width: 30px;
+  }
+
+  .timing-tower {
+    width: 172px;
+    top: 52px;
+  }
+  .tower-row {
+    grid-template-columns: 16px 6px 1fr 15px 44px;
+    gap: 4px;
+    padding: 3px 5px;
+    font-size: 10.5px;
+  }
+  .tower-name small {
+    display: none;
+  }
+
+  .condition-panel {
+    bottom: 152px;
+    width: 138px;
+    padding: 6px 8px;
+    font-size: 11px;
+  }
+  .cond-pos b {
+    font-size: 24px;
+  }
+  /* on a phone the essentials are position, tires and fuel */
+  .condition-panel .cond-car,
+  .condition-panel .cond-lastlap {
+    display: none;
+  }
+}
+
+/* ------------------------------------------------------------ title rival */
+
+.rival-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: var(--panel);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-left: 3px solid var(--bad);
+  border-radius: 6px;
+  padding: 12px 16px;
+  margin: 12px 0 4px;
+  flex-wrap: wrap;
+}
+
+.rival-portrait {
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--panel-line);
+}
+
+.rival-card b {
+  display: block;
+  font-size: 17px;
+  letter-spacing: 0.05em;
+  margin-top: 2px;
+}
+
+.rival-trait {
+  display: inline-block;
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-top: 2px;
+}
+
+.rival-card p {
+  font-size: 11.5px;
+  color: var(--text-dim);
+  margin-top: 4px;
+  max-width: 46ch;
+}
+
+.rival-pts {
+  margin-left: auto;
+  text-align: right;
+}
+
+.rival-pts b {
+  font-family: var(--font-timing);
+  font-size: 24px;
+}
+
+.rival-pts .good {
+  color: var(--good);
+  font-size: 11px;
+}
+
+.rival-pts .warn {
+  color: var(--bad);
+  font-size: 11px;
+}

@@ -5,6 +5,11 @@
 import { RaceRenderer, type InterpState } from '../../render/raceRenderer';
 import { buildResult, createRace, tick, TICK_S } from '../../sim/engine';
 import { biomeOf } from '../../data/tracks';
+import {
+  clearRaceInProgress,
+  saveRaceInProgress,
+  snapshotRace,
+} from '../../state/raceSave';
 import type {
   CarRaceState,
   Command,
@@ -12,9 +17,11 @@ import type {
   RaceEvent,
   RaceResult,
   RaceState,
+  TrackDef,
 } from '../../sim/types';
 import { RaceHud } from '../raceHud';
 import { highlightFor, type Highlight } from '../highlights';
+import { nextTip } from '../coaching';
 import { nextRadioPrompt, type RadioPrompt } from '../radio';
 import { SOUND, type AudioScene } from '../sound';
 
@@ -22,6 +29,13 @@ export interface RaceScreenOptions {
   config: RaceConfig;
   title: string;
   subtitle: string;
+  /** coaching tips already shown; mutated as new ones are taught */
+  coachSeen?: Record<string, number>;
+  onCoachSeen?(id: string): void;
+  /** enough context to write a resumable snapshot; omit to disable saving */
+  resume?: { trackDef: TrackDef; params: unknown };
+  /** a race restored from a snapshot, instead of a fresh one */
+  restored?: RaceState;
   onFinished(result: RaceResult, state: RaceState): void;
   /** retire without rewards (defaults to reloading into onFinished flow) */
   onRetire?(): void;
@@ -41,7 +55,7 @@ export function mountRaceScreen(root: HTMLElement, opts: RaceScreenOptions): () 
   screen.appendChild(canvas);
   root.appendChild(screen);
 
-  const state = createRace(opts.config);
+  const state = opts.restored ?? createRace(opts.config);
   const playerId = opts.config.entries.find((e) => e.isPlayer)?.carId ?? '';
   const renderer = new RaceRenderer(canvas, opts.config.track);
 
@@ -95,6 +109,22 @@ export function mountRaceScreen(root: HTMLElement, opts: RaceScreenOptions): () 
     radio = { prompt, remainingS: prompt.timeoutS };
     SOUND.radioIn();
     hud.showRadio(prompt, answerRadio);
+  };
+
+  // -- coaching -------------------------------------------------------------
+  const coachSeen = opts.coachSeen ?? {};
+  const updateCoaching = (): void => {
+    if (hud.hasTip() || radio) return;
+    const player = state.cars.find((c) => c.carId === playerId);
+    if (!player || player.finished) return;
+    const tip = nextTip(state, player, coachSeen);
+    if (!tip) return;
+    coachSeen[tip.id] = Date.now();
+    opts.onCoachSeen?.(tip.id);
+    paused = true;
+    hud.showTip(tip, () => {
+      paused = false;
+    });
   };
 
   // The sim already emits a complete typed record of everything that
@@ -232,6 +262,7 @@ export function mountRaceScreen(root: HTMLElement, opts: RaceScreenOptions): () 
   let stopped = false;
   let finishedShown = false;
   let hudClock = 0;
+  let saveClock = 0;
 
   const onVisibility = (): void => {
     last = performance.now(); // don't fast-forward after a hidden period
@@ -265,6 +296,7 @@ export function mountRaceScreen(root: HTMLElement, opts: RaceScreenOptions): () 
       if (ticks === MAX_TICKS_PER_FRAME) acc = 0; // shed backlog, keep frame rate
       // the radio counts down in race time, so a call is as urgent at x4 as x1
       updateRadio(dt * speedMult);
+      updateCoaching();
       hudClock += dt;
       if (hudClock >= 0.25) {
         hudClock = 0;
@@ -273,6 +305,18 @@ export function mountRaceScreen(root: HTMLElement, opts: RaceScreenOptions): () 
         if (me && state.phase === 'racing') SOUND.updateScene(buildScene(state, me));
       }
       if (hud.updateCountdown(state)) SOUND.countdownTick();
+
+      // Snapshot every few seconds of race time. Cheap, and it means the
+      // worst a closed tab can cost is a handful of corners.
+      if (opts.resume && state.phase === 'racing') {
+        saveClock += dt * speedMult;
+        if (saveClock >= 5) {
+          saveClock = 0;
+          saveRaceInProgress(
+            snapshotRace(state, opts.resume.trackDef, opts.title, opts.subtitle, opts.resume.params),
+          );
+        }
+      }
     }
 
     renderer.draw(
@@ -286,6 +330,7 @@ export function mountRaceScreen(root: HTMLElement, opts: RaceScreenOptions): () 
 
     if (state.phase === 'finished' && !finishedShown) {
       finishedShown = true;
+      clearRaceInProgress();
       hud.clearRadio();
       hud.update(state);
       const result = buildResult(state);
@@ -301,6 +346,7 @@ export function mountRaceScreen(root: HTMLElement, opts: RaceScreenOptions): () 
   return () => {
     stopped = true;
     SOUND.stopEngine();
+    hud.clearTip();
     cancelAnimationFrame(raf);
     document.removeEventListener('visibilitychange', onVisibility);
     window.removeEventListener('resize', onResize);

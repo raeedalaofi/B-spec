@@ -16,6 +16,7 @@ import type {
 } from '../sim/types';
 import { DRIVER_ORDERS, TIRE_COMPOUNDS } from '../sim/types';
 import { imgTag } from './assets';
+import type { CoachTip } from './coaching';
 import { buildReel, type Highlight } from './highlights';
 import { messageFor } from './messages';
 import type { RadioPrompt } from './radio';
@@ -65,6 +66,7 @@ export class RaceHud {
   private shotCaption!: HTMLElement;
   private wideBtn!: HTMLButtonElement;
   private wideOn = false;
+  private tipEl: HTMLElement | null = null;
   private radioEl: HTMLElement | null = null;
   private radioId: string | null = null;
   private currentOrder: DriverOrder = 'push';
@@ -208,6 +210,36 @@ export class RaceHud {
     this.currentOrder = order;
     for (const [id, btn] of this.orderBtns) btn.classList.toggle('active', id === order);
     this.cb.onOrder(order);
+  }
+
+  /**
+   * A coaching tip, anchored near the thing it is about. Dismissed by the
+   * player or by acting on it; either way it is never shown again.
+   */
+  showTip(tip: CoachTip, onDismiss: () => void): void {
+    if (this.tipEl) return;
+    const el = document.createElement('div');
+    el.className = `coach-tip coach-${tip.anchor}`;
+    el.setAttribute('role', 'note');
+    el.innerHTML = `
+      <div class="coach-head">${tip.title}</div>
+      <p>${tip.text}</p>
+      <button class="btn small" type="button">Got it</button>`;
+    el.querySelector('button')!.addEventListener('click', () => {
+      this.clearTip();
+      onDismiss();
+    });
+    this.root.appendChild(el);
+    this.tipEl = el;
+  }
+
+  hasTip(): boolean {
+    return this.tipEl !== null;
+  }
+
+  clearTip(): void {
+    this.tipEl?.remove();
+    this.tipEl = null;
   }
 
   /** the camera caption: what the current shot is showing */

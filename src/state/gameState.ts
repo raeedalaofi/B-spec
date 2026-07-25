@@ -56,6 +56,8 @@ export interface GameState {
   career: Record<string, ChampionshipProgress>;
   /** achievement id → unlockedAt timestamp */
   achievements: Record<string, number>;
+  /** coaching tip id → shown-at timestamp, so nothing is taught twice */
+  coachSeen: Record<string, number>;
   /** most recent races, newest first (capped) */
   history: RaceHistoryEntry[];
   /** completed Invitational Series events (endless endgame) */
@@ -101,6 +103,7 @@ export function createNewGame(driverName: string): GameState {
     strategies: {},
     career: {},
     achievements: {},
+    coachSeen: {},
     history: [],
     invitationals: 0,
     trialMedals: {},

@@ -46,7 +46,8 @@ export function statBars(stats: Record<string, number>): string {
       ([k, v]) => `
       <div class="stat-row">
         <span class="label">${k}</span>
-        <div class="bar stat-bar"><i style="width:${v}%"></i></div>
+        <div class="bar stat-bar" role="meter" aria-label="${k}"
+             aria-valuenow="${v}" aria-valuemin="0" aria-valuemax="100"><i style="width:${v}%"></i></div>
         <span class="stat-val">${v}</span>
       </div>`,
     )

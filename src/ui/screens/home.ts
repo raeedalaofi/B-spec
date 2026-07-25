@@ -1,6 +1,7 @@
 import { CARS } from '../../data/cars';
 import { CHAMPIONSHIPS } from '../../data/championships';
 import { championshipProgress } from '../../state/gameState';
+import { clearRaceInProgress, loadRaceInProgress, restoreRace } from '../../state/raceSave';
 import { highestLicense } from '../../state/trials';
 import { imgTag } from '../assets';
 import { menuShell } from '../menuCommon';
@@ -61,7 +62,25 @@ export function homeScreen(ctx: AppContext): void {
     },
   ];
 
+  // A race left running is the most urgent thing on this screen: offer it
+  // first, and let the player abandon it if they would rather not.
+  const snap = loadRaceInProgress();
+  const resumeHtml = snap
+    ? `<div class="resume-banner">
+         <div>
+           <span class="label">Race in progress</span>
+           <b>${snap.title}</b>
+           <span class="resume-sub">${snap.subtitle}</span>
+         </div>
+         <div class="resume-actions">
+           <button class="btn primary" id="hub-resume">Resume Race</button>
+           <button class="btn ghost" id="hub-abandon">Abandon</button>
+         </div>
+       </div>`
+    : '';
+
   content.innerHTML = `
+    ${resumeHtml}
     <div class="hub-status">
       <div class="hub-stat"><span class="label">Races</span><b>${gs.totals.races}</b></div>
       <div class="hub-stat"><span class="label">Wins</span><b>${gs.totals.wins}</b></div>
@@ -91,6 +110,22 @@ export function homeScreen(ctx: AppContext): void {
     <div class="hub-foot">
       <button class="btn" id="hub-quit">Main Menu</button>
     </div>`;
+
+  if (snap) {
+    content.querySelector('#hub-resume')!.addEventListener('click', () => {
+      const state = restoreRace(snap);
+      if (!state) {
+        clearRaceInProgress();
+        ctx.go('home');
+        return;
+      }
+      ctx.go('race', { ...(snap.params as object), __resume: state });
+    });
+    content.querySelector('#hub-abandon')!.addEventListener('click', () => {
+      clearRaceInProgress();
+      ctx.go('home');
+    });
+  }
 
   content.querySelectorAll<HTMLButtonElement>('.hub-card').forEach((btn) => {
     btn.addEventListener('click', () => ctx.go(btn.dataset.screen as never));

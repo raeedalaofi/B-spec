@@ -29,7 +29,16 @@ import {
 import { applyTrialMedal, evaluateTrial, trialTrackDef } from '../../state/trials';
 import { hashSeed } from '../../sim/rng';
 import { compileTrack } from '../../sim/trackCompiler';
-import type { CarSpec, RaceConfig, RaceEntry, RaceResult, RaceState, Track } from '../../sim/types';
+import { clearRaceInProgress } from '../../state/raceSave';
+import type {
+  CarSpec,
+  RaceConfig,
+  RaceEntry,
+  RaceResult,
+  RaceState,
+  Track,
+  TrackDef,
+} from '../../sim/types';
 import { mountPreRace } from '../preRace';
 import type { AppContext } from '../screenManager';
 import { showAchievementToasts } from '../toasts';
@@ -71,6 +80,10 @@ function wearPerLapFor(track: Track, spec: CarSpec, smoothness: number): number 
 
 interface RaceSetup {
   track: Track;
+  /** the definition the track was compiled from, for resumable snapshots */
+  trackDef: TrackDef;
+  /** how to route back into this exact race after a reload */
+  params: CareerRaceParams;
   laps: number;
   title: string;
   subtitle: string;
@@ -88,7 +101,7 @@ interface RaceSetup {
  * chosen compound and fuel load are applied to the player's entry here, so
  * the simulation never has to know a strategy screen exists.
  */
-function runSetup(ctx: AppContext, setup: RaceSetup): () => void {
+function runSetup(ctx: AppContext, setup: RaceSetup, restored?: RaceState): () => void {
   const gs = ctx.gs!;
   let dispose: (() => void) | null = null;
 
@@ -121,10 +134,27 @@ function runSetup(ctx: AppContext, setup: RaceSetup): () => void {
         gs.settings.audio = on;
         ctx.save();
       },
-      onFinished: setup.onFinished,
-      onRetire: setup.onBack,
+      coachSeen: gs.coachSeen,
+      onCoachSeen: () => ctx.save(),
+      resume: { trackDef: setup.trackDef, params: setup.params },
+      restored,
+      onFinished: (result, state) => {
+        clearRaceInProgress();
+        setup.onFinished(result, state);
+      },
+      onRetire: () => {
+        clearRaceInProgress();
+        setup.onBack();
+      },
     });
   };
+
+  // a restored race goes straight back on track — the strategy was committed
+  // to before the tab closed, and re-asking would let the player rewrite it
+  if (restored) {
+    start(clampStrategy(strategyFor(gs, setup.strategyKey)));
+    return () => dispose?.();
+  }
 
   dispose = mountPreRace(ctx.root, {
     title: setup.title,
@@ -153,6 +183,8 @@ function clampStrategy(s: RaceStrategy): RaceStrategy {
 
 export function careerRaceScreen(ctx: AppContext, params?: unknown): (() => void) | void {
   const gs = ctx.gs!;
+  const wrapper = params as (CareerRaceParams & { __resume?: RaceState }) | undefined;
+  const restored = wrapper?.__resume;
   const p = params as CareerRaceParams;
 
   const playerEntry = (carId: string): RaceEntry => ({
@@ -174,6 +206,8 @@ export function careerRaceScreen(ctx: AppContext, params?: unknown): (() => void
     entries.push(me);
     return runSetup(ctx, {
       track,
+      trackDef: TRACK_DEFS[event.trackId],
+      params: p,
       laps: event.laps,
       title: champ.name,
       subtitle: `${event.name} — ${track.def.name} · ${event.laps} laps`,
@@ -189,7 +223,7 @@ export function careerRaceScreen(ctx: AppContext, params?: unknown): (() => void
         ctx.go('results', { championshipId: champ.id, result, rewards });
       },
       onBack: () => ctx.go('events', { championshipId: champ.id }),
-    });
+    }, restored);
   }
 
   if ('invitational' in p) {
@@ -201,6 +235,8 @@ export function careerRaceScreen(ctx: AppContext, params?: unknown): (() => void
     entries.push(me);
     return runSetup(ctx, {
       track,
+      trackDef: TRACK_DEFS[inv.trackId],
+      params: p,
       laps: inv.laps,
       title: 'Invitational Series',
       subtitle: `${inv.name} — ${track.def.name} · ${inv.laps} laps`,
@@ -222,7 +258,7 @@ export function careerRaceScreen(ctx: AppContext, params?: unknown): (() => void
         ctx.go('results', { invitational: true, result, rewards });
       },
       onBack: () => ctx.go('events'),
-    });
+    }, restored);
   }
 
   if ('standalone' in p) {
@@ -242,6 +278,8 @@ export function careerRaceScreen(ctx: AppContext, params?: unknown): (() => void
     entries.push(me);
     return runSetup(ctx, {
       track,
+      trackDef: def,
+      params: p,
       laps: event.laps,
       title: event.name,
       subtitle: `${track.def.name} · ${event.laps} laps`,
@@ -257,7 +295,7 @@ export function careerRaceScreen(ctx: AppContext, params?: unknown): (() => void
         ctx.go('results', { standaloneCategory: event.category, result, rewards });
       },
       onBack: () => ctx.go('catalog', { category: event.category }),
-    });
+    }, restored);
   }
 
   if ('trial' in p) {
@@ -287,6 +325,8 @@ export function careerRaceScreen(ctx: AppContext, params?: unknown): (() => void
     };
     return runSetup(ctx, {
       track,
+      trackDef: trialTrackDef(trial),
+      params: p,
       laps: trial.laps,
       title: license ? `${license.short} License — ${trial.name}` : `Mission — ${trial.name}`,
       subtitle: `${track.def.name} · ${trial.laps} laps`,
@@ -307,7 +347,7 @@ export function careerRaceScreen(ctx: AppContext, params?: unknown): (() => void
         });
       },
       onBack: () => goBack(),
-    });
+    }, restored);
   }
 
   // free race — exhibition, no rewards
@@ -326,6 +366,8 @@ export function careerRaceScreen(ctx: AppContext, params?: unknown): (() => void
   entries.push(me);
   return runSetup(ctx, {
     track,
+    trackDef: TRACK_DEFS[cfg.trackId],
+    params: p,
     laps: cfg.laps,
     title: 'Free Race',
     subtitle: `Exhibition — ${track.def.name} · ${cfg.laps} laps · no rewards`,
@@ -335,5 +377,5 @@ export function careerRaceScreen(ctx: AppContext, params?: unknown): (() => void
     seed: hashSeed(`free-${Date.now()}`),
     onFinished: () => ctx.go('free-race'),
     onBack: () => ctx.go('free-race'),
-  });
+  }, restored);
 }

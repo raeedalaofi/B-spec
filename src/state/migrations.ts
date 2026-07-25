@@ -3,6 +3,7 @@
 // SCHEMA_VERSION. Keep every historical migration — old saves in the wild
 // stay loadable forever.
 
+import { COACH_TIP_IDS } from '../ui/coaching';
 import type { GameState } from './gameState';
 
 type Migration = (old: Record<string, unknown>) => Record<string, unknown>;
@@ -37,6 +38,8 @@ export const MIGRATIONS: Migration[] = [
         stats: { ...stats, aggression: stats.aggression ?? stats.battle ?? 45 },
       },
       strategies: old.strategies ?? {},
+      // an existing player has already learned the game by playing it
+      coachSeen: old.coachSeen ?? Object.fromEntries(COACH_TIP_IDS.map((id) => [id, 1])),
     };
   },
 ];
