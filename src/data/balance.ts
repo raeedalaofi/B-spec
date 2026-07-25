@@ -29,7 +29,7 @@ export const BAL = {
   /** corner runs longer than this get chopped into sub-corners */
   cornerMaxLenM: 240,
   /** minimum straight length feeding a braking zone (m) */
-  overtakeMinStraightM: 140,
+  overtakeMinStraightM: 115,
   /** curvature smoothing window (samples) */
   curvatureSmoothWindow: 9,
   /** merge corner runs separated by less than this many meters */
@@ -58,6 +58,7 @@ export const BAL = {
   mistakeConsistency: 2.5,
   mistakeWear: 2.0,
   mistakeFatigue: 1.5,
+  mistakeDamage: 1.2,
   /** while overtake mode engaged in a battle */
   mistakeOvertakeMult: 1.4,
   mistakeMinor: { p: 0.7, factor: 0.85, durS: 2 },
@@ -91,47 +92,134 @@ export const BAL = {
   /** m/s crawl speed when out of fuel */
   fuelEmptyCrawl: 25,
 
-  // -- battles / overtaking
-  battleCatchingGapS: 1.2,
-  battleFollowGapS: 0.55,
-  /** hard minimum gap while following (s) — the no-ghosting clamp */
-  minGapS: 0.35,
-  slipstreamMinGapS: 0.2,
-  slipstreamMaxGapS: 1.0,
-  slipstreamBoost: 1.03,
-  passBase: 0.25,
-  passPaceDelta: 9.0,
-  passBattleDiff: 0.25,
-  passOvertakeMode: 0.1,
-  passSlipstream: 0.08,
-  passZoneDifficulty: 0.15,
-  passBlocking: 0.1,
-  passMin: 0.03,
-  passMax: 0.85,
-  /** failed attempt: attacker slowdown factor and duration */
-  passFailFactor: 0.985,
-  passFailDurS: 1.5,
-  /** seconds before the attacker may attempt again after a failure */
-  passRetryCooldownS: 12,
-  /** seconds before a just-passed defender may counter-attack */
-  passCounterCooldownS: 8,
-  /** forced resolution deadline for a pass in progress (s) */
-  passingForceResolveS: 3.5,
-  /** attacker target speed relative to defender speed while passing */
-  passingAttackerBoost: 1.1,
-  passingDefenderLoss: 0.985,
-  /** attacker must be this many meters clear to complete the pass */
-  passingClearM: 4,
-  /** a leader slower than this fraction of the follower's target is
-   *  driven around freely (spun/crawling cars don't form trains) */
-  slowLeaderFrac: 0.5,
-  /** absolute minimum physical gap between cars (m) */
+  // -- traffic, battles and overtaking
+  //
+  // The model has no dice roll for "did the pass work". A follower loses
+  // corner grip in dirty air, gains speed in the slipstream on straights,
+  // and when it commits it pulls out of line and the move is decided by the
+  // ground the two cars actually take off each other. Position is therefore
+  // earned by pace, timing and nerve rather than won on a coin flip.
+
+  battleCatchingGapS: 1.6,
+  battleFollowGapS: 0.8,
+  /** physical car length used for overlap maths (m) */
+  carLengthM: 4.5,
+  /** absolute minimum bumper-to-bumper gap on the same line (m) */
   minGapM: 3,
-  /** pace advantage (fraction) beyond which anywhere-passes unlock */
-  fallbackPassAdvantage: 0.03,
-  fallbackPassP: 0.1,
-  /** overtake mode runs pace one notch hotter */
+  /** gap below which a same-line follower must lift (s) */
+  minGapS: 0.35,
+
+  // dirty air: the reason a follower cannot simply drive through the car
+  // ahead. Scales with proximity and only bites in corners.
+  dirtyAirGapS: 1.1,
+  dirtyAirMaxLoss: 0.032,
+
+  // slipstream: the counterweight to dirty air, on straights only
+  slipstreamMinGapS: 0.05,
+  slipstreamMaxGapS: 1.3,
+  slipstreamBoost: 1.055,
+
+  // lateral movement across the road (normalised half-widths per second)
+  lateralRate: 1.9,
+  /** cars closer than this in normalised lateral space are on the same line */
+  lateralOverlap: 0.55,
+  /** offset an attacker pulls out to when committing */
+  lateralPassLine: 0.85,
+  /** corner-speed cost of running off the racing line */
+  offLineLoss: 0.036,
+  /** extra cost for a defender actively covering the inside */
+  defendLoss: 0.028,
+
+  // committing to a move
+  /** minimum pace advantage (fraction) to consider a move at all */
+  commitMinAdvantage: -0.012,
+  /** a driver only pulls out from genuine striking distance (s) */
+  commitMaxGapS: 0.5,
+  /** base chance per second of committing when a move looks on */
+  commitBaseRateHz: 0.3,
+  /** how much the driver's aggression scales the commit rate */
+  commitAggressionScale: 1.5,
+  /** how much a zone's difficulty suppresses committing */
+  commitZoneDifficulty: 0.55,
+  /** committing outside an overtaking zone is much rarer */
+  commitOffZoneScale: 0.2,
+  /** seconds before the same attacker may commit again after a failed move */
+  commitCooldownS: 6,
+  /** seconds before a just-passed defender may counter-attack */
+  counterCooldownS: 4,
+  /** a move that has not resolved by now is abandoned (s) */
+  commitMaxS: 8,
+
+  // Resolving a move. The attacker arrives carrying slipstream momentum and
+  // commits to a later braking point; the defender gives up the ideal line to
+  // keep the position. The pass is then just arithmetic on those two facts.
+  /** attacker's push relative to the defender's actual speed while alongside */
+  committedAttackerBoost: 1.045,
+  /** defender's cost of racing wheel-to-wheel rather than the ideal line */
+  committedDefenderLoss: 0.982,
+  /** a defender who has decided not to fight genuinely yields */
+  committedConcedeLoss: 0.974,
+  /**
+   * Extra acceleration available to an attacker mid-move (m/s^2). This is the
+   * tow: it is what physically lets a following car out-drag the one ahead.
+   * Without it two identical cars both sit on their traction limit out of
+   * every corner and no overtake can ever complete, however generous the
+   * target speeds are.
+   */
+  committedTowAccel: 1.05,
+  /** metres clear of the defender at which the pass is complete */
+  passingClearM: 5,
+  /** losing this much ground relative to where the move started abandons it (m) */
+  passAbandonM: 8,
+  /** a leader slower than this fraction of the follower is simply driven around */
+  slowLeaderFrac: 0.55,
+  /** overtake mode runs pace one notch hotter and doubles commit appetite */
   overtakeModePaceBoost: 1,
+  overtakeModeCommitScale: 2.1,
+
+  // contact: the price of racing too hard, too close
+  /** base chance per second of contact while side by side */
+  contactBaseRateHz: 0.026,
+  /** how much low smoothness raises it */
+  contactSmoothnessScale: 1.8,
+  contactHeavyP: 0.22,
+  contactLightDamage: 0.06,
+  contactHeavyDamage: 0.22,
+  contactLightFactor: 0.86,
+  contactHeavyFactor: 0.45,
+  contactLightDurS: 1.6,
+  contactHeavyDurS: 3.4,
+
+  // damage: an accumulating tax on the car, and eventually the race
+  /** speed lost at full damage */
+  damageSpeedLoss: 0.09,
+  /** damage above this can end the race */
+  damageRetireAt: 0.85,
+  /** per-lap chance of retiring while above the threshold */
+  damageRetireRateHz: 0.012,
+  /** damage taken from a spin */
+  spinDamage: 0.05,
+
+  // full-course cautions: rare, and a real strategy fork when they land
+  /** cautions allowed per race */
+  cautionMaxPerRace: 1,
+  /** chance a heavy incident brings out a caution */
+  cautionFromContactP: 0.35,
+  cautionFromRetirementP: 0.5,
+  /** never deploy inside the first or last N laps */
+  cautionMinLap: 2,
+  cautionEndBufferLaps: 2,
+  /** how many laps a caution runs */
+  cautionLaps: 2,
+  /** field speed under caution, as a fraction of the ideal profile */
+  cautionSpeedFrac: 0.62,
+  /** target spacing behind the car ahead while bunched (s) */
+  cautionSpacingS: 0.7,
+  /** how hard the field is pulled toward that spacing */
+  cautionBunchRate: 0.5,
+  /** consumption while circulating under caution */
+  cautionWearFrac: 0.3,
+  cautionFuelFrac: 0.55,
 
   // -- pit stops
   pitStationaryBaseS: 2,

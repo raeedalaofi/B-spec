@@ -1,6 +1,7 @@
 // Per-corner-entry rolls: lap-time noise and driving mistakes.
 
 import { BAL } from '../data/balance';
+import { maybeDeployCaution } from './engine';
 import { rngGaussian, rngNext } from './rng';
 import type { CarRaceState, RaceEvent, RaceState } from './types';
 
@@ -19,8 +20,10 @@ export function rollMistake(
   events: RaceEvent[],
 ): void {
   if (car.mistake || car.pit) return;
+  // a neutralised field is not being driven hard enough to make errors
+  if (state.caution) return;
   const corner = state.track.corners[cornerIdx];
-  const inAttack = car.overtakeMode && car.battle !== null;
+  const wheelToWheel = car.battle?.phase === 'COMMITTED' || car.defence === 'cover';
 
   const p =
     BAL.mistakeBase *
@@ -28,7 +31,9 @@ export function rollMistake(
     BAL.paceRisk[car.paceCmd] *
     (1 + car.tireWear * car.tireWear * BAL.mistakeWear) *
     (1 + car.fatigue * BAL.mistakeFatigue) *
-    (inAttack ? BAL.mistakeOvertakeMult : 1) *
+    // a damaged car is harder to place
+    (1 + car.damage * BAL.mistakeDamage) *
+    (wheelToWheel ? BAL.mistakeOvertakeMult : 1) *
     corner.severity;
 
   if (rngNext(state) >= p) return;
@@ -46,7 +51,18 @@ export function rollMistake(
     severity = 'spin';
     car.mistake = { factor: BAL.mistakeSpin.factor, timer: BAL.mistakeSpin.durS, severity };
     car.morale = Math.max(BAL.moraleMin, car.morale + BAL.mistakeSpin.morale);
+    car.damage = Math.min(1, car.damage + BAL.spinDamage);
+    // a car spinning in front of the field is the classic caution trigger
+    car.battle = null;
   }
   car.raceStats.mistakes++;
   events.push({ type: 'MISTAKE', carId: car.carId, severity, cornerName: corner.name });
+  if (severity === 'spin') {
+    maybeDeployCaution(
+      state,
+      `${car.driverName} spun at ${corner.name}`,
+      BAL.cautionFromContactP,
+      events,
+    );
+  }
 }

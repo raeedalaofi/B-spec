@@ -59,7 +59,9 @@ describe('multi-car races', () => {
     expect(JSON.parse(JSON.stringify(a))).toEqual(JSON.parse(JSON.stringify(b)));
   });
 
-  it('never lets cars ghost through each other', () => {
+  it('never lets cars ghost through each other on the same line', () => {
+    // Two cars may share a piece of road *across* its width — that is what
+    // side-by-side racing is — but never on the same line at the same point.
     const state = createRace({ track: GREENPARK, lapsTotal: 5, seed: 31337, entries: field() });
     const L = GREENPARK.lengthM;
     run(state, {}, (s) => {
@@ -71,7 +73,10 @@ describe('multi-car races', () => {
         if (leader === follower) continue;
         const gapM = (leader.s - follower.s + L) % L;
         if (gapM > L / 2) continue;
-        if (follower.battle?.phase === 'PASSING') continue;
+        // laterally separated cars are alongside, not overlapping
+        if (Math.abs(follower.lateral - leader.lateral) >= BAL.lateralOverlap) continue;
+        if (follower.battle?.phase === 'COMMITTED') continue;
+        if (leader.battle?.phase === 'COMMITTED') continue;
         // spun or crawling leaders are legitimately driven around
         if (Math.max(leader.speed, 1) < BAL.slowLeaderFrac * Math.max(follower.speed, 1)) continue;
         expect(gapM).toBeGreaterThanOrEqual(BAL.minGapM - 0.6);

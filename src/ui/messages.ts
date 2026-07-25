@@ -19,9 +19,22 @@ export interface RaceMessage {
   tone: MessageTone;
 }
 
+/**
+ * Deterministic variety: the same event on the same tick always produces the
+ * same line, but consecutive events read differently. Without this the feed
+ * degenerates into the same sentence repeated once per car per lap, which is
+ * what makes a busy race feel like a stuck record rather than a broadcast.
+ */
+function pick(state: RaceState, salt: string, options: string[]): string {
+  let h = state.tickCount * 2654435761;
+  for (let i = 0; i < salt.length; i++) h = (h ^ salt.charCodeAt(i)) * 16777619;
+  return options[Math.abs(h) % options.length];
+}
+
 export function messageFor(state: RaceState, e: RaceEvent): RaceMessage | null {
   const isPlayer = (id: string): boolean =>
     state.cars.find((c) => c.carId === id)?.isPlayer ?? false;
+  const involved = (a: string, b: string): boolean => isPlayer(a) || isPlayer(b);
   switch (e.type) {
     case 'GREEN_FLAG':
       return { text: 'GREEN FLAG! The race is underway.', tone: 'highlight' };
@@ -33,16 +46,69 @@ export function messageFor(state: RaceState, e: RaceEvent): RaceMessage | null {
         tone,
       };
     }
-    case 'OVERTAKE_ATTEMPT_FAILED':
+    case 'SIDE_BY_SIDE': {
+      const att = driver(state, e.carId);
+      const def = driver(state, e.defenderId);
+      const where = e.zoneName ? ` into ${e.zoneName}` : '';
       return {
-        text: `${driver(state, e.carId)} looks at ${driver(state, e.defenderId)} — the door is closed.`,
+        text: pick(state, e.carId, [
+          `${att} pulls out and goes for it${where} — side by side for P${e.forPosition}!`,
+          `${att} is alongside ${def}${where}!`,
+          `Here comes ${att} down the inside of ${def}${where}!`,
+        ]),
+        tone: involved(e.carId, e.defenderId) ? 'highlight' : 'normal',
+      };
+    }
+    case 'OVERTAKE_ATTEMPT_FAILED': {
+      const att = driver(state, e.carId);
+      const def = driver(state, e.defenderId);
+      return {
+        text: pick(state, e.carId, [
+          `${def} holds the line — ${att} has to tuck back in.`,
+          `${att} runs out of road and concedes it back to ${def}.`,
+          `No way through for ${att}; ${def} keeps the position.`,
+        ]),
         tone: isPlayer(e.carId) ? 'bad' : 'normal',
       };
-    case 'BATTLE_STARTED':
+    }
+    case 'BATTLE_STARTED': {
+      const att = driver(state, e.carId);
+      const ahead = driver(state, e.aheadId);
       return {
-        text: `${driver(state, e.carId)} is all over the back of ${driver(state, e.aheadId)}.`,
-        tone: isPlayer(e.carId) || isPlayer(e.aheadId) ? 'highlight' : 'normal',
+        text: pick(state, e.carId, [
+          `${att} is all over the back of ${ahead}.`,
+          `${att} closes right up on ${ahead}.`,
+          `${ahead} has ${att} filling the mirrors now.`,
+        ]),
+        tone: involved(e.carId, e.aheadId) ? 'highlight' : 'normal',
       };
+    }
+    case 'CONTACT': {
+      const a = driver(state, e.carId);
+      const b = driver(state, e.otherId);
+      return {
+        text:
+          e.severity === 'heavy'
+            ? `CONTACT! ${a} and ${b} come together — both are hurt.`
+            : `${a} and ${b} touch wheels — a scruffy moment for both.`,
+        tone: involved(e.carId, e.otherId) ? 'bad' : 'normal',
+      };
+    }
+    case 'RETIREMENT':
+      return {
+        text:
+          e.reason === 'damage'
+            ? `${driver(state, e.carId)} is out — the car has had enough.`
+            : `${driver(state, e.carId)} retires from the race.`,
+        tone: isPlayer(e.carId) ? 'bad' : 'normal',
+      };
+    case 'CAUTION_START':
+      return {
+        text: `FULL-COURSE CAUTION — ${e.cause}. ${e.lapsLeft} laps behind the safety car.`,
+        tone: 'highlight',
+      };
+    case 'CAUTION_END':
+      return { text: 'The caution is over — racing resumes next time by.', tone: 'highlight' };
     case 'MISTAKE': {
       const who = driver(state, e.carId);
       const text =

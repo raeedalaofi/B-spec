@@ -123,25 +123,40 @@ export type Command =
   | { type: 'OVERTAKE_MODE'; carId: string; on: boolean }
   | { type: 'PIT'; carId: string; tires: boolean; refuel: boolean };
 
-export type BattlePhase = 'CATCHING' | 'FOLLOWING' | 'PASSING';
+/**
+ * COMMITTED is the heart of the racing model: the attacker has pulled out of
+ * line and the two cars are running side by side. The move is then resolved
+ * by the distance they actually gain on each other, not by a dice roll — so
+ * a faster car wins the corner and a slower one gets shuffled back out.
+ */
+export type BattlePhase = 'CATCHING' | 'FOLLOWING' | 'COMMITTED';
+
+/** which side of the racing line an attacker has pulled out to */
+export type PassSide = -1 | 1;
 
 export interface BattleState {
   phase: BattlePhase;
   /** carId of the car ahead */
   targetId: string;
-  /** seconds remaining in PASSING before forced resolution */
-  passingTimer: number;
-  /** overtake zones to skip after a failed attempt */
-  attemptCooldown: number;
-  /** index of last overtake zone attempted (to roll once per zone pass) */
-  lastZoneTried: number;
-  /** ticks of continuous slipstream on the current straight */
-  slipstreamTicks: number;
-  /** seconds of post-failed-attempt slowdown remaining */
-  penaltyTimer: number;
-  /** overtaking zone name where the current pass attempt started */
+  /** seconds spent side by side in the current move */
+  committedS: number;
+  /** seconds before this car may commit to another move */
+  commitCooldown: number;
+  /** side the attacker pulled out to while COMMITTED */
+  side: PassSide;
+  /** gap behind the defender when the move began (m) — the move is judged
+   *  against this, not against an absolute distance */
+  startGapM: number;
+  /** seconds of continuous slipstream on the current straight */
+  slipstreamS: number;
+  /** overtaking zone name where the current move began */
   zoneName: string;
+  /** best overlap achieved this move: 1 = fully alongside, >1 = ahead */
+  bestOverlap: number;
 }
+
+/** how a car under attack is responding, decided by the defender's AI */
+export type DefenceMode = 'none' | 'cover' | 'concede';
 
 export interface PitState {
   phase: 'requested' | 'in-lane';
@@ -182,7 +197,14 @@ export interface CarRaceState {
   /** total distance = lap * trackLen + s, maintained incrementally */
   totalDist: number;
   speed: number;
-  lane: 0 | 1;
+  /**
+   * Position across the road, -1 (left edge) .. 1 (right edge), 0 = racing
+   * line. Continuous rather than a two-lane flag so cars can genuinely run
+   * side by side, and so the renderer can place them honestly.
+   */
+  lateral: number;
+  /** where the car is trying to be across the road this tick */
+  lateralTarget: number;
 
   paceCmd: PaceLevel;
   overtakeMode: boolean;
@@ -191,10 +213,19 @@ export interface CarRaceState {
   fuelL: number;
   fatigue: number;
   morale: number;
+  /**
+   * Accumulated car damage, 0..1. Comes from contact and heavy spins; costs
+   * power and grip, and at the extreme ends the car's race.
+   */
+  damage: number;
 
   battle: BattleState | null;
-  /** true while another car is following/passing this one (set per tick) */
+  /** true while another car is following/attacking this one (set per tick) */
   underAttack: boolean;
+  /** how this car is responding to an attack (set per tick) */
+  defence: DefenceMode;
+  /** corner-speed multiplier from running in another car's wake (per tick) */
+  dirtyAir: number;
   mistake: MistakeState | null;
   pit: PitState | null;
   pitCount: number;
@@ -215,6 +246,8 @@ export interface CarRaceState {
   finished: boolean;
   finishPosition: number | null;
   finishTime: number | null;
+  /** set when the car's race ended early; null if it was running at the flag */
+  retired: RetirementReason | null;
 
   raceStats: {
     overtakes: number;
@@ -222,8 +255,14 @@ export interface CarRaceState {
     mistakes: number;
     lapsLed: number;
     fastestLap: boolean;
+    /** moves committed to, whether or not they stuck */
+    movesAttempted: number;
+    /** laps spent side by side with another car */
+    sideBySideS: number;
   };
 }
+
+export type RetirementReason = 'mechanical' | 'damage' | 'fuel';
 
 export interface RaceConfig {
   track: Track;
@@ -242,6 +281,23 @@ export interface RaceEntry {
   paceCmd?: PaceLevel;
 }
 
+/**
+ * A full-course caution: the field is neutralised behind a safety car and
+ * bunched up. It exists as a strategy lever — a stop taken under caution
+ * costs far less track position — and as the thing that stops a runaway
+ * leader from making the second half of a race a formality.
+ */
+export interface CautionState {
+  /** 'deploying' bunches the field, 'running' holds it, 'ending' releases it */
+  phase: 'deploying' | 'running' | 'ending';
+  /** laps of caution remaining (counted on the leader) */
+  lapsLeft: number;
+  /** leader lap number when the caution started */
+  startedOnLap: number;
+  /** what caused it, for the message feed */
+  cause: string;
+}
+
 export interface RaceState {
   tickCount: number;
   rngState: number;
@@ -255,6 +311,10 @@ export interface RaceState {
   cars: CarRaceState[];
   fastestLap: { carId: string; timeS: number } | null;
   finishedCount: number;
+  /** active full-course caution, or null under green flag conditions */
+  caution: CautionState | null;
+  /** cautions already run (each race has a cap so they stay an event) */
+  cautionCount: number;
 }
 
 // ---------------------------------------------------------------------------
@@ -265,8 +325,14 @@ export type RaceEvent =
   | { type: 'LAP_COMPLETE'; carId: string; lap: number; lapTimeS: number; isPersonalBest: boolean; isRaceFastest: boolean }
   | { type: 'OVERTAKE'; carId: string; passedId: string; forPosition: number; zoneName: string }
   | { type: 'OVERTAKE_ATTEMPT_FAILED'; carId: string; defenderId: string; zoneName: string }
+  /** an attacker has pulled out of line and is alongside */
+  | { type: 'SIDE_BY_SIDE'; carId: string; defenderId: string; zoneName: string; forPosition: number }
   | { type: 'BATTLE_STARTED'; carId: string; aheadId: string }
   | { type: 'MISTAKE'; carId: string; severity: 'minor' | 'major' | 'spin'; cornerName: string }
+  | { type: 'CONTACT'; carId: string; otherId: string; severity: 'light' | 'heavy' }
+  | { type: 'RETIREMENT'; carId: string; reason: RetirementReason }
+  | { type: 'CAUTION_START'; cause: string; lapsLeft: number }
+  | { type: 'CAUTION_END' }
   | { type: 'PIT_IN'; carId: string }
   | { type: 'PIT_OUT'; carId: string; stopTimeS: number }
   | { type: 'TIRE_WARNING'; carId: string; wear: number }
@@ -288,6 +354,7 @@ export interface RaceResultRow {
   mistakes: number;
   pitStops: number;
   fastestLap: boolean;
+  retired: RetirementReason | null;
 }
 
 export interface RaceResult {

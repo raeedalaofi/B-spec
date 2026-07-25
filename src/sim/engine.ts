@@ -23,6 +23,7 @@ import type {
   RaceEvent,
   RaceResult,
   RaceState,
+  RetirementReason,
 } from './types';
 
 export const TICK_S = BAL.tickS;
@@ -47,15 +48,20 @@ export function createRace(cfg: RaceConfig): RaceState {
       lap: 0,
       totalDist: -behind,
       speed: 0,
-      lane: 0,
+      // grid slots alternate across the road, as a real standing start does
+      lateral: i % 2 === 0 ? 0.4 : -0.4,
+      lateralTarget: 0,
       paceCmd: entry.paceCmd ?? 3,
       overtakeMode: false,
       tireWear: 0,
       fuelL: entry.spec.fuelTankL,
       fatigue: 0,
       morale: 1,
+      damage: 0,
       battle: null,
       underAttack: false,
+      defence: 'none',
+      dirtyAir: 1,
       mistake: null,
       pit: null,
       pitCount: 0,
@@ -74,12 +80,15 @@ export function createRace(cfg: RaceConfig): RaceState {
       finished: false,
       finishPosition: null,
       finishTime: null,
+      retired: null,
       raceStats: {
         overtakes: 0,
         timesPassed: 0,
         mistakes: 0,
         lapsLed: 0,
         fastestLap: false,
+        movesAttempted: 0,
+        sideBySideS: 0,
       },
     };
   });
@@ -95,6 +104,8 @@ export function createRace(cfg: RaceConfig): RaceState {
     cars,
     fastestLap: null,
     finishedCount: 0,
+    caution: null,
+    cautionCount: 0,
   };
 }
 
@@ -107,9 +118,16 @@ function firstCornerAhead(track: RaceState['track'], s: number): number {
   return 0; // wraps to the first corner
 }
 
-/** cars in race order: finished first (by position), then by distance */
+/**
+ * Cars in race order: classified runners first (finishers by position, then
+ * cars still circulating by distance), retirements last by how far they got.
+ */
 export function raceOrder(state: RaceState): CarRaceState[] {
   return [...state.cars].sort((a, b) => {
+    const aOut = a.retired !== null;
+    const bOut = b.retired !== null;
+    if (aOut !== bOut) return aOut ? 1 : -1;
+    if (aOut && bOut) return b.totalDist - a.totalDist;
     if (a.finished && b.finished) return a.finishPosition! - b.finishPosition!;
     if (a.finished) return -1;
     if (b.finished) return 1;
@@ -158,7 +176,7 @@ export function tick(state: RaceState, commands: Command[]): RaceEvent[] {
     vTargets[i] = computeVTarget(state, car);
   }
 
-  // 2. traffic: clamps, slipstream, battles, passes
+  // 2. traffic: aero, lateral position, side-by-side moves, passes
   updateBattles(state, vTargets, events);
 
   // 3. integrate motion, corners, laps, pits, consumption
@@ -168,11 +186,85 @@ export function tick(state: RaceState, commands: Command[]): RaceEvent[] {
     moveCar(state, car, vTargets[i], dt, events);
   }
 
-  // 4. hard no-overlap invariant
+  // 4. hard no-overlap invariant (same-line only)
   enforceGaps(state);
+
+  // 5. attrition, then whether the incident brought out a caution
+  rollAttrition(state, events);
+  updateCaution(state, events);
 
   state.tickCount++;
   return events;
+}
+
+/** cars carrying heavy damage may not make the finish */
+function rollAttrition(state: RaceState, events: RaceEvent[]): void {
+  // once a second is plenty, and keeps the RNG draw count stable
+  if (state.tickCount % 10 !== 0) return;
+  for (const car of state.cars) {
+    if (car.finished || car.damage < BAL.damageRetireAt) continue;
+    const over = (car.damage - BAL.damageRetireAt) / (1 - BAL.damageRetireAt);
+    if (rngNext(state) < BAL.damageRetireRateHz * (0.3 + over)) {
+      retireCar(state, car, 'damage', events);
+    }
+  }
+}
+
+export function retireCar(
+  state: RaceState,
+  car: CarRaceState,
+  reason: RetirementReason,
+  events: RaceEvent[],
+): void {
+  if (car.finished) return;
+  car.retired = reason;
+  car.finished = true;
+  car.speed = 0;
+  car.battle = null;
+  car.pit = null;
+  events.push({ type: 'RETIREMENT', carId: car.carId, reason });
+  maybeDeployCaution(state, `${car.driverName} is out`, BAL.cautionFromRetirementP, events);
+}
+
+/**
+ * Cautions are deliberately rare. They exist to punctuate a race and to open
+ * a cheap pit window, not to be a regular occurrence — a race that keeps
+ * neutralising itself is worse than one that never does.
+ */
+export function maybeDeployCaution(
+  state: RaceState,
+  cause: string,
+  probability: number,
+  events: RaceEvent[],
+): void {
+  if (state.caution || state.cautionCount >= BAL.cautionMaxPerRace) return;
+  const leaderLap = Math.max(...state.cars.map((c) => c.lap));
+  if (leaderLap < BAL.cautionMinLap) return;
+  if (leaderLap > state.lapsTotal - BAL.cautionEndBufferLaps) return;
+  if (state.lapsTotal < BAL.cautionMinLap + BAL.cautionEndBufferLaps + BAL.cautionLaps) return;
+  if (rngNext(state) >= probability) return;
+
+  state.caution = {
+    phase: 'deploying',
+    lapsLeft: BAL.cautionLaps,
+    startedOnLap: leaderLap,
+    cause,
+  };
+  state.cautionCount++;
+  events.push({ type: 'CAUTION_START', cause, lapsLeft: BAL.cautionLaps });
+}
+
+function updateCaution(state: RaceState, events: RaceEvent[]): void {
+  const caution = state.caution;
+  if (!caution) return;
+  const leaderLap = Math.max(...state.cars.map((c) => c.lap));
+  const lapsRun = leaderLap - caution.startedOnLap;
+  if (caution.phase === 'deploying' && lapsRun >= 1) caution.phase = 'running';
+  caution.lapsLeft = Math.max(0, BAL.cautionLaps - lapsRun);
+  if (caution.lapsLeft <= 0 || leaderLap >= state.lapsTotal) {
+    state.caution = null;
+    events.push({ type: 'CAUTION_END' });
+  }
 }
 
 function applyCommands(state: RaceState, commands: Command[]): void {
@@ -241,8 +333,11 @@ function moveCar(
   if (vTarget > car.speed) {
     const vp = Math.max(car.speed, 5);
     const aPower = (car.spec.powerKw * 1000) / (car.spec.massKg * vp);
+    // a car mid-move is sitting in the tow, which is worth real acceleration
+    const tow = car.battle?.phase === 'COMMITTED' ? BAL.committedTowAccel : 0;
     const a =
-      Math.min(BAL.aAccelGripRef * grip, aPower) -
+      Math.min(BAL.aAccelGripRef * grip, aPower) +
+      tow -
       car.spec.dragCoeff * vp * vp -
       9.81 * gradeHere;
     car.speed = Math.min(vTarget, car.speed + Math.max(a, 0.3) * dt);
@@ -386,6 +481,14 @@ function classifyRemaining(state: RaceState, events: RaceEvent[]): void {
     }
     events.push({ type: 'FINISH', carId: car.carId, position: car.finishPosition });
   }
+  // retirements are classified behind everyone who was still running
+  const retired = state.cars
+    .filter((c) => c.retired !== null && c.finishPosition === null)
+    .sort((a, b) => b.totalDist - a.totalDist);
+  for (const car of retired) {
+    car.finishPosition = ++state.finishedCount;
+    car.finishTime = null;
+  }
 }
 
 export function buildResult(state: RaceState): RaceResult {
@@ -411,6 +514,7 @@ export function buildResult(state: RaceState): RaceResult {
       mistakes: car.raceStats.mistakes,
       pitStops: car.pitCount,
       fastestLap: state.fastestLap?.carId === car.carId,
+      retired: car.retired,
     })),
   };
 }

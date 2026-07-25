@@ -201,10 +201,10 @@ if (mode === 'single') {
   // The race-quality dashboard. Every number here has a target band in
   // QUALITY_TARGETS; CI fails on the same thresholds via tests/quality.test.ts.
   const n = parseInt(args[1] ?? '8', 10);
-  const laps: Record<string, number> = { greenpark: 6, oval: 10, aria: 8, kaiserwald: 3 };
+  const laps: Record<string, number> = { greenpark: 6, oval: 10, aria: 8, kaiserwald: 5 };
   console.log(`Race quality — ${n} seeds per track, 8 identical cars, one skill tier\n`);
   console.log(
-    'track        train%  bigTrain%  maxQueue  passes  failed  convert%  lapSpread  lateOT  leadChg',
+    'track        stuck%  maxStuck  bigTrain%  near%  passes  failed  convert%  lapSprd%  lateOT',
   );
   const all: RaceMetrics[] = [];
   for (const trackId of REFERENCE_TRACKS) {
@@ -216,22 +216,22 @@ if (mode === 'single') {
     const a = (f: (m: RaceMetrics) => number): number => avg(runs.map(f));
     console.log(
       `${trackId.padEnd(12)} ` +
-        `${a((r) => r.trainPct).toFixed(1).padStart(5)}${band(a((r) => r.trainPct), 0, QUALITY_TARGETS.maxTrainPct)} ` +
-        `${a((r) => r.bigTrainPct).toFixed(1).padStart(8)}  ` +
-        `${a((r) => r.longestTrain).toFixed(1).padStart(7)} ` +
+        `${a((r) => r.stuckPct).toFixed(1).padStart(5)}${band(a((r) => r.stuckPct), 0, QUALITY_TARGETS.maxStuckPct)} ` +
+        `${a((r) => r.maxStuckS).toFixed(0).padStart(7)}${band(a((r) => r.maxStuckS), 0, QUALITY_TARGETS.maxStuckS)} ` +
+        `${a((r) => r.bigTrainPct).toFixed(1).padStart(8)}${band(a((r) => r.bigTrainPct), 0, QUALITY_TARGETS.maxBigTrainPct)} ` +
+        `${a((r) => r.trainPct).toFixed(1).padStart(5)} ` +
         `${a((r) => r.passes).toFixed(1).padStart(7)} ` +
         `${a((r) => r.failedAttempts).toFixed(1).padStart(7)} ` +
         `${a((r) => r.conversionPct).toFixed(1).padStart(8)}${band(a((r) => r.conversionPct), QUALITY_TARGETS.minConversionPct, QUALITY_TARGETS.maxConversionPct)} ` +
-        `${a((r) => r.bestLapSpreadS).toFixed(2).padStart(9)}${band(a((r) => r.bestLapSpreadS), 0, QUALITY_TARGETS.maxBestLapSpreadS)} ` +
-        `${a((r) => r.lateOvertakes).toFixed(1).padStart(6)} ` +
-        `${a((r) => r.leadChanges).toFixed(1).padStart(7)}`,
+        `${a((r) => r.bestLapSpreadPct).toFixed(2).padStart(9)}${band(a((r) => r.bestLapSpreadPct), 0, QUALITY_TARGETS.maxBestLapSpreadPct)} ` +
+        `${a((r) => r.lateOvertakes).toFixed(1).padStart(6)}`,
     );
   }
   const g = (f: (m: RaceMetrics) => number): number => avg(all.map(f));
   console.log(
-    `\noverall: train ${g((r) => r.trainPct).toFixed(1)}% (target <${QUALITY_TARGETS.maxTrainPct}%) · ` +
+    `\noverall: stuck ${g((r) => r.stuckPct).toFixed(1)}% (target <${QUALITY_TARGETS.maxStuckPct}%) · ` +
       `convert ${g((r) => r.conversionPct).toFixed(1)}% (target ${QUALITY_TARGETS.minConversionPct}-${QUALITY_TARGETS.maxConversionPct}%) · ` +
-      `lap spread ${g((r) => r.bestLapSpreadS).toFixed(2)}s (target <${QUALITY_TARGETS.maxBestLapSpreadS}s)`,
+      `lap spread ${g((r) => r.bestLapSpreadPct).toFixed(2)}% (target <${QUALITY_TARGETS.maxBestLapSpreadPct}%)`,
   );
 } else if (mode === 'curve') {
   // Career difficulty sweep against the intended player path. Every event

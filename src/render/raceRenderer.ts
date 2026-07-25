@@ -321,9 +321,11 @@ export class RaceRenderer {
       const sDraw = (((car.s - (cur - lerped)) % L) + L) % L;
       const pos = posAt(this.track, sDraw);
 
-      // lateral offset: passing lane, plus pit-lane offset
-      let lateral = car.lane === 1 ? 4.5 : 0;
-      if (car.pit?.phase === 'in-lane') lateral = -(this.track.def.widthM / 2 + 4);
+      // the sim tracks a continuous position across the road; render it
+      // honestly so side-by-side racing actually looks side by side
+      const halfRoad = this.track.def.widthM / 2;
+      let lateral = car.lateral * halfRoad * 0.62;
+      if (car.pit?.phase === 'in-lane') lateral = -(halfRoad + 4);
       const nx = -Math.sin(pos.heading);
       const ny = Math.cos(pos.heading);
       const wx = pos.x + nx * lateral;

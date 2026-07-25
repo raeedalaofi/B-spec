@@ -20,7 +20,7 @@ import {
   passivePolicy,
 } from '../scripts/fields';
 
-const LAPS: Record<string, number> = { greenpark: 6, oval: 10, aria: 8, kaiserwald: 3 };
+const LAPS: Record<string, number> = { greenpark: 6, oval: 10, aria: 8, kaiserwald: 5 };
 const SEEDS = [1, 2, 3, 4, 5];
 
 const avg = (xs: number[]): number => xs.reduce((a, b) => a + b, 0) / xs.length;
@@ -34,10 +34,12 @@ describe('race quality', () => {
     describe(trackId, () => {
       const runs = sweep(trackId);
 
-      it('does not freeze the field into a nose-to-tail queue', () => {
-        // The single most important property: if cars spend their race glued
-        // at the minimum gap, nobody can race and the sim is a parade.
-        expect(avg(runs.map((r) => r.trainPct))).toBeLessThan(QUALITY_TARGETS.maxTrainPct);
+      it('does not leave cars stuck behind the same gearbox indefinitely', () => {
+        // The single most important property. Cars being close is the goal;
+        // cars being close with no move available for minutes on end is the
+        // parade this model exists to prevent.
+        expect(avg(runs.map((r) => r.stuckPct))).toBeLessThan(QUALITY_TARGETS.maxStuckPct);
+        expect(avg(runs.map((r) => r.maxStuckS))).toBeLessThan(QUALITY_TARGETS.maxStuckS);
       });
 
       it('resolves overtake attempts instead of spamming failures', () => {
@@ -49,14 +51,14 @@ describe('race quality', () => {
       });
 
       it('keeps identical cars within a plausible lap-time spread', () => {
-        expect(avg(runs.map((r) => r.bestLapSpreadS))).toBeLessThan(
-          QUALITY_TARGETS.maxBestLapSpreadS,
+        expect(avg(runs.map((r) => r.bestLapSpreadPct))).toBeLessThan(
+          QUALITY_TARGETS.maxBestLapSpreadPct,
         );
       });
 
-      it('never forms a permanent freight train', () => {
-        expect(avg(runs.map((r) => r.longestTrain))).toBeLessThanOrEqual(
-          QUALITY_TARGETS.maxLongestTrain,
+      it('does not weld the whole field into one queue', () => {
+        expect(avg(runs.map((r) => r.bigTrainPct))).toBeLessThan(
+          QUALITY_TARGETS.maxBigTrainPct,
         );
       });
 

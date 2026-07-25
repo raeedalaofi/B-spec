@@ -12,8 +12,20 @@ import { buildResult, tick } from './engine';
 import type { Command, RaceEvent, RaceResult, RaceState } from './types';
 
 export interface RaceMetrics {
-  /** % of car-ticks spent glued inside the minimum following gap */
+  /**
+   * % of car-ticks spent glued inside the minimum following gap. Note this
+   * is *not* by itself a defect — close racing looks exactly like this. It
+   * is reported for context; `stuckPct` is the number that matters.
+   */
   trainPct: number;
+  /**
+   * % of car-ticks spent in a welded stint lasting longer than STUCK_S
+   * behind the same car. This is the real failure mode: not "cars are close"
+   * but "cars are close, indefinitely, with nothing either driver can do".
+   */
+  stuckPct: number;
+  /** longest single welded stint behind one car, seconds */
+  maxStuckS: number;
   /** % of car-ticks spent in the largest contiguous queue of 4+ cars */
   bigTrainPct: number;
   /** longest contiguous queue of cars each within the following gap */
@@ -24,6 +36,14 @@ export interface RaceMetrics {
   conversionPct: number;
   /** spread between the fastest and slowest best lap in the field (s) */
   bestLapSpreadS: number;
+  /**
+   * Pace spread across the leading group, as a percentage of the fastest
+   * lap. Percentage rather than seconds because nine seconds means something
+   * very different on a five-minute lap than a one-minute one, and the
+   * leading group rather than the whole field because a backmarker's best
+   * lap measures traffic, not the model.
+   */
+  bestLapSpreadPct: number;
   /** lead changes over the whole race */
   leadChanges: number;
   /** overtakes completed in the final third of the race */
@@ -34,6 +54,11 @@ export interface RaceMetrics {
 }
 
 export type CommandPolicy = (state: RaceState) => Command[];
+
+/** gap at which two cars count as welded together, seconds */
+const WELDED_GAP_S = 0.3;
+/** a welded stint longer than this counts as genuinely stuck */
+const STUCK_S = 15;
 
 const MAX_TICKS = 3 * 60 * 60 * 10; // 3 hours of sim time, hard stop
 
@@ -58,6 +83,10 @@ export function measureRace(
   let leadChanges = 0;
   let lateOvertakes = 0;
   let leaderId: string | null = null;
+  // per-follower: who they are welded behind, and for how long
+  const weld = new Map<string, { behind: string; sinceS: number }>();
+  let stuckTicks = 0;
+  let maxStuckS = 0;
 
   while (state.phase !== 'finished' && ticks++ < MAX_TICKS) {
     const cmds = policy ? policy(state) : [];
@@ -77,6 +106,9 @@ export function measureRace(
       }
     }
     if (state.phase !== 'racing') continue;
+    // A bunched-up opening lap is correct racing, not a failure mode; queue
+    // metrics only start once the field has had a chance to spread out.
+    const settled = state.cars.every((c) => c.lap >= 2 || c.finished);
 
     const racing = state.cars.filter((c) => !c.finished && c.pit === null);
     if (racing.length < 2) continue;
@@ -90,15 +122,30 @@ export function measureRace(
       const gapM = (leader.s - follower.s + L) % L;
       const gapS = gapM / Math.max(follower.speed, 10);
       carTicks++;
-      if (gapS <= BAL.minGapS) clampedTicks++;
+      // fixed threshold on purpose: reading BAL.minGapS here would let the
+      // metric be "improved" by loosening the very clamp it measures
+      const welded = gapS <= WELDED_GAP_S;
+      if (welded) clampedTicks++;
+      const prev = weld.get(follower.carId);
+      if (welded && prev && prev.behind === leader.carId) {
+        prev.sinceS += BAL.tickS;
+        if (prev.sinceS > maxStuckS) maxStuckS = prev.sinceS;
+        if (prev.sinceS > STUCK_S) stuckTicks++;
+      } else if (welded) {
+        weld.set(follower.carId, { behind: leader.carId, sinceS: 0 });
+      } else {
+        weld.delete(follower.carId);
+      }
       following.push(gapS <= BAL.battleFollowGapS && gapM <= L / 2);
     }
 
     // pass 2: longest contiguous queue (cars each following the next)
-    const run = longestRun(following);
-    const trainCars = run > 0 ? run + 1 : 0;
-    if (trainCars > longestTrain) longestTrain = trainCars;
-    if (trainCars >= 4) bigTrainCarTicks += trainCars;
+    if (settled) {
+      const run = longestRun(following);
+      const trainCars = run > 0 ? run + 1 : 0;
+      if (trainCars > longestTrain) longestTrain = trainCars;
+      if (trainCars >= 4) bigTrainCarTicks += trainCars;
+    }
 
     const lead = byS.length ? currentLeaderId(state) : null;
     if (lead && leaderId && lead !== leaderId) leadChanges++;
@@ -112,18 +159,34 @@ export function measureRace(
 
   return {
     trainPct: pct(clampedTicks, carTicks),
+    stuckPct: pct(stuckTicks, carTicks),
+    maxStuckS,
     bigTrainPct: pct(bigTrainCarTicks, carTicks),
     longestTrain,
     passes,
     failedAttempts,
     conversionPct: pct(passes, passes + failedAttempts),
     bestLapSpreadS: bestLaps.length ? Math.max(...bestLaps) - Math.min(...bestLaps) : 0,
+    bestLapSpreadPct: frontGroupSpreadPct(bestLaps),
     leadChanges,
     lateOvertakes,
     mistakes,
     raceTimeS: state.raceTime,
     result,
   };
+}
+
+/**
+ * Pace spread inside the leading group: third-fastest best lap versus
+ * fastest, as a percentage. Restricted to the front because those cars are
+ * the ones that plausibly saw clean air — a backmarker's best lap measures
+ * how much traffic it met, which is a fact about the race rather than about
+ * whether identical cars are modelled identically.
+ */
+function frontGroupSpreadPct(laps: number[]): number {
+  if (laps.length < 3) return 0;
+  const sorted = [...laps].sort((a, b) => a - b);
+  return (100 * (sorted[2] - sorted[0])) / sorted[0];
 }
 
 function pct(a: number, b: number): number {
@@ -175,15 +238,24 @@ function longestRun(flags: boolean[]): number {
 // "what good racing looks like" as testable numbers rather than opinion.
 
 export const QUALITY_TARGETS = {
-  /** cars glued at the minimum gap — above this the field is a frozen queue */
-  maxTrainPct: 12,
+  /**
+   * Cars sitting nose to tail for more than STUCK_S at a time with no move
+   * possible. This — not raw proximity — is what makes a race a parade.
+   */
+  maxStuckPct: 8,
+  /** no car should spend minutes on end welded behind the same gearbox */
+  maxStuckS: 100,
+  /** time the field spends in a queue of four or more */
+  maxBigTrainPct: 15,
   /** overtake attempts that actually stick */
   minConversionPct: 45,
   maxConversionPct: 75,
-  /** identical cars should lap within this of each other */
-  maxBestLapSpreadS: 2.0,
+  /**
+   * Identical cars at the front should be lapping within this of each other.
+   * Not zero, because driver stats and corner noise are real, but a large
+   * number here means the model is handing equal cars unequal pace.
+   */
+  maxBestLapSpreadPct: 2.5,
   /** a healthy race keeps moving to the end */
   minLateOvertakes: 1,
-  /** no permanent 5-car freight train */
-  maxLongestTrain: 4,
 } as const;

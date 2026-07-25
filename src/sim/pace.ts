@@ -24,6 +24,23 @@ export function fatigueFactor(fatigue: number, stamina: number): number {
   return 1 - BAL.fatigueSpeedLoss * fatigue * (1 - stamina / 150);
 }
 
+/** a damaged car is simply a slower car */
+export function damageFactor(damage: number): number {
+  return 1 - BAL.damageSpeedLoss * damage;
+}
+
+/**
+ * Cost of not being on the racing line. Applied in corners only — off-line
+ * tarmac is dirty and the geometry is worse, but a straight is a straight.
+ * This is what makes an overtake a genuine trade rather than a free move:
+ * the attacker gives up corner speed for track position.
+ */
+export function offLineFactor(car: CarRaceState): number {
+  const offLine = Math.min(1, Math.abs(car.lateral));
+  const defending = car.defence === 'cover' ? BAL.defendLoss : 0;
+  return 1 - BAL.offLineLoss * offLine - defending;
+}
+
 /**
  * Corner weight: 1 where the car is at its slowest (deep in corners),
  * 0 on flat-out straights. Driver skill, pace command, morale and noise
@@ -62,7 +79,8 @@ export function paceIndex(state: RaceState, car: CarRaceState): number {
     fMorale *
     tireFactor(car.tireWear) *
     fuelFactor(car.fuelL) *
-    fatigueFactor(car.fatigue, car.stats.stamina)
+    fatigueFactor(car.fatigue, car.stats.stamina) *
+    damageFactor(car.damage)
   );
 }
 
@@ -85,9 +103,14 @@ export function computeVTarget(state: RaceState, car: CarRaceState): number {
     blend(fPace) *
     blend(fMorale) *
     blend(car.noise) *
+    // aero and line effects are corner-weighted too: dirty air costs grip in
+    // the turns, and being off-line only matters where geometry matters
+    blend(car.dirtyAir) *
+    blend(offLineFactor(car)) *
     tireFactor(car.tireWear) *
     fuelFactor(car.fuelL) *
-    fatigueFactor(car.fatigue, car.stats.stamina);
+    fatigueFactor(car.fatigue, car.stats.stamina) *
+    damageFactor(car.damage);
 
   if (car.mistake) v *= car.mistake.factor;
   if (car.fuelL <= 0) v = Math.min(v, BAL.fuelEmptyCrawl);

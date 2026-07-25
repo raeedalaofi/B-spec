@@ -185,13 +185,17 @@ export class RaceHud {
         const t = distBehind / Math.max(car.speed, 20);
         gap = distBehind > state.track.lengthM ? `+${Math.floor(distBehind / state.track.lengthM)}L` : `+${t.toFixed(1)}`;
       }
-      const status = car.pit
-        ? '<span class="st">PIT</span>'
-        : car.mistake?.severity === 'spin'
-          ? '<span class="st" style="color:var(--bad)">SPIN</span>'
-          : car.battle?.phase === 'PASSING'
-            ? '<span class="st">ATTACK</span>'
-            : '';
+      const status = car.retired
+        ? '<span class="st" style="color:var(--bad)">OUT</span>'
+        : car.pit
+          ? '<span class="st">PIT</span>'
+          : car.mistake?.severity === 'spin'
+            ? '<span class="st" style="color:var(--bad)">SPIN</span>'
+            : car.battle?.phase === 'COMMITTED'
+              ? '<span class="st">ATTACK</span>'
+              : car.defence === 'cover'
+                ? '<span class="st" style="color:var(--accent)">DEFEND</span>'
+                : '';
       return `<div class="tower-row${car.isPlayer ? ' player' : ''}">
         <span class="tower-pos">${i + 1}</span>
         <span class="tower-chip" style="background:${car.spec.color}"></span>
